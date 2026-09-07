@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.mjs"
+    "start": "nodemon server.mjs",
+    "create-admin":"node createAdmin.mjs"
+
+
   },
   "keywords": [],
   "type": "module",

@@ -5,26 +5,39 @@ import Employee from '../model/Employee.mjs'
 
 
 const generateEmployeeId = async () => {
-    const lastEmployee = await Employee.findOne().sort({ createdAt: -1 }).select("employeeId");
+  const employees = await Employee.find({})
+    .select("employeeId")
+    .sort({ createdAt: -1 });
 
-    if (!lastEmployee) {
-        return 'CMATRIX#001';
+  let highestNumber = 0;
+
+  for (const employee of employees) {
+    if (!employee.employeeId) continue;
+
+    const match = employee.employeeId.match(/^CMATRIX#(\d+)$/);
+
+    if (match) {
+      const number = parseInt(match[1], 10);
+
+      if (number > highestNumber) {
+        highestNumber = number;
+      }
     }
+  }
 
-    const lastNumber = parseInt(lastEmployee.employeeId.replace('CMATRIX#', ''), 10);
-    const newNumber = lastNumber + 1;
-    return `CMATRIX#${newNumber.toString().padStart(3, '0')}`;
-}
-const  generateTemporaryPassword = async () => {
-    const characters="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$*"
-    const password=""
-    for(let i=0;i<8;i++)
-    {
-        const randomIndex=Math.floor(Math.random()*characters.length);
-        password+=characters[randomIndex];
+  const newNumber = highestNumber + 1;
 
-    }
-    return password;
+  return `CMATRIX#${newNumber.toString().padStart(3, "0")}`;
+};
+const generateTemporaryPassword = () => {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$*"
+  let  password = ""
+  for (let i = 0; i < 8; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    password += characters[randomIndex];
+
+  }
+  return password;
 
 }
 
@@ -32,52 +45,52 @@ const  generateTemporaryPassword = async () => {
 
 export const createEmployee = async (req, res) => {
 
-    try {
+  try {
 
-        const {
-            email,
-            name,
-            phone,
-            department,
-            designation,
-            joiningDate,
-            attendanceMethod,
-        } = req.body;
-        if (!email || !name) {
-            return res.status(401).json({ success: false, message: "Email and Name is required" })
-        }
-        const existingUser = await User.findOne({ email: email.toLowerCase() })
-        if (existingUser) {
-            return res.status(400).json({ success: false, message: "User with this email already exists" })
+    const {
+      email,
+      name,
+      phone,
+      department,
+      designation,
+      joiningDate,
+      attendanceMethod,
+    } = req.body;
+    if (!email || !name) {
+      return res.status(401).json({ success: false, message: "Email and Name is required" })
+    }
+    const existingUser = await User.findOne({ email: email.toLowerCase() })
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: "User with this email already exists" })
 
-        }
+    }
 
-        const employeeId=await generateEmployeeId();
-        const temppassword= await generateTemporaryPassword();
+    const employeeId = await generateEmployeeId();
+    const temppassword = generateTemporaryPassword();
 
-        const hashedpassword = await bcrypt.hash(temppassword, 10)
+    const hashedpassword = await bcrypt.hash(temppassword, 10)
 
-        const user = await User.Create({
-            email: email.toLowerCase(),
-            password: hashedpassword,
-            role: "employee",
-            mustChangePassword: true,
-            isActive: true,
+    const user = await User.create({
+      email: email.toLowerCase(),
+      password: hashedpassword,
+      role: "employee",
+      mustChangePassword: true,
+      isActive: true,
 
-        });
+    });
 
-        const employee = await Employee.create({
-            employeeId: await employeeId,
-            userId: user._id,
-            name,
-            phone,
-            department,
-            designation,
-            joiningDate,
-            attendanceMethod: attendanceMethod || "OFFICE",
-            employmentStatus: "ACTIVE",
-        })
-          return res.status(201).json({
+    const employee = await Employee.create({
+      employeeId,
+      userId: user._id,
+      name,
+      phone,
+      department,
+      designation,
+      joiningDate,
+      attendanceMethod: attendanceMethod || "OFFICE",
+      employmentStatus: "ACTIVE",
+    });
+    return res.status(201).json({
       success: true,
       message: "Employee created successfully",
 
@@ -96,13 +109,13 @@ export const createEmployee = async (req, res) => {
         temppassword,
       },
     });
-    }
-    catch (error) {
+  }
+  catch (error) {
 
-        console.error("Create Employee Error:", error.message);
-        return res.status(500).json({ success: false, message: "Server Error" })
+    console.error("Create Employee Error:", error.message);
+    return res.status(500).json({ success: false, message: "Server Error" })
 
-    }
+  }
 
 }
 
