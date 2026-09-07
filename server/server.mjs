@@ -5,7 +5,8 @@ import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.mjs";
 import {authRoutes} from "./routes/authroutes.mjs";
-import {employeeRouter} from './routes/employeeroutes.mjs';
+import employeeRouter from './routes/employeeroutes.mjs';
+import employeeselfrouter from "./routes/employeeSelfRoute.mjs";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use('/api/employees',employeeRouter);
+app.use('/api/employee/',employeeselfrouter)
 
 app.get("/", (req, res) => {
   res.json({

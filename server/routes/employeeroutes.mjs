@@ -1,7 +1,7 @@
 import express from 'express';
 import {createEmployee,getEmployeeById,getAllEmployees,updateEmployee,deactivateEmployee}from '../controller/employeeController.mjs';
-import {authMiddleware,roleMiddleware} from '../middleware/authMiddleware.mjs'
-
+import {authMiddleware} from '../middleware/authMiddleware.mjs'
+import roleMiddleware from '../middleware/roleMiddleware.mjs'
 const employeeRouter=express.Router();
 
 employeeRouter.use(authMiddleware)
