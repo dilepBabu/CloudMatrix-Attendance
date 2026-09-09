@@ -2,6 +2,8 @@ import Attendance from "../model/Attendance.mjs";
 import Employee from "../model/Employee.mjs";
 import CompanySettings from "../model/CompanySettings.mjs";
 import User from "../model/User.mjs";
+import mongoose from "mongoose";
+import WorkReport from "../model/WorkReport.mjs";
 
 
 // Calculate distance between two GPS coordinates
@@ -33,6 +35,26 @@ const calculateDistance = (
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return earthRadius * c;
+};
+const markMissedCheckout = async (employeeId, currentDay) => {
+    try {
+        await Attendance.updateMany(
+            {
+                employeeId,
+                date: { $lt: currentDay },
+                "checkIn.time": { $exists: true },
+                "checkOut.time": { $exists: false },
+                status: "PRESENT",
+            },
+            {
+                $set: {
+                    status: "MISSED_CHECKOUT",
+                },
+            }
+        );
+    } catch (error) {
+        console.error("Mark Missed Checkout Error:", error);
+    }
 };
 
 
@@ -81,6 +103,8 @@ export const checkIn = async (req, res) => {
 
         const startOfDay = new Date(now);
         startOfDay.setHours(0, 0, 0, 0);
+
+        await markMissedCheckout(employee._id, startOfDay);
 
         const endOfDay = new Date(now);
         endOfDay.setHours(23, 59, 59, 999);
@@ -279,6 +303,16 @@ export const checkOut = async (req, res) => {
                 message: "You have already checked out today",
             });
         }
+        const workReport = await WorkReport.findOne({
+            attendanceId: attendance._id,
+        });
+
+        if (!workReport) {
+            return res.status(400).json({
+                success: false,
+                message: "Please submit your work report before checking out",
+            });
+        }
 
         // Get company settings
         const settings = await CompanySettings.findOne();
@@ -389,39 +423,199 @@ export const checkOut = async (req, res) => {
 };
 
 export const getMyAttendance = async (req, res) => {
-  try {
-    const employee = await Employee.findOne({
-      userId: req.user._id,
-      employmentStatus: "ACTIVE",
-    });
+    try {
+        const employee = await Employee.findOne({
+            userId: req.user._id,
+            employmentStatus: "ACTIVE",
+        });
 
-    if (!employee) {
-      return res.status(404).json({
-        success: false,
-        message: "Active employee profile not found",
-      });
+        if (!employee) {
+            return res.status(404).json({
+                success: false,
+                message: "Active employee profile not found",
+            });
+        }
+
+        const attendanceRecords = await Attendance.find({
+            employeeId: employee._id,
+        })
+            .sort({ date: -1 })
+            .select(
+                "date checkIn checkOut status workingMinutes createdAt updatedAt"
+            );
+
+        return res.status(200).json({
+            success: true,
+            count: attendanceRecords.length,
+            attendance: attendanceRecords,
+        });
+
+    } catch (error) {
+        console.error("Get My Attendance Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
     }
+};
+export const getAllAttendance = async (req, res) => {
+    try {
+        const { date, employeeId, status } = req.query;
 
-    const attendanceRecords = await Attendance.find({
-      employeeId: employee._id,
-    })
-      .sort({ date: -1 })
-      .select(
-        "date checkIn checkOut status workingMinutes createdAt updatedAt"
-      );
+        const filter = {};
 
-    return res.status(200).json({
-      success: true,
-      count: attendanceRecords.length,
-      attendance: attendanceRecords,
-    });
+        // Filter by date
+        if (date) {
+            const selectedDate = new Date(date);
 
-  } catch (error) {
-    console.error("Get My Attendance Error:", error);
+            if (Number.isNaN(selectedDate.getTime())) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid date",
+                });
+            }
 
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
+            const startOfDay = new Date(selectedDate);
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const endOfDay = new Date(selectedDate);
+            endOfDay.setHours(23, 59, 59, 999);
+
+            filter.date = {
+                $gte: startOfDay,
+                $lte: endOfDay,
+            };
+        }
+
+        // Filter by employee MongoDB ObjectId
+        if (employeeId) {
+            if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid employee ID",
+                });
+            }
+
+            filter.employeeId = employeeId;
+        }
+
+        // Filter by attendance status
+        if (status) {
+            filter.status = status.toUpperCase();
+        }
+
+        const attendanceRecords = await Attendance.find(filter)
+            .populate(
+                "employeeId",
+                "employeeId name department designation attendanceMethod"
+            )
+            .sort({ date: -1, "checkIn.time": -1 });
+
+        return res.status(200).json({
+            success: true,
+            count: attendanceRecords.length,
+            attendance: attendanceRecords,
+        });
+
+    } catch (error) {
+        console.error("Get All Attendance Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+};
+export const adminUpdateCheckout = async (req, res) => {
+    try {
+        const { checkoutTime } = req.body;
+        const { id } = req.params;
+
+        if (!checkoutTime) {
+            return res.status(400).json({
+                success: false,
+                message: "Checkout time is required",
+            });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid attendance ID",
+            });
+        }
+
+        const attendance = await Attendance.findById(id);
+
+        if (!attendance) {
+            return res.status(404).json({
+                success: false,
+                message: "Attendance record not found",
+            });
+        }
+
+        if (!attendance.checkIn?.time) {
+            return res.status(400).json({
+                success: false,
+                message: "Check-in record not found",
+            });
+        }
+
+        if (attendance.checkOut?.time) {
+            return res.status(400).json({
+                success: false,
+                message: "Checkout has already been recorded",
+            });
+        }
+
+        const parsedCheckoutTime = new Date(checkoutTime);
+
+        if (Number.isNaN(parsedCheckoutTime.getTime())) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid checkout time",
+            });
+        }
+
+        const checkInTime = new Date(attendance.checkIn.time);
+
+        if (parsedCheckoutTime <= checkInTime) {
+            return res.status(400).json({
+                success: false,
+                message: "Checkout time must be after check-in time",
+            });
+        }
+
+        const workingMilliseconds =
+            parsedCheckoutTime.getTime() - checkInTime.getTime();
+
+        const workingMinutes = Math.floor(
+            workingMilliseconds / (1000 * 60)
+        );
+
+        attendance.checkOut = {
+            time: parsedCheckoutTime,
+            method: attendance.checkIn.method,
+        };
+
+        attendance.workingMinutes = workingMinutes;
+        attendance.status = "PRESENT";
+
+        await attendance.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Checkout updated successfully",
+            attendance,
+        });
+
+    } catch (error) {
+        console.error("Admin Update Checkout Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
 };
