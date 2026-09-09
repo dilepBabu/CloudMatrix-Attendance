@@ -9,6 +9,7 @@ import employeeRouter from './routes/employeeroutes.mjs';
 import employeeselfrouter from "./routes/employeeSelfRoute.mjs";
 import attendanceRouter from "./routes/attendanceRouter.mjs";
 import settingsRouter from "./routes/settingsRouter.mjs";
+import workReportRouter from "./routes/workReportRouter.mjs";
 
 dotenv.config();
 
@@ -32,7 +33,7 @@ app.use('/api/employees',employeeRouter);
 app.use('/api/employee/',employeeselfrouter);
 app.use('/api/attendance',attendanceRouter);
 app.use("/api/settings", settingsRouter);
-
+app.use("/api/work-reports", workReportRouter);
 app.get("/", (req, res) => {
   res.json({
     success: true,
