@@ -10,6 +10,7 @@ import employeeselfrouter from "./routes/employeeSelfRoute.mjs";
 import attendanceRouter from "./routes/attendanceRouter.mjs";
 import settingsRouter from "./routes/settingsRouter.mjs";
 import workReportRouter from "./routes/workReportRouter.mjs";
+import leaveRouter from "./routes/leaveRoutes.mjs";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/employee/',employeeselfrouter);
 app.use('/api/attendance',attendanceRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/work-reports", workReportRouter);
+app.use("/api/leaves", leaveRouter);
 app.get("/", (req, res) => {
   res.json({
     success: true,
