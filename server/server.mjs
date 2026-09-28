@@ -4,13 +4,17 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import connectDB from "./config/db.mjs";
-import {authRoutes} from "./routes/authroutes.mjs";
+import { authRoutes } from "./routes/authroutes.mjs";
 import employeeRouter from './routes/employeeroutes.mjs';
 import employeeselfrouter from "./routes/employeeSelfRoute.mjs";
 import attendanceRouter from "./routes/attendanceRouter.mjs";
 import settingsRouter from "./routes/settingsRouter.mjs";
 import workReportRouter from "./routes/workReportRouter.mjs";
 import leaveRouter from "./routes/leaveRoutes.mjs";
+import holidayRouter from "./routes/HolidayRoutes.mjs";
+import dashboardRouter from "./routes/dashboardRoutes.mjs";
+import remoteRequestRoutes from "./routes/remoteRequestRoutes.mjs";
+import overtimeRequestRoutes from "./routes/overtimeRequestRoutes.mjs";
 
 dotenv.config();
 
@@ -30,12 +34,19 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
-app.use('/api/employees',employeeRouter);
-app.use('/api/employee/',employeeselfrouter);
-app.use('/api/attendance',attendanceRouter);
+app.use('/api/employees', employeeRouter);
+app.use('/api/employee/', employeeselfrouter);
+app.use('/api/attendance', attendanceRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/work-reports", workReportRouter);
 app.use("/api/leaves", leaveRouter);
+app.use("/api/holidays", holidayRouter);
+app.use("/api/dashboard", dashboardRouter);
+app.use("/api/remote-requests", remoteRequestRoutes);
+app.use(
+  "/api/overtime-requests",
+  overtimeRequestRoutes
+);
 app.get("/", (req, res) => {
   res.json({
     success: true,

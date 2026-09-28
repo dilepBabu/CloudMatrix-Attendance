@@ -31,6 +31,7 @@ export const getSettings = async (req, res) => {
 // Create or update office settings
 export const updateOfficeSettings = async (req, res) => {
   try {
+    
     const {
       latitude,
       longitude,
@@ -38,10 +39,10 @@ export const updateOfficeSettings = async (req, res) => {
       address,
       officeAttendanceEnabled,
     } = req.body;
-
-    // Validate latitude
+    
     if (
-      latitude === undefined ||
+      typeof latitude !== "number" ||
+      !Number.isFinite(latitude) ||
       latitude < -90 ||
       latitude > 90
     ) {
@@ -51,9 +52,9 @@ export const updateOfficeSettings = async (req, res) => {
       });
     }
 
-    // Validate longitude
     if (
-      longitude === undefined ||
+      typeof longitude !== "number" ||
+      !Number.isFinite(longitude) ||
       longitude < -180 ||
       longitude > 180
     ) {
@@ -63,9 +64,9 @@ export const updateOfficeSettings = async (req, res) => {
       });
     }
 
-    // Validate radius
     if (
-      radius === undefined ||
+      typeof radius !== "number" ||
+      !Number.isFinite(radius) ||
       radius <= 0
     ) {
       return res.status(400).json({
@@ -73,6 +74,8 @@ export const updateOfficeSettings = async (req, res) => {
         message: "Radius must be greater than 0",
       });
     }
+
+
 
     let settings = await CompanySettings.findOne();
 
