@@ -1,6 +1,7 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const employeeSchema=new mongoose.Schema({
+const employeeSchema = new mongoose.Schema(
+  {
     employeeId: {
       type: String,
       required: true,
@@ -41,9 +42,10 @@ const employeeSchema=new mongoose.Schema({
       type: Date,
     },
 
+    // Employee's normal attendance method
     attendanceMethod: {
       type: String,
-      enum: ["OFFICE", "REMOTE", "FIELD", "HYBRID"],
+      enum: ["OFFICE", "REMOTE", "FIELD"],
       default: "OFFICE",
     },
 
@@ -52,8 +54,15 @@ const employeeSchema=new mongoose.Schema({
       enum: ["ACTIVE", "INACTIVE"],
       default: "ACTIVE",
     },
-},{timestamps:true});
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const Employee = mongoose.model("Employee",employeeSchema);
+const Employee = mongoose.model(
+  "Employee",
+  employeeSchema
+);
 
 export default Employee;

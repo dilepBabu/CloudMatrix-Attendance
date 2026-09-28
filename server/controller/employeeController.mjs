@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-
+import crypto from "crypto";
 import User from '../model/User.mjs'
 import Employee from '../model/Employee.mjs'
 
@@ -29,17 +29,22 @@ const generateEmployeeId = async () => {
 
   return `CMATRIX#${newNumber.toString().padStart(3, "0")}`;
 };
+
+
 const generateTemporaryPassword = () => {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$*"
-  let  password = ""
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$*";
+
+  const randomBytes = crypto.randomBytes(8);
+
+  let password = "";
+
   for (let i = 0; i < 8; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    password += characters[randomIndex];
-
+    password += characters[randomBytes[i] % characters.length];
   }
-  return password;
 
-}
+  return password;
+};
 
 
 
@@ -57,7 +62,7 @@ export const createEmployee = async (req, res) => {
       attendanceMethod,
     } = req.body;
     if (!email || !name) {
-      return res.status(401).json({ success: false, message: "Email and Name is required" })
+      return res.status(400).json({ success: false, message: "Email and Name is required" })
     }
     const existingUser = await User.findOne({ email: email.toLowerCase() })
     if (existingUser) {
@@ -287,6 +292,42 @@ export const deactivateEmployee = async (req, res) => {
       "Deactivate Employee Error:",
       error
     );
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// ACTIVATE EMPLOYEE
+export const activateEmployee = async (req, res) => {
+  try {
+    const employee = await Employee.findById(req.params.id);
+
+    if (!employee) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    employee.employmentStatus = "ACTIVE";
+    await employee.save();
+
+    await User.findByIdAndUpdate(
+      employee.userId,
+      {
+        isActive: true,
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Employee activated successfully",
+    });
+  } catch (error) {
+    console.error("Activate Employee Error:", error);
 
     return res.status(500).json({
       success: false,

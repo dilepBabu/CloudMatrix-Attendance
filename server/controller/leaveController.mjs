@@ -5,17 +5,25 @@ import Employee from "../model/Employee.mjs";
 import LeaveAllocation from "../model/LeaveAllocation.mjs";
 import Attendance from "../model/Attendance.mjs";
 
+import {
+    getCompanyDateParts,
+    getCompanyDayStart,
+    getCompanyMonthRange,
+    getCompanyDayOfWeek,
+    parseCompanyDate,
+} from "../utils/dateUtils.mjs";
+
 
 // =====================================================
 // HELPER - GET START OF DAY
 // =====================================================
 
 const getStartOfDay = (date) => {
-    const result = new Date(date);
-
-    result.setHours(0, 0, 0, 0);
-
-    return result;
+    return getCompanyDayStart(
+        getCompanyDateParts(date).year,
+        getCompanyDateParts(date).month,
+        getCompanyDateParts(date).day
+    );
 };
 
 
@@ -24,28 +32,104 @@ const getStartOfDay = (date) => {
 // =====================================================
 
 const getEndOfDay = (date) => {
-    const result = new Date(date);
+    const startOfDay = getStartOfDay(date);
 
-    result.setHours(23, 59, 59, 999);
-
-    return result;
+    return new Date(
+        startOfDay.getTime() +
+            24 * 60 * 60 * 1000 -
+            1
+    );
 };
 
 
 // =====================================================
-// HELPER - GET DAYS BETWEEN TWO DATES
+// HELPER - CHECK WEEKEND
 // =====================================================
 
-const calculateLeaveDays = (startDate, endDate) => {
+const isWeekend = (date) => {
+    const { year, month, day } =
+        getCompanyDateParts(date);
+
+    const dayOfWeek = getCompanyDayOfWeek(
+        year,
+        month,
+        day
+    );
+
+    return dayOfWeek === 0 || dayOfWeek === 6;
+};
+
+
+// =====================================================
+// HELPER - GET TOTAL CALENDAR DAYS
+// =====================================================
+
+const calculateCalendarDays = (
+    startDate,
+    endDate
+) => {
     const start = getStartOfDay(startDate);
     const end = getStartOfDay(endDate);
 
     const difference =
         end.getTime() - start.getTime();
 
-    return Math.floor(
-        difference / (1000 * 60 * 60 * 24)
-    ) + 1;
+    return (
+        Math.floor(
+            difference /
+                (1000 * 60 * 60 * 24)
+        ) + 1
+    );
+};
+
+
+// =====================================================
+// HELPER - GET TOTAL WORKING DAYS
+// EXCLUDES SATURDAY AND SUNDAY
+// =====================================================
+
+const calculateLeaveDays = (
+    startDate,
+    endDate
+) => {
+    let currentDate =
+        getStartOfDay(startDate);
+
+    const finalDate =
+        getStartOfDay(endDate);
+
+    let workingDays = 0;
+
+    while (currentDate <= finalDate) {
+        if (!isWeekend(currentDate)) {
+            workingDays++;
+        }
+
+        currentDate = new Date(
+            currentDate.getTime() +
+                24 * 60 * 60 * 1000
+        );
+    }
+
+    return workingDays;
+};
+
+
+// =====================================================
+// HELPER - VALIDATE LEAVE DATE
+// =====================================================
+
+const parseAndNormalizeLeaveDate = (
+    dateString
+) => {
+    const parsed =
+        parseCompanyDate(dateString);
+
+    if (!parsed) {
+        return null;
+    }
+
+    return parsed.start;
 };
 
 
@@ -53,69 +137,88 @@ const calculateLeaveDays = (startDate, endDate) => {
 // EMPLOYEE - GET CASUAL LEAVE BALANCE
 // =====================================================
 
-export const getMyCasualLeaveBalance = async (req, res) => {
+export const getMyCasualLeaveBalance = async (
+    req,
+    res
+) => {
     try {
-        const employee = await Employee.findOne({
-            userId: req.user._id,
-            employmentStatus: "ACTIVE",
-        });
+        const employee =
+            await Employee.findOne({
+                userId: req.user._id,
+                employmentStatus: "ACTIVE",
+            });
 
         if (!employee) {
             return res.status(404).json({
                 success: false,
-                message: "Active employee profile not found",
+                message:
+                    "Active employee profile not found",
             });
         }
 
-        const now = new Date();
+        // -----------------------------------------------
+        // Current company date
+        // -----------------------------------------------
 
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1;
-
-        // If admin has not created allocation,
-        // default is 1 casual leave.
-        const allocation = await LeaveAllocation.findOne({
-            employeeId: employee._id,
+        const {
             year,
             month,
-        });
+        } = getCompanyDateParts(
+            new Date()
+        );
 
+        // -----------------------------------------------
+        // Find allocation
+        // -----------------------------------------------
+
+        const allocation =
+            await LeaveAllocation.findOne({
+                employeeId: employee._id,
+                year,
+                month,
+            });
+
+        // Default = 1 casual leave
         const casualLeaveLimit =
             allocation?.casualLeaveLimit ?? 1;
 
-        const monthStart = new Date(
+        // -----------------------------------------------
+        // Company month range
+        // -----------------------------------------------
+
+        const {
+            start: monthStart,
+            end: monthEnd,
+        } = getCompanyMonthRange(
             year,
-            month - 1,
-            1
+            month
         );
 
-        const monthEnd = new Date(
-            year,
-            month,
-            0,
-            23,
-            59,
-            59,
-            999
-        );
+        // -----------------------------------------------
+        // Get used casual leaves
+        // -----------------------------------------------
 
-        const usedLeaves = await Leave.find({
-            employeeId: employee._id,
+        const usedLeaves =
+            await Leave.find({
+                employeeId: employee._id,
+                leaveType: "CASUAL",
+                status: {
+                    $in: [
+                        "PENDING",
+                        "APPROVED",
+                    ],
+                },
+                startDate: {
+                    $gte: monthStart,
+                },
+                endDate: {
+                    $lte: monthEnd,
+                },
+            });
 
-            leaveType: "CASUAL",
-
-            status: {
-                $in: ["PENDING", "APPROVED"],
-            },
-
-            startDate: {
-                $gte: monthStart,
-            },
-
-            endDate: {
-                $lte: monthEnd,
-            },
-        });
+        // -----------------------------------------------
+        // Calculate working days only
+        // -----------------------------------------------
 
         let usedDays = 0;
 
@@ -133,14 +236,10 @@ export const getMyCasualLeaveBalance = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-
             year,
             month,
-
             casualLeaveLimit,
-
             usedDays,
-
             availableDays,
         });
 
@@ -162,7 +261,10 @@ export const getMyCasualLeaveBalance = async (req, res) => {
 // EMPLOYEE - APPLY FOR LEAVE
 // =====================================================
 
-export const applyLeave = async (req, res) => {
+export const applyLeave = async (
+    req,
+    res
+) => {
     try {
         const {
             leaveType,
@@ -183,7 +285,8 @@ export const applyLeave = async (req, res) => {
         ) {
             return res.status(400).json({
                 success: false,
-                message: "All leave fields are required",
+                message:
+                    "All leave fields are required",
             });
         }
 
@@ -199,7 +302,11 @@ export const applyLeave = async (req, res) => {
             "OTHER",
         ];
 
-        if (!allowedLeaveTypes.includes(leaveType)) {
+        if (
+            !allowedLeaveTypes.includes(
+                leaveType
+            )
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid leave type",
@@ -230,27 +337,34 @@ export const applyLeave = async (req, res) => {
         // Date validation
         // -----------------------------------------------
 
-        const parsedStartDate = new Date(startDate);
-        const parsedEndDate = new Date(endDate);
+        const normalizedStartDate =
+            parseAndNormalizeLeaveDate(
+                startDate
+            );
+
+        const normalizedEndDate =
+            parseAndNormalizeLeaveDate(
+                endDate
+            );
 
         if (
-            Number.isNaN(parsedStartDate.getTime()) ||
-            Number.isNaN(parsedEndDate.getTime())
+            !normalizedStartDate ||
+            !normalizedEndDate
         ) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid leave dates",
+                message:
+                    "Invalid leave dates. Use YYYY-MM-DD format.",
             });
         }
 
-        const normalizedStartDate =
-            getStartOfDay(parsedStartDate);
-
-        const normalizedEndDate =
-            getStartOfDay(parsedEndDate);
+        // -----------------------------------------------
+        // End date validation
+        // -----------------------------------------------
 
         if (
-            normalizedEndDate < normalizedStartDate
+            normalizedEndDate <
+            normalizedStartDate
         ) {
             return res.status(400).json({
                 success: false,
@@ -263,11 +377,21 @@ export const applyLeave = async (req, res) => {
         // Prevent leave crossing months
         // -----------------------------------------------
 
+        const startParts =
+            getCompanyDateParts(
+                normalizedStartDate
+            );
+
+        const endParts =
+            getCompanyDateParts(
+                normalizedEndDate
+            );
+
         if (
-            normalizedStartDate.getMonth() !==
-            normalizedEndDate.getMonth() ||
-            normalizedStartDate.getFullYear() !==
-            normalizedEndDate.getFullYear()
+            startParts.month !==
+                endParts.month ||
+            startParts.year !==
+                endParts.year
         ) {
             return res.status(400).json({
                 success: false,
@@ -280,10 +404,11 @@ export const applyLeave = async (req, res) => {
         // Find employee
         // -----------------------------------------------
 
-        const employee = await Employee.findOne({
-            userId: req.user._id,
-            employmentStatus: "ACTIVE",
-        });
+        const employee =
+            await Employee.findOne({
+                userId: req.user._id,
+                employmentStatus: "ACTIVE",
+            });
 
         if (!employee) {
             return res.status(404).json({
@@ -294,7 +419,7 @@ export const applyLeave = async (req, res) => {
         }
 
         // -----------------------------------------------
-        // Calculate requested days
+        // Calculate working leave days
         // -----------------------------------------------
 
         const requestedDays =
@@ -304,19 +429,32 @@ export const applyLeave = async (req, res) => {
             );
 
         // -----------------------------------------------
+        // Reject weekend-only leave
+        // -----------------------------------------------
+
+        if (requestedDays === 0) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Leave must contain at least one working day",
+            });
+        }
+
+        // -----------------------------------------------
         // CASUAL LEAVE LIMIT CHECK
         // -----------------------------------------------
 
         if (leaveType === "CASUAL") {
             const year =
-                normalizedStartDate.getFullYear();
+                startParts.year;
 
             const month =
-                normalizedStartDate.getMonth() + 1;
+                startParts.month;
 
             const allocation =
                 await LeaveAllocation.findOne({
-                    employeeId: employee._id,
+                    employeeId:
+                        employee._id,
                     year,
                     month,
                 });
@@ -325,30 +463,26 @@ export const applyLeave = async (req, res) => {
             const casualLeaveLimit =
                 allocation?.casualLeaveLimit ?? 1;
 
-            const monthStart = new Date(
+            const {
+                start: monthStart,
+                end: monthEnd,
+            } = getCompanyMonthRange(
                 year,
-                month - 1,
-                1
-            );
-
-            const monthEnd = new Date(
-                year,
-                month,
-                0,
-                23,
-                59,
-                59,
-                999
+                month
             );
 
             const existingCasualLeaves =
                 await Leave.find({
-                    employeeId: employee._id,
+                    employeeId:
+                        employee._id,
 
                     leaveType: "CASUAL",
 
                     status: {
-                        $in: ["PENDING", "APPROVED"],
+                        $in: [
+                            "PENDING",
+                            "APPROVED",
+                        ],
                     },
 
                     startDate: {
@@ -363,29 +497,35 @@ export const applyLeave = async (req, res) => {
             let usedDays = 0;
 
             for (
-                const leave of existingCasualLeaves
+                const leave of
+                    existingCasualLeaves
             ) {
-                usedDays += calculateLeaveDays(
-                    leave.startDate,
-                    leave.endDate
-                );
+                usedDays +=
+                    calculateLeaveDays(
+                        leave.startDate,
+                        leave.endDate
+                    );
             }
 
             const availableDays =
-                casualLeaveLimit - usedDays;
+                casualLeaveLimit -
+                usedDays;
 
-            if (requestedDays > availableDays) {
+            if (
+                requestedDays >
+                availableDays
+            ) {
                 return res.status(400).json({
                     success: false,
                     message:
                         "Insufficient casual leave balance",
-
                     casualLeaveLimit,
-
                     usedDays,
-
-                    availableDays,
-
+                    availableDays:
+                        Math.max(
+                            availableDays,
+                            0
+                        ),
                     requestedDays,
                 });
             }
@@ -397,18 +537,24 @@ export const applyLeave = async (req, res) => {
 
         const overlappingLeave =
             await Leave.findOne({
-                employeeId: employee._id,
+                employeeId:
+                    employee._id,
 
                 status: {
-                    $in: ["PENDING", "APPROVED"],
+                    $in: [
+                        "PENDING",
+                        "APPROVED",
+                    ],
                 },
 
                 startDate: {
-                    $lte: normalizedEndDate,
+                    $lte:
+                        normalizedEndDate,
                 },
 
                 endDate: {
-                    $gte: normalizedStartDate,
+                    $gte:
+                        normalizedStartDate,
                 },
             });
 
@@ -424,29 +570,34 @@ export const applyLeave = async (req, res) => {
         // Create leave
         // -----------------------------------------------
 
-        const leave = await Leave.create({
-            employeeId: employee._id,
+        const leave =
+            await Leave.create({
+                employeeId:
+                    employee._id,
 
-            userId: req.user._id,
+                userId:
+                    req.user._id,
 
-            leaveType,
+                leaveType,
 
-            startDate: normalizedStartDate,
+                startDate:
+                    normalizedStartDate,
 
-            endDate: normalizedEndDate,
+                endDate:
+                    normalizedEndDate,
 
-            reason: reason.trim(),
+                reason:
+                    reason.trim(),
 
-            status: "PENDING",
-        });
+                status: "PENDING",
+            });
 
         return res.status(201).json({
             success: true,
-
             message:
                 "Leave application submitted successfully",
-
             leave,
+            requestedDays,
         });
 
     } catch (error) {
@@ -467,12 +618,16 @@ export const applyLeave = async (req, res) => {
 // EMPLOYEE - GET MY LEAVES
 // =====================================================
 
-export const getMyLeaves = async (req, res) => {
+export const getMyLeaves = async (
+    req,
+    res
+) => {
     try {
-        const employee = await Employee.findOne({
-            userId: req.user._id,
-            employmentStatus: "ACTIVE",
-        });
+        const employee =
+            await Employee.findOne({
+                userId: req.user._id,
+                employmentStatus: "ACTIVE",
+            });
 
         if (!employee) {
             return res.status(404).json({
@@ -482,23 +637,23 @@ export const getMyLeaves = async (req, res) => {
             });
         }
 
-        const leaves = await Leave.find({
-            employeeId: employee._id,
-        })
-            .sort({
-                startDate: -1,
-                createdAt: -1,
+        const leaves =
+            await Leave.find({
+                employeeId:
+                    employee._id,
             })
-            .populate(
-                "reviewedBy",
-                "email"
-            );
+                .sort({
+                    startDate: -1,
+                    createdAt: -1,
+                })
+                .populate(
+                    "reviewedBy",
+                    "email"
+                );
 
         return res.status(200).json({
             success: true,
-
             count: leaves.length,
-
             leaves,
         });
 
@@ -520,7 +675,10 @@ export const getMyLeaves = async (req, res) => {
 // EMPLOYEE - CANCEL PENDING LEAVE
 // =====================================================
 
-export const cancelMyLeave = async (req, res) => {
+export const cancelMyLeave = async (
+    req,
+    res
+) => {
     try {
         const { id } = req.params;
 
@@ -533,10 +691,11 @@ export const cancelMyLeave = async (req, res) => {
             });
         }
 
-        const employee = await Employee.findOne({
-            userId: req.user._id,
-            employmentStatus: "ACTIVE",
-        });
+        const employee =
+            await Employee.findOne({
+                userId: req.user._id,
+                employmentStatus: "ACTIVE",
+            });
 
         if (!employee) {
             return res.status(404).json({
@@ -546,10 +705,12 @@ export const cancelMyLeave = async (req, res) => {
             });
         }
 
-        const leave = await Leave.findOne({
-            _id: id,
-            employeeId: employee._id,
-        });
+        const leave =
+            await Leave.findOne({
+                _id: id,
+                employeeId:
+                    employee._id,
+            });
 
         if (!leave) {
             return res.status(404).json({
@@ -559,7 +720,9 @@ export const cancelMyLeave = async (req, res) => {
             });
         }
 
-        if (leave.status !== "PENDING") {
+        if (
+            leave.status !== "PENDING"
+        ) {
             return res.status(400).json({
                 success: false,
                 message:
@@ -573,10 +736,8 @@ export const cancelMyLeave = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-
             message:
                 "Leave cancelled successfully",
-
             leave,
         });
 
@@ -598,7 +759,10 @@ export const cancelMyLeave = async (req, res) => {
 // ADMIN - GET ALL LEAVES
 // =====================================================
 
-export const getAllLeaves = async (req, res) => {
+export const getAllLeaves = async (
+    req,
+    res
+) => {
     try {
         const {
             status,
@@ -630,11 +794,13 @@ export const getAllLeaves = async (req, res) => {
             ) {
                 return res.status(400).json({
                     success: false,
-                    message: "Invalid leave status",
+                    message:
+                        "Invalid leave status",
                 });
             }
 
-            filter.status = normalizedStatus;
+            filter.status =
+                normalizedStatus;
         }
 
         // -----------------------------------------------
@@ -649,11 +815,13 @@ export const getAllLeaves = async (req, res) => {
             ) {
                 return res.status(400).json({
                     success: false,
-                    message: "Invalid employee ID",
+                    message:
+                        "Invalid employee ID",
                 });
             }
 
-            filter.employeeId = employeeId;
+            filter.employeeId =
+                employeeId;
         }
 
         // -----------------------------------------------
@@ -661,53 +829,43 @@ export const getAllLeaves = async (req, res) => {
         // -----------------------------------------------
 
         if (date) {
-            const selectedDate =
-                new Date(date);
+            const parsedDate =
+                parseCompanyDate(date);
 
-            if (
-                Number.isNaN(
-                    selectedDate.getTime()
-                )
-            ) {
+            if (!parsedDate) {
                 return res.status(400).json({
                     success: false,
-                    message: "Invalid date",
+                    message:
+                        "Invalid date. Use YYYY-MM-DD format.",
                 });
             }
 
-            const startOfDay =
-                getStartOfDay(selectedDate);
-
-            const endOfDay =
-                getEndOfDay(selectedDate);
-
             filter.startDate = {
-                $lte: endOfDay,
+                $lte: parsedDate.end,
             };
 
             filter.endDate = {
-                $gte: startOfDay,
+                $gte: parsedDate.start,
             };
         }
 
-        const leaves = await Leave.find(filter)
-            .populate(
-                "employeeId",
-                "employeeId name department designation attendanceMethod"
-            )
-            .populate(
-                "reviewedBy",
-                "email"
-            )
-            .sort({
-                createdAt: -1,
-            });
+        const leaves =
+            await Leave.find(filter)
+                .populate(
+                    "employeeId",
+                    "employeeId name department designation attendanceMethod"
+                )
+                .populate(
+                    "reviewedBy",
+                    "email"
+                )
+                .sort({
+                    createdAt: -1,
+                });
 
         return res.status(200).json({
             success: true,
-
             count: leaves.length,
-
             leaves,
         });
 
@@ -724,41 +882,82 @@ export const getAllLeaves = async (req, res) => {
     }
 };
 
-const createAttendanceForApprovedLeave = async (leave) => {
-    const startDate = getStartOfDay(leave.startDate);
-    const endDate = getStartOfDay(leave.endDate);
 
-    const currentDate = new Date(startDate);
+// =====================================================
+// HELPER - CREATE ATTENDANCE FOR APPROVED LEAVE
+// ONLY WORKING DAYS
+// =====================================================
 
-    while (currentDate <= endDate) {
-        const attendanceDate = getStartOfDay(currentDate);
+const createAttendanceForApprovedLeave =
+    async (leave) => {
+        let currentDate =
+            getStartOfDay(
+                leave.startDate
+            );
 
-        const existingAttendance = await Attendance.findOne({
-            employeeId: leave.employeeId,
-            date: attendanceDate,
-        });
+        const endDate =
+            getStartOfDay(
+                leave.endDate
+            );
 
-        if (!existingAttendance) {
-            await Attendance.create({
-                employeeId: leave.employeeId,
-                userId: leave.userId,
-                date: attendanceDate,
-                status: "ON_LEAVE",
-                workingMinutes: 0,
-            });
+        while (
+            currentDate <= endDate
+        ) {
+            // -------------------------------------------
+            // Skip Saturday and Sunday
+            // -------------------------------------------
+
+            if (!isWeekend(currentDate)) {
+                const attendanceDate =
+                    getStartOfDay(
+                        currentDate
+                    );
+
+                const existingAttendance =
+                    await Attendance.findOne({
+                        employeeId:
+                            leave.employeeId,
+
+                        date:
+                            attendanceDate,
+                    });
+
+                if (!existingAttendance) {
+                    await Attendance.create({
+                        employeeId:
+                            leave.employeeId,
+
+                        userId:
+                            leave.userId,
+
+                        date:
+                            attendanceDate,
+
+                        status:
+                            "ON_LEAVE",
+
+                        workingMinutes: 0,
+                    });
+                }
+            }
+
+            currentDate =
+                new Date(
+                    currentDate.getTime() +
+                        24 * 60 * 60 * 1000
+                );
         }
+    };
 
-        currentDate.setDate(
-            currentDate.getDate() + 1
-        );
-    }
-};
 
 // =====================================================
 // ADMIN - APPROVE / REJECT LEAVE
 // =====================================================
 
-export const reviewLeave = async (req, res) => {
+export const reviewLeave = async (
+    req,
+    res
+) => {
     try {
         const { id } = req.params;
 
@@ -767,19 +966,29 @@ export const reviewLeave = async (req, res) => {
             adminComment,
         } = req.body;
 
+        // -----------------------------------------------
+        // Validate leave ID
+        // -----------------------------------------------
+
         if (
             !mongoose.Types.ObjectId.isValid(id)
         ) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid leave ID",
+                message:
+                    "Invalid leave ID",
             });
         }
 
+        // -----------------------------------------------
+        // Validate status
+        // -----------------------------------------------
+
         if (
-            !["APPROVED", "REJECTED"].includes(
-                status
-            )
+            ![
+                "APPROVED",
+                "REJECTED",
+            ].includes(status)
         ) {
             return res.status(400).json({
                 success: false,
@@ -787,6 +996,10 @@ export const reviewLeave = async (req, res) => {
                     "Status must be APPROVED or REJECTED",
             });
         }
+
+        // -----------------------------------------------
+        // Validate admin comment
+        // -----------------------------------------------
 
         if (
             adminComment &&
@@ -799,6 +1012,10 @@ export const reviewLeave = async (req, res) => {
             });
         }
 
+        // -----------------------------------------------
+        // Find leave
+        // -----------------------------------------------
+
         const leave =
             await Leave.findById(id);
 
@@ -810,7 +1027,13 @@ export const reviewLeave = async (req, res) => {
             });
         }
 
-        if (leave.status !== "PENDING") {
+        // -----------------------------------------------
+        // Only pending leaves can be reviewed
+        // -----------------------------------------------
+
+        if (
+            leave.status !== "PENDING"
+        ) {
             return res.status(400).json({
                 success: false,
                 message:
@@ -826,15 +1049,18 @@ export const reviewLeave = async (req, res) => {
             status === "APPROVED" &&
             leave.leaveType === "CASUAL"
         ) {
-            const year =
-                leave.startDate.getFullYear();
-
-            const month =
-                leave.startDate.getMonth() + 1;
+            const {
+                year,
+                month,
+            } = getCompanyDateParts(
+                leave.startDate
+            );
 
             const allocation =
                 await LeaveAllocation.findOne({
-                    employeeId: leave.employeeId,
+                    employeeId:
+                        leave.employeeId,
+
                     year,
                     month,
                 });
@@ -842,20 +1068,12 @@ export const reviewLeave = async (req, res) => {
             const casualLeaveLimit =
                 allocation?.casualLeaveLimit ?? 1;
 
-            const monthStart = new Date(
+            const {
+                start: monthStart,
+                end: monthEnd,
+            } = getCompanyMonthRange(
                 year,
-                month - 1,
-                1
-            );
-
-            const monthEnd = new Date(
-                year,
-                month,
-                0,
-                23,
-                59,
-                59,
-                999
+                month
             );
 
             const otherCasualLeaves =
@@ -883,14 +1101,16 @@ export const reviewLeave = async (req, res) => {
             let approvedDays = 0;
 
             for (
-                const existingLeave of otherCasualLeaves
+                const existingLeave of
+                    otherCasualLeaves
             ) {
-                approvedDays += calculateLeaveDays(
-                    existingLeave.startDate,
-                    existingLeave.endDate
-                );
+                approvedDays +=
+                    calculateLeaveDays(
+                        existingLeave.startDate,
+                        existingLeave.endDate
+                    );
             }
-  
+
             const requestedDays =
                 calculateLeaveDays(
                     leave.startDate,
@@ -898,24 +1118,40 @@ export const reviewLeave = async (req, res) => {
                 );
 
             if (
-                approvedDays + requestedDays >
+                requestedDays === 0
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Leave must contain at least one working day",
+                });
+            }
+
+            if (
+                approvedDays +
+                    requestedDays >
                 casualLeaveLimit
             ) {
                 return res.status(400).json({
                     success: false,
                     message:
                         "Cannot approve. Employee does not have enough casual leave balance",
+
                     casualLeaveLimit,
+
                     approvedDays,
+
                     requestedDays,
                 });
             }
         }
 
+        // -----------------------------------------------
+        // Update leave status
+        // -----------------------------------------------
+
         leave.status = status;
-        if (status === "APPROVED") {
-            await createAttendanceForApprovedLeave(leave);
-        }
+
         leave.adminComment =
             adminComment?.trim() || "";
 
@@ -925,14 +1161,22 @@ export const reviewLeave = async (req, res) => {
         leave.reviewedAt =
             new Date();
 
+        // -----------------------------------------------
+        // Create attendance for approved leave
+        // -----------------------------------------------
+
+        if (status === "APPROVED") {
+            await createAttendanceForApprovedLeave(
+                leave
+            );
+        }
+
         await leave.save();
 
         return res.status(200).json({
             success: true,
-
             message:
                 `Leave ${status.toLowerCase()} successfully`,
-
             leave,
         });
 
@@ -954,235 +1198,259 @@ export const reviewLeave = async (req, res) => {
 // ADMIN - GET EMPLOYEE LEAVE ALLOCATION
 // =====================================================
 
-export const getEmployeeLeaveAllocation = async (
-    req,
-    res
-) => {
-    try {
-        const { employeeId } = req.params;
+export const getEmployeeLeaveAllocation =
+    async (
+        req,
+        res
+    ) => {
+        try {
+            const { employeeId } =
+                req.params;
 
-        if (
-            !mongoose.Types.ObjectId.isValid(
-                employeeId
-            )
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid employee ID",
+            if (
+                !mongoose.Types.ObjectId.isValid(
+                    employeeId
+                )
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Invalid employee ID",
+                });
+            }
+
+            const employee =
+                await Employee.findById(
+                    employeeId
+                );
+
+            if (!employee) {
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Employee not found",
+                });
+            }
+
+            const {
+                year: currentYear,
+                month: currentMonth,
+            } =
+                getCompanyDateParts(
+                    new Date()
+                );
+
+            const year =
+                Number(req.query.year) ||
+                currentYear;
+
+            const month =
+                Number(req.query.month) ||
+                currentMonth;
+
+            if (
+                month < 1 ||
+                month > 12
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Invalid month",
+                });
+            }
+
+            const allocation =
+                await LeaveAllocation.findOne({
+                    employeeId,
+                    year,
+                    month,
+                });
+
+            return res.status(200).json({
+                success: true,
+
+                employee: {
+                    _id:
+                        employee._id,
+
+                    employeeId:
+                        employee.employeeId,
+
+                    name:
+                        employee.name,
+                },
+
+                year,
+
+                month,
+
+                casualLeaveLimit:
+                    allocation
+                        ?.casualLeaveLimit ??
+                    1,
             });
-        }
 
-        const employee =
-            await Employee.findById(employeeId);
+        } catch (error) {
+            console.error(
+                "Get Employee Leave Allocation Error:",
+                error
+            );
 
-        if (!employee) {
-            return res.status(404).json({
+            return res.status(500).json({
                 success: false,
                 message:
-                    "Employee not found",
+                    "Server error",
             });
         }
-
-        const now = new Date();
-
-        const year =
-            Number(req.query.year) ||
-            now.getFullYear();
-
-        const month =
-            Number(req.query.month) ||
-            now.getMonth() + 1;
-
-        if (
-            month < 1 ||
-            month > 12
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid month",
-            });
-        }
-
-        const allocation =
-            await LeaveAllocation.findOne({
-                employeeId,
-                year,
-                month,
-            });
-
-        return res.status(200).json({
-            success: true,
-
-            employee: {
-                _id: employee._id,
-                employeeId:
-                    employee.employeeId,
-                name: employee.name,
-            },
-
-            year,
-
-            month,
-
-            casualLeaveLimit:
-                allocation?.casualLeaveLimit ?? 1,
-        });
-
-    } catch (error) {
-        console.error(
-            "Get Employee Leave Allocation Error:",
-            error
-        );
-
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-};
+    };
 
 
 // =====================================================
 // ADMIN - SET EMPLOYEE CASUAL LEAVE ALLOCATION
 // =====================================================
 
-export const setEmployeeLeaveAllocation = async (
-    req,
-    res
-) => {
-    try {
-        const { employeeId } = req.params;
+export const setEmployeeLeaveAllocation =
+    async (
+        req,
+        res
+    ) => {
+        try {
+            const { employeeId } =
+                req.params;
 
-        const {
-            year,
-            month,
-            casualLeaveLimit,
-        } = req.body;
+            const {
+                year,
+                month,
+                casualLeaveLimit,
+            } = req.body;
 
-        // -----------------------------------------------
-        // Validate employee ID
-        // -----------------------------------------------
+            // -------------------------------------------
+            // Validate employee ID
+            // -------------------------------------------
 
-        if (
-            !mongoose.Types.ObjectId.isValid(
-                employeeId
-            )
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid employee ID",
-            });
-        }
+            if (
+                !mongoose.Types.ObjectId.isValid(
+                    employeeId
+                )
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Invalid employee ID",
+                });
+            }
 
-        // -----------------------------------------------
-        // Validate year
-        // -----------------------------------------------
+            // -------------------------------------------
+            // Validate year
+            // -------------------------------------------
 
-        if (
-            year === undefined ||
-            !Number.isInteger(year) ||
-            year < 2020 ||
-            year > 2100
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "Valid year is required",
-            });
-        }
+            if (
+                year === undefined ||
+                !Number.isInteger(year) ||
+                year < 2020 ||
+                year > 2100
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Valid year is required",
+                });
+            }
 
-        // -----------------------------------------------
-        // Validate month
-        // -----------------------------------------------
+            // -------------------------------------------
+            // Validate month
+            // -------------------------------------------
 
-        if (
-            month === undefined ||
-            !Number.isInteger(month) ||
-            month < 1 ||
-            month > 12
-        ) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Month must be between 1 and 12",
-            });
-        }
+            if (
+                month === undefined ||
+                !Number.isInteger(month) ||
+                month < 1 ||
+                month > 12
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Month must be between 1 and 12",
+                });
+            }
 
-        // -----------------------------------------------
-        // Validate casual leave limit
-        // -----------------------------------------------
+            // -------------------------------------------
+            // Validate casual leave limit
+            // -------------------------------------------
 
-        if (
-            casualLeaveLimit === undefined ||
-            !Number.isInteger(
-                casualLeaveLimit
-            ) ||
-            casualLeaveLimit < 0
-        ) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Casual leave limit must be a non-negative integer",
-            });
-        }
+            if (
+                casualLeaveLimit === undefined ||
+                !Number.isInteger(
+                    casualLeaveLimit
+                ) ||
+                casualLeaveLimit < 0
+            ) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Casual leave limit must be a non-negative integer",
+                });
+            }
 
-        // -----------------------------------------------
-        // Find employee
-        // -----------------------------------------------
+            // -------------------------------------------
+            // Find employee
+            // -------------------------------------------
 
-        const employee =
-            await Employee.findById(
-                employeeId
-            );
+            const employee =
+                await Employee.findById(
+                    employeeId
+                );
 
-        if (!employee) {
-            return res.status(404).json({
-                success: false,
-                message:
-                    "Employee not found",
-            });
-        }
+            if (!employee) {
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Employee not found",
+                });
+            }
 
-        // -----------------------------------------------
-        // Create or update allocation
-        // -----------------------------------------------
+            // -------------------------------------------
+            // Create or update allocation
+            // -------------------------------------------
 
-        const allocation =
-            await LeaveAllocation.findOneAndUpdate(
-                {
-                    employeeId,
-                    year,
-                    month,
-                },
-                {
-                    $set: {
-                        casualLeaveLimit,
+            const allocation =
+                await LeaveAllocation.findOneAndUpdate(
+                    {
+                        employeeId,
+                        year,
+                        month,
                     },
-                },
-                {
-                    returnDocument: "after",
-                    upsert: true,
-                    runValidators: true,
-                }
+                    {
+                        $set: {
+                            casualLeaveLimit,
+                        },
+                    },
+                    {
+                        returnDocument:
+                            "after",
+                        upsert: true,
+                        runValidators:
+                            true,
+                    }
+                );
+
+            return res.status(200).json({
+                success: true,
+                message:
+                    "Casual leave allocation updated successfully",
+                allocation,
+            });
+
+        } catch (error) {
+            console.error(
+                "Set Employee Leave Allocation Error:",
+                error
             );
 
-        return res.status(200).json({
-            success: true,
-
-            message:
-                "Casual leave allocation updated successfully",
-
-            allocation,
-        });
-
-    } catch (error) {
-        console.error(
-            "Set Employee Leave Allocation Error:",
-            error
-        );
-
-        return res.status(500).json({
-            success: false,
-            message: "Server error",
-        });
-    }
-};
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Server error",
+            });
+        }
+    };

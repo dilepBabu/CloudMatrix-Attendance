@@ -82,7 +82,19 @@ const attendanceSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    // Overtime information
+    isOvertime: {
+      type: Boolean,
+      default: false,
+    },
+
+    overtimeMinutes: {
+      type: Number,
+      default: 0,
+    },
   },
+
   {
     timestamps: true,
   }
@@ -97,7 +109,7 @@ attendanceSchema.index(
   {
     unique: true,
   }
-); 
+);
 
 const Attendance = mongoose.model("Attendance", attendanceSchema);
 
