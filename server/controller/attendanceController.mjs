@@ -530,14 +530,14 @@ export const checkIn = async (
         });
       }
 
-      if (accuracy > 50) {
+      if (accuracy > 300) {
         return res.status(403).json({
           success: false,
           message:
             "GPS accuracy is too low. Please move to an open area and try again.",
           accuracy:
             Math.round(accuracy),
-          maximumAllowedAccuracy: 50,
+          maximumAllowedAccuracy: 300,
         });
       }
 
@@ -969,7 +969,7 @@ export const checkOut = async (
         });
       }
 
-      if (accuracy > 50) {
+      if (accuracy > 300) {
         return res.status(403).json({
           success: false,
           message:
@@ -977,7 +977,7 @@ export const checkOut = async (
           accuracy:
             Math.round(accuracy),
           maximumAllowedAccuracy:
-            50,
+            300,
         });
       }
 
@@ -988,6 +988,15 @@ export const checkOut = async (
           settings.officeLocation.latitude,
           settings.officeLocation.longitude
         );
+        console.log("CHECK-OUT GPS CHECK:", {
+  userLatitude: latitude,
+  userLongitude: longitude,
+  accuracy,
+  officeLatitude: settings.officeLocation.latitude,
+  officeLongitude: settings.officeLocation.longitude,
+  officeRadius: settings.officeLocation.radius,
+  distance,
+});
 
       if (
         distance >

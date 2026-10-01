@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import OvertimeRequest from "../model/OvertimeRequest.mjs";
 import Employee from "../model/Employee.mjs";
+import Holiday from "../model/Holiday.mjs";
+
 import {
   parseCompanyDate,
   getCurrentCompanyDayStart,
@@ -13,12 +15,7 @@ const getEmployeeForUser = async (userId) => {
   });
 };
 
-/*
-|--------------------------------------------------------------------------
-| EMPLOYEE - CREATE OVERTIME REQUEST
-|--------------------------------------------------------------------------
-*/
-
+// CREATE
 export const createOvertimeRequest = async (req, res) => {
   try {
     const employee = await getEmployeeForUser(req.user._id);
@@ -56,9 +53,9 @@ export const createOvertimeRequest = async (req, res) => {
     }
 
     const requestedDate = parsedDate.start;
-
     const today = getCurrentCompanyDayStart();
 
+    // Past date validation
     if (requestedDate < today) {
       return res.status(400).json({
         success: false,
@@ -66,18 +63,59 @@ export const createOvertimeRequest = async (req, res) => {
       });
     }
 
-    const existingRequest = await OvertimeRequest.findOne({
-      employeeId: employee._id,
+    // --------------------------------------------------
+    // OVERTIME IS ALLOWED ONLY ON:
+    // 1. Sunday
+    // 2. Active company holiday
+    // --------------------------------------------------
+
+    // JavaScript getDay():
+    // Sunday = 0
+    // Monday = 1
+    // ...
+    // Saturday = 6
+    const dayOfWeek = requestedDate.getDay();
+
+    const isSunday = dayOfWeek === 0;
+
+    // Check whether requested date is an active company holiday
+    const holiday = await Holiday.findOne({
       date: requestedDate,
+      isActive: true,
     });
 
-    if (existingRequest) {
-      return res.status(409).json({
+    const isCompanyHoliday = !!holiday;
+
+    if (!isSunday && !isCompanyHoliday) {
+      return res.status(400).json({
         success: false,
-        message: `An overtime request already exists for this date with status ${existingRequest.status}`,
-        request: existingRequest,
+        message:
+          "Overtime can only be requested for Sundays or company holidays",
       });
     }
+
+    // --------------------------------------------------
+    // CHECK EXISTING REQUEST
+    // --------------------------------------------------
+const existingRequest = await OvertimeRequest.findOne({
+  employeeId: employee._id,
+  date: requestedDate,
+  status: {
+    $in: ["PENDING", "APPROVED", "REJECTED"],
+  },
+});
+
+if (existingRequest) {
+  return res.status(409).json({
+    success: false,
+    message: `An overtime request already exists for this date with status ${existingRequest.status}`,
+    request: existingRequest,
+  });
+}
+
+    // --------------------------------------------------
+    // CREATE REQUEST
+    // --------------------------------------------------
 
     const overtimeRequest = await OvertimeRequest.create({
       employeeId: employee._id,
@@ -92,10 +130,7 @@ export const createOvertimeRequest = async (req, res) => {
       request: overtimeRequest,
     });
   } catch (error) {
-    console.error(
-      "Create Overtime Request Error:",
-      error
-    );
+    console.error("Create Overtime Request Error:", error);
 
     if (error.code === 11000) {
       return res.status(409).json({
@@ -112,12 +147,7 @@ export const createOvertimeRequest = async (req, res) => {
   }
 };
 
-/*
-|--------------------------------------------------------------------------
-| EMPLOYEE - GET MY OVERTIME REQUESTS
-|--------------------------------------------------------------------------
-*/
-
+// GET MY
 export const getMyOvertimeRequests = async (req, res) => {
   try {
     const employee = await getEmployeeForUser(req.user._id);
@@ -132,10 +162,7 @@ export const getMyOvertimeRequests = async (req, res) => {
     const requests = await OvertimeRequest.find({
       employeeId: employee._id,
     })
-      .populate(
-        "reviewedBy",
-        "name email"
-      )
+      .populate("reviewedBy", "name email")
       .sort({
         date: -1,
         createdAt: -1,
@@ -147,10 +174,7 @@ export const getMyOvertimeRequests = async (req, res) => {
       requests,
     });
   } catch (error) {
-    console.error(
-      "Get My Overtime Requests Error:",
-      error
-    );
+    console.error("Get My Overtime Requests Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -160,12 +184,7 @@ export const getMyOvertimeRequests = async (req, res) => {
   }
 };
 
-/*
-|--------------------------------------------------------------------------
-| EMPLOYEE - CANCEL PENDING REQUEST
-|--------------------------------------------------------------------------
-*/
-
+// CANCEL
 export const cancelOvertimeRequest = async (req, res) => {
   try {
     const employee = await getEmployeeForUser(req.user._id);
@@ -206,7 +225,6 @@ export const cancelOvertimeRequest = async (req, res) => {
     }
 
     request.status = "CANCELLED";
-
     await request.save();
 
     return res.status(200).json({
@@ -215,10 +233,7 @@ export const cancelOvertimeRequest = async (req, res) => {
       request,
     });
   } catch (error) {
-    console.error(
-      "Cancel Overtime Request Error:",
-      error
-    );
+    console.error("Cancel Overtime Request Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -228,20 +243,10 @@ export const cancelOvertimeRequest = async (req, res) => {
   }
 };
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN - GET ALL OVERTIME REQUESTS
-|--------------------------------------------------------------------------
-*/
-
+// ADMIN GET ALL
 export const getAllOvertimeRequests = async (req, res) => {
   try {
-    const {
-      status,
-      employeeId,
-      date,
-    } = req.query;
-
+    const { status, employeeId, date } = req.query;
     const filter = {};
 
     if (status) {
@@ -291,10 +296,7 @@ export const getAllOvertimeRequests = async (req, res) => {
         "employeeId",
         "employeeId name department designation attendanceMethod employmentStatus"
       )
-      .populate(
-        "reviewedBy",
-        "name email"
-      )
+      .populate("reviewedBy", "name email")
       .sort({
         date: -1,
         createdAt: -1,
@@ -306,10 +308,7 @@ export const getAllOvertimeRequests = async (req, res) => {
       requests,
     });
   } catch (error) {
-    console.error(
-      "Get All Overtime Requests Error:",
-      error
-    );
+    console.error("Get All Overtime Requests Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -319,12 +318,7 @@ export const getAllOvertimeRequests = async (req, res) => {
   }
 };
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN - APPROVE OVERTIME REQUEST
-|--------------------------------------------------------------------------
-*/
-
+// APPROVE
 export const approveOvertimeRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
@@ -337,9 +331,7 @@ export const approveOvertimeRequest = async (req, res) => {
       });
     }
 
-    const request = await OvertimeRequest.findById(
-      requestId
-    );
+    const request = await OvertimeRequest.findById(requestId);
 
     if (!request) {
       return res.status(404).json({
@@ -372,8 +364,7 @@ export const approveOvertimeRequest = async (req, res) => {
     request.reviewedAt = new Date();
 
     if (adminComment !== undefined) {
-      request.adminComment =
-        adminComment?.trim() || undefined;
+      request.adminComment = adminComment?.trim() || undefined;
     }
 
     await request.save();
@@ -384,10 +375,7 @@ export const approveOvertimeRequest = async (req, res) => {
       request,
     });
   } catch (error) {
-    console.error(
-      "Approve Overtime Request Error:",
-      error
-    );
+    console.error("Approve Overtime Request Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -397,12 +385,7 @@ export const approveOvertimeRequest = async (req, res) => {
   }
 };
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN - REJECT OVERTIME REQUEST
-|--------------------------------------------------------------------------
-*/
-
+// REJECT
 export const rejectOvertimeRequest = async (req, res) => {
   try {
     const { requestId } = req.params;
@@ -415,9 +398,7 @@ export const rejectOvertimeRequest = async (req, res) => {
       });
     }
 
-    const request = await OvertimeRequest.findById(
-      requestId
-    );
+    const request = await OvertimeRequest.findById(requestId);
 
     if (!request) {
       return res.status(404).json({
@@ -438,8 +419,7 @@ export const rejectOvertimeRequest = async (req, res) => {
     request.reviewedAt = new Date();
 
     if (adminComment !== undefined) {
-      request.adminComment =
-        adminComment?.trim() || undefined;
+      request.adminComment = adminComment?.trim() || undefined;
     }
 
     await request.save();
@@ -450,10 +430,7 @@ export const rejectOvertimeRequest = async (req, res) => {
       request,
     });
   } catch (error) {
-    console.error(
-      "Reject Overtime Request Error:",
-      error
-    );
+    console.error("Reject Overtime Request Error:", error);
 
     return res.status(500).json({
       success: false,

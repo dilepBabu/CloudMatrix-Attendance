@@ -96,13 +96,15 @@ export const createRemoteRequest = async (req, res) => {
     const existingRequest = await RemoteRequest.findOne({
       employeeId: employee._id,
       date: requestedDate,
+      status: {
+        $in: ["PENDING", "APPROVED", "REJECTED"],
+      },
     });
 
     if (existingRequest) {
       return res.status(409).json({
         success: false,
         message: `A remote request already exists for this date with status ${existingRequest.status}`,
-        request: existingRequest,
       });
     }
 
