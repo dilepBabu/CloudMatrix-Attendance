@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 import Holiday from "../model/Holiday.mjs";
@@ -7,7 +8,11 @@ import {
   getCompanyMonthRange,
 } from "../utils/dateUtils.mjs";
 
-// Create Holiday
+// --------------------------------------------------
+// CREATE HOLIDAY
+// Admin only
+// --------------------------------------------------
+
 export const createHoliday = async (req, res) => {
   try {
     const { name, date, description } = req.body;
@@ -31,31 +36,34 @@ export const createHoliday = async (req, res) => {
     // Parse date using company timezone
     const parsedDate = parseCompanyDate(date);
 
-    if (!parsedDate) {
+    if (!parsedDate || !parsedDate.start) {
       return res.status(400).json({
         success: false,
         message: "Invalid holiday date. Use YYYY-MM-DD",
       });
     }
-   
+
+    const holidayDate = parsedDate.start;
 
     // Check duplicate date
     const existingHoliday = await Holiday.findOne({
-      date: parsedDate.start,
+      date: holidayDate,
     });
 
     if (existingHoliday) {
       return res.status(409).json({
         success: false,
         message: "A holiday already exists for this date",
+        holiday: existingHoliday,
       });
     }
 
     // Create holiday
     const holiday = await Holiday.create({
       name: name.trim(),
-      date: parsedDate.start,
+      date: holidayDate,
       description: description?.trim() || "",
+      isActive: true,
     });
 
     return res.status(201).json({
@@ -76,22 +84,43 @@ export const createHoliday = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to create holiday",
+      error: error.message,
     });
   }
 };
 
-// Get All Holidays
+// --------------------------------------------------
+// GET ALL HOLIDAYS
+//
+// Employee:
+// GET /api/holidays
+// → Active holidays only
+//
+// Admin:
+// GET /api/holidays
+// → Active holidays only
+//
+// Admin:
+// GET /api/holidays?includeInactive=true
+// → Active + inactive holidays
+// --------------------------------------------------
+
 export const getAllHolidays = async (req, res) => {
   try {
-    const { year } = req.query;
+    const { year, includeInactive } = req.query;
 
-    const filter = {
-      isActive: true,
-    };
+    const isAdmin = req.user?.role === "admin";
+
+    // By default, only active holidays are returned.
+    const filter = {};
+
+    if (!(isAdmin && includeInactive === "true")) {
+      filter.isActive = true;
+    }
 
     // Optional year filter
-    if (year) {
+    if (year !== undefined) {
       const selectedYear = Number(year);
 
       if (
@@ -135,12 +164,17 @@ export const getAllHolidays = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to fetch holidays",
+      error: error.message,
     });
   }
 };
 
-// Update Holiday
+// --------------------------------------------------
+// UPDATE HOLIDAY
+// Admin only
+// --------------------------------------------------
+
 export const updateHoliday = async (req, res) => {
   try {
     const { id } = req.params;
@@ -163,9 +197,12 @@ export const updateHoliday = async (req, res) => {
       });
     }
 
-    // Validate name if provided
+    // ----------------------------------------------
+    // Validate name
+    // ----------------------------------------------
+
     if (name !== undefined) {
-      if (!name.trim()) {
+      if (typeof name !== "string" || !name.trim()) {
         return res.status(400).json({
           success: false,
           message: "Holiday name cannot be empty",
@@ -175,35 +212,53 @@ export const updateHoliday = async (req, res) => {
       holiday.name = name.trim();
     }
 
-    // Validate date if provided
+    // ----------------------------------------------
+    // Validate date
+    // ----------------------------------------------
+
     if (date !== undefined) {
       const parsedDate = parseCompanyDate(date);
 
-      if (!parsedDate) {
+      if (!parsedDate || !parsedDate.start) {
         return res.status(400).json({
           success: false,
           message: "Invalid holiday date. Use YYYY-MM-DD",
         });
       }
 
-      // Check duplicate date
+      const holidayDate = parsedDate.start;
+
+      // Check duplicate date excluding current holiday
       const existingHoliday = await Holiday.findOne({
-        date: parsedDate.start,
-        _id: { $ne: holiday._id },
+        date: holidayDate,
+        _id: {
+          $ne: holiday._id,
+        },
       });
 
       if (existingHoliday) {
         return res.status(409).json({
           success: false,
           message: "A holiday already exists for this date",
+          holiday: existingHoliday,
         });
       }
 
-      holiday.date = parsedDate.start;
+      holiday.date = holidayDate;
     }
 
+    // ----------------------------------------------
     // Update description
+    // ----------------------------------------------
+
     if (description !== undefined) {
+      if (typeof description !== "string") {
+        return res.status(400).json({
+          success: false,
+          message: "Description must be a string",
+        });
+      }
+
       holiday.description = description.trim();
     }
 
@@ -217,6 +272,7 @@ export const updateHoliday = async (req, res) => {
   } catch (error) {
     console.error("Update Holiday Error:", error);
 
+    // MongoDB duplicate key error
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
@@ -226,12 +282,17 @@ export const updateHoliday = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to update holiday",
+      error: error.message,
     });
   }
 };
 
-// Deactivate Holiday
+// --------------------------------------------------
+// DEACTIVATE HOLIDAY
+// Admin only
+// --------------------------------------------------
+
 export const deactivateHoliday = async (req, res) => {
   try {
     const { id } = req.params;
@@ -274,16 +335,22 @@ export const deactivateHoliday = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to deactivate holiday",
+      error: error.message,
     });
   }
 };
 
-// Activate Holiday
+// --------------------------------------------------
+// ACTIVATE HOLIDAY
+// Admin only
+// --------------------------------------------------
+
 export const activateHoliday = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Validate ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
@@ -321,7 +388,8 @@ export const activateHoliday = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "Failed to activate holiday",
+      error: error.message,
     });
   }
 };

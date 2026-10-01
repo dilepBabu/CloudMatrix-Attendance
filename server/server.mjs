@@ -39,7 +39,7 @@ app.use('/api/employee/', employeeselfrouter);
 app.use('/api/attendance', attendanceRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/work-reports", workReportRouter);
-app.use("/api/leaves", leaveRouter);
+app.use("/api/leave", leaveRouter);
 app.use("/api/holidays", holidayRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/remote-requests", remoteRequestRoutes);

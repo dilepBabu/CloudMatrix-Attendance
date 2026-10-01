@@ -124,39 +124,25 @@ export const getMyWorkReport = async (req, res) => {
       });
     }
 
-    const now = new Date();
-
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    const workReport = await WorkReport.findOne({
+    const workReports = await WorkReport.find({
       employeeId: employee._id,
-      date: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
-    }).populate(
-      "attendanceId",
-      "date checkIn checkOut status workingMinutes"
-    );
-
-    if (!workReport) {
-      return res.status(404).json({
-        success: false,
-        message: "Work report not submitted for today",
+    })
+      .populate(
+        "attendanceId",
+        "date checkIn checkOut status workingMinutes"
+      )
+      .sort({
+        date: -1,
+        createdAt: -1,
       });
-    }
 
     return res.status(200).json({
       success: true,
-      workReport,
+      count: workReports.length,
+      workReports,
     });
-
   } catch (error) {
-    console.error("Get My Work Report Error:", error);
+    console.error("Get My Work Reports Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -269,6 +255,8 @@ export const updateMyWorkReport = async (req, res) => {
 
 export const getAllWorkReports = async (req, res) => {
   try {
+    console.log("===== GET MY WORK REPORT =====");
+    console.log("req.user:", req.user);
     const { date, employeeId } = req.query;
 
     const filter = {};
