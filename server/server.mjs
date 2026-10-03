@@ -11,7 +11,7 @@ import attendanceRouter from "./routes/attendanceRouter.mjs";
 import settingsRouter from "./routes/settingsRouter.mjs";
 import workReportRouter from "./routes/workReportRouter.mjs";
 import leaveRouter from "./routes/leaveRoutes.mjs";
-import holidayRouter from "./routes/HolidayRoutes.mjs";
+import holidayRouter from "./routes/holidayRoutes.mjs";
 import dashboardRouter from "./routes/dashboardRoutes.mjs";
 import remoteRequestRoutes from "./routes/remoteRequestRoutes.mjs";
 import overtimeRequestRoutes from "./routes/overtimeRequestRoutes.mjs";
