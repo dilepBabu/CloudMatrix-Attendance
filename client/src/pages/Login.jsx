@@ -68,7 +68,7 @@ const Login = () => {
           <div className="login-logo">CM</div>
 
           <div>
-            <h1>CloudMatrix</h1>
+            <h1>Cloud Matrix</h1>
             <span>Attendance Management</span>
           </div>
         </div>
@@ -155,7 +155,7 @@ const Login = () => {
         <div className="login-footer">
           <span>Secure employee access</span>
           <span>•</span>
-          <span>CloudMatrix Technologies</span>
+          <span>Cloud Matrix Technologies</span>
         </div>
       </div>
     </div>
