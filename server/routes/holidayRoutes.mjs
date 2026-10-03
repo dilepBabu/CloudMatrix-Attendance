@@ -3,7 +3,7 @@ import express from "express";
 
 import { authMiddleware } from "../middleware/authMiddleware.mjs";
 import roleMiddleware from "../middleware/roleMiddleware.mjs";
-import { activateHoliday, createHoliday, deactivateHoliday, getAllHolidays, updateHoliday } from "../controller/HolidayController.mjs";
+import { activateHoliday, createHoliday, deactivateHoliday, getAllHolidays, updateHoliday } from "../controller/holidayController.mjs";
 
 const holidayRouter = express.Router();
 
