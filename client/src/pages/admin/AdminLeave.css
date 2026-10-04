@@ -1348,3 +1348,687 @@
     padding: 10px 12px;
   }
 }
+
+/* =========================================================
+   CASUAL LEAVE ALLOCATION
+   ========================================================= */
+
+.casual-allocation-card {
+  margin-top: 24px;
+}
+
+.casual-allocation-header {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.casual-allocation-header > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.casual-allocation-eyebrow {
+  margin: 0 0 5px;
+  color: #0066b3;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.casual-allocation-header h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 20px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.casual-allocation-header > div:first-child > p:last-child {
+  margin: 6px 0 0;
+  color: #8490a2;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ALLOCATION PERIOD
+   ========================================================= */
+
+.allocation-period {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 10px;
+}
+
+.allocation-period > div {
+  min-width: 125px;
+}
+
+.allocation-period label {
+  display: block;
+  margin-bottom: 6px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.allocation-period select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 11px;
+  border: 1px solid #dce3ec;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.allocation-period select:focus {
+  border-color: #0066b3;
+  box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.07);
+}
+
+
+/* =========================================================
+   ALLOCATION PERIOD INFO
+   ========================================================= */
+
+.allocation-period-info {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px 24px;
+  background: #f8fbfe;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.allocation-period-info span {
+  color: #7b8798;
+  font-size: 12px;
+}
+
+.allocation-period-info strong {
+  color: #0066b3;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ALLOCATION TABLE
+   ========================================================= */
+
+.allocation-table {
+  min-width: 900px;
+}
+
+.allocation-table th {
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
+.allocation-table td {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+
+/* =========================================================
+   ALLOCATION DEPARTMENT
+   ========================================================= */
+
+.allocation-department {
+  min-width: 120px;
+}
+
+.allocation-department strong {
+  display: block;
+  color: #344054;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.allocation-department span {
+  display: block;
+  margin-top: 4px;
+  color: #8a95a6;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ALLOCATION STATUS
+   ========================================================= */
+
+.allocation-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.allocation-status > span {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+}
+
+.allocation-status.active {
+  background: #e9f8ef;
+  color: #167648;
+}
+
+.allocation-status.active > span {
+  background: #16804c;
+}
+
+.allocation-status.inactive {
+  background: #eef1f4;
+  color: #667085;
+}
+
+.allocation-status.inactive > span {
+  background: #98a2b3;
+}
+
+
+/* =========================================================
+   ALLOCATION VALUE
+   ========================================================= */
+
+.allocation-value {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.allocation-value strong {
+  color: #0066b3;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.allocation-value span {
+  color: #7b8798;
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   ALLOCATION EDIT BUTTON
+   ========================================================= */
+
+.allocation-edit-button {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid #cfe4f5;
+  border-radius: 8px;
+  background: #f2f9fe;
+  color: #0066b3;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+
+.allocation-edit-button:hover {
+  background: #e4f3fc;
+  border-color: #b8d9ef;
+}
+
+.allocation-edit-button:active {
+  transform: translateY(1px);
+}
+
+
+/* =========================================================
+   ALLOCATION MODAL
+   ========================================================= */
+
+.allocation-modal {
+  width: min(500px, 100%);
+}
+
+.allocation-form {
+  min-width: 0;
+}
+
+.allocation-form-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 24px;
+}
+
+.allocation-form-info > div {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #e8edf3;
+  border-radius: 10px;
+  background: #fafbfd;
+}
+
+.allocation-form-info span {
+  display: block;
+  margin-bottom: 5px;
+  color: #8994a5;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.allocation-form-info strong {
+  display: block;
+  color: #334155;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ALLOCATION INPUT
+   ========================================================= */
+
+.allocation-input-group {
+  min-width: 0;
+  margin: 20px 24px 0;
+}
+
+.allocation-input-group label {
+  display: block;
+  margin-bottom: 8px;
+  color: #344054;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.allocation-number-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.allocation-number-wrapper input {
+  width: 100%;
+  height: 48px;
+  padding: 0 62px 0 13px;
+  border: 1px solid #dce3ec;
+  border-radius: 10px;
+  outline: none;
+  background: #ffffff;
+  color: #172033;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.allocation-number-wrapper input:focus {
+  border-color: #0066b3;
+  box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.08);
+}
+
+.allocation-number-wrapper input:disabled {
+  background: #f5f7fa;
+  cursor: not-allowed;
+}
+
+.allocation-number-wrapper span {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #7b8798;
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.allocation-input-group > small {
+  display: block;
+  margin-top: 6px;
+  color: #98a2b3;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   ALLOCATION NOTE
+   ========================================================= */
+
+.allocation-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 16px 24px 0;
+  padding: 12px;
+  border: 1px solid #dcecf7;
+  border-radius: 10px;
+  background: #f4faff;
+}
+
+.allocation-note > span {
+  flex: 0 0 20px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #e1f1fc;
+  color: #0066b3;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.allocation-note p {
+  min-width: 0;
+  flex: 1;
+  margin: 0;
+  color: #607086;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ALLOCATION SAVE BUTTON
+   ========================================================= */
+
+.allocation-save-button {
+  background: #0066b3;
+  color: #ffffff;
+}
+
+.allocation-save-button:hover {
+  background: #005895;
+}
+
+.allocation-save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   LARGE LAPTOP
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+  .casual-allocation-header {
+    gap: 18px;
+  }
+
+  .allocation-period > div {
+    min-width: 115px;
+  }
+
+  .allocation-table {
+    min-width: 850px;
+  }
+}
+
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .casual-allocation-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .allocation-period {
+    width: 100%;
+  }
+
+  .allocation-period > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .allocation-table {
+    min-width: 820px;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+  .casual-allocation-header {
+    padding: 19px 18px 16px;
+  }
+
+  .casual-allocation-header h2 {
+    font-size: 18px;
+  }
+
+  .casual-allocation-header > div:first-child > p:last-child {
+    font-size: 12px;
+  }
+
+  .allocation-period-info {
+    padding: 11px 18px;
+  }
+
+  .allocation-table {
+    min-width: 800px;
+  }
+
+  .allocation-form-info {
+    padding: 0 18px;
+  }
+
+  .allocation-input-group {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  .allocation-note {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .casual-allocation-card {
+    margin-top: 18px;
+  }
+
+  .casual-allocation-header {
+    padding: 16px 14px;
+  }
+
+  .casual-allocation-eyebrow {
+    font-size: 10px;
+  }
+
+  .casual-allocation-header h2 {
+    font-size: 17px;
+  }
+
+  .casual-allocation-header > div:first-child > p:last-child {
+    font-size: 11px;
+  }
+
+  .allocation-period {
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .allocation-period > div {
+    width: 100%;
+  }
+
+  .allocation-period select {
+    height: 42px;
+  }
+
+  .allocation-period-info {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .allocation-table {
+    min-width: 760px;
+  }
+
+  .allocation-edit-button {
+    width: 100%;
+  }
+
+  .allocation-modal {
+    width: 100%;
+  }
+
+  .allocation-form-info {
+    grid-template-columns: 1fr;
+    padding: 0 16px;
+    gap: 9px;
+  }
+
+  .allocation-input-group {
+    margin: 16px;
+  }
+
+  .allocation-note {
+    margin: 14px 16px 0;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .casual-allocation-header {
+    padding: 15px 12px;
+  }
+
+  .casual-allocation-header h2 {
+    font-size: 16px;
+  }
+
+  .allocation-period-info {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  .allocation-table {
+    min-width: 720px;
+  }
+
+  .allocation-form-info {
+    padding: 0 15px;
+  }
+
+  .allocation-input-group {
+    margin: 15px;
+  }
+
+  .allocation-note {
+    margin: 13px 15px 0;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  .casual-allocation-header {
+    padding: 14px 13px;
+  }
+
+  .allocation-period-info {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .allocation-table {
+    min-width: 690px;
+  }
+
+  .allocation-form-info {
+    padding: 0 13px;
+  }
+
+  .allocation-input-group {
+    margin-left: 13px;
+    margin-right: 13px;
+  }
+
+  .allocation-note {
+    margin-left: 13px;
+    margin-right: 13px;
+  }
+}
+
+
+/* =========================================================
+   EXTRA SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 340px) {
+
+  .casual-allocation-header {
+    padding: 13px 10px;
+  }
+
+  .casual-allocation-header h2 {
+    font-size: 15px;
+  }
+
+  .allocation-table {
+    min-width: 660px;
+  }
+
+  .allocation-form-info {
+    padding: 0 12px;
+  }
+
+  .allocation-input-group {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .allocation-note {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+}

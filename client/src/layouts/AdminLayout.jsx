@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -38,10 +39,12 @@ const AdminLayout = () => {
            ADMIN LAYOUT
            Cloud Matrix Attendance System
            Responsive: Desktop / Laptop / Tablet / Mobile
+           Same structure/style as EmployeeLayout
            ========================================================= */
 
         .admin-layout {
           width: 100%;
+          min-width: 0;
           min-height: 100vh;
           margin: 0;
           padding: 0;
@@ -62,7 +65,7 @@ const AdminLayout = () => {
 
 
         /* =========================================================
-           DESKTOP SIDEBAR
+           SIDEBAR
            ========================================================= */
 
         .admin-sidebar {
@@ -83,8 +86,8 @@ const AdminLayout = () => {
 
           z-index: 1000;
 
-          overflow-x: hidden;
           overflow-y: auto;
+          overflow-x: hidden;
 
           transition:
             transform 0.3s ease,
@@ -95,37 +98,91 @@ const AdminLayout = () => {
 
 
         /* =========================================================
-           SIDEBAR LOGO
+           SIDEBAR HEADER
            ========================================================= */
 
-        .sidebar-logo {
+        .admin-sidebar-logo {
           width: 100%;
           min-height: 82px;
 
           display: flex;
-          flex-direction: column;
-          justify-content: center;
+          align-items: center;
 
-          padding: 18px 20px;
+          gap: 12px;
+
+          padding: 18px;
 
           border-bottom: 1px solid #edf0f4;
 
           flex-shrink: 0;
+
+          position: relative;
         }
 
-        .sidebar-logo h2 {
+
+        /* =========================================================
+           BRAND MARK
+           ========================================================= */
+
+        .admin-brand-mark {
+          width: 44px;
+          height: 44px;
+
+          flex: 0 0 44px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          border-radius: 12px;
+
+          background: linear-gradient(
+            135deg,
+            #0066b3,
+            #00a9e0
+          );
+
+          color: #ffffff;
+
+          font-size: 15px;
+          font-weight: 800;
+
+          letter-spacing: 0.5px;
+
+          box-shadow:
+            0 5px 14px rgba(0, 102, 179, 0.2);
+        }
+
+
+        /* =========================================================
+           BRAND TEXT
+           ========================================================= */
+
+        .admin-brand-text {
+          min-width: 0;
+
+          flex: 1;
+
+          display: flex;
+          flex-direction: column;
+        }
+
+        .admin-brand-text h2 {
           margin: 0;
 
           color: #172033;
 
-          font-size: 18px;
-          line-height: 1.25;
+          font-size: 17px;
+          line-height: 1.2;
+
           font-weight: 750;
 
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
-        .sidebar-logo p {
+        .admin-brand-text p {
           margin: 4px 0 0;
 
           color: #7b8495;
@@ -134,15 +191,50 @@ const AdminLayout = () => {
           line-height: 1.2;
 
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
 
         /* =========================================================
-           ADMIN NAVIGATION
+           SIDEBAR CLOSE BUTTON
+           ========================================================= */
+
+        .admin-sidebar-close {
+          display: none;
+
+          width: 34px;
+          height: 34px;
+
+          border: none;
+          border-radius: 8px;
+
+          background: #f3f4f6;
+          color: #374151;
+
+          font-size: 24px;
+          line-height: 1;
+
+          cursor: pointer;
+
+          align-items: center;
+          justify-content: center;
+
+          flex-shrink: 0;
+        }
+
+        .admin-sidebar-close:hover {
+          background: #e5e7eb;
+        }
+
+
+        /* =========================================================
+           NAVIGATION
            ========================================================= */
 
         .admin-nav {
           width: 100%;
+          min-width: 0;
 
           display: flex;
           flex-direction: column;
@@ -156,12 +248,15 @@ const AdminLayout = () => {
 
         .admin-nav a {
           width: 100%;
+          min-width: 0;
           min-height: 46px;
 
           display: flex;
           align-items: center;
 
-          padding: 10px 14px;
+          gap: 12px;
+
+          padding: 10px 13px;
 
           border-radius: 10px;
 
@@ -173,6 +268,8 @@ const AdminLayout = () => {
           font-weight: 550;
 
           line-height: 1.3;
+
+          white-space: nowrap;
 
           transition:
             background 0.2s ease,
@@ -202,44 +299,125 @@ const AdminLayout = () => {
 
 
         /* =========================================================
+           NAV ICON
+           ========================================================= */
+
+        .admin-nav-icon {
+          width: 23px;
+          min-width: 23px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          font-size: 17px;
+          line-height: 1;
+
+          color: currentColor;
+        }
+
+
+        /* =========================================================
            SIDEBAR USER
            ========================================================= */
 
-        .sidebar-user {
+        .admin-sidebar-user {
           width: 100%;
+          min-width: 0;
 
-          padding: 15px 14px 17px;
+          padding: 14px 14px 16px;
 
           border-top: 1px solid #edf0f4;
+
+          display: grid;
+
+          grid-template-columns: 40px minmax(0, 1fr);
+
+          column-gap: 10px;
+          row-gap: 12px;
 
           flex-shrink: 0;
         }
 
-        .sidebar-user p {
-          width: 100%;
 
-          margin: 0 0 12px;
+        /* =========================================================
+           USER AVATAR
+           ========================================================= */
 
-          padding: 0 2px;
+        .admin-sidebar-avatar {
+          width: 40px;
+          height: 40px;
 
-          color: #687385;
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
-          font-size: 11px;
-          line-height: 1.4;
+          border-radius: 50%;
+
+          background: #e8f4fb;
+
+          color: #0066b3;
+
+          font-size: 15px;
+          font-weight: 750;
+
+          flex-shrink: 0;
+        }
+
+
+        /* =========================================================
+           USER INFO
+           ========================================================= */
+
+        .admin-user-info {
+          min-width: 0;
+
+          display: flex;
+          flex-direction: column;
+
+          justify-content: center;
+        }
+
+        .admin-user-info strong {
+          display: block;
+
+          color: #1f2937;
+
+          font-size: 13px;
+          line-height: 1.3;
 
           white-space: nowrap;
+
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .admin-user-info span {
+          display: block;
+
+          margin-top: 3px;
+
+          color: #8a93a3;
+
+          font-size: 10px;
+          line-height: 1.3;
+
+          white-space: nowrap;
+
           overflow: hidden;
           text-overflow: ellipsis;
         }
 
 
         /* =========================================================
-           LOGOUT
+           LOGOUT BUTTON
            ========================================================= */
 
         .admin-sidebar .logout-button {
+          grid-column: 1 / -1;
+
           width: 100%;
-          min-height: 39px;
+          min-height: 38px;
 
           border: 1px solid #e5e7eb;
 
@@ -280,6 +458,7 @@ const AdminLayout = () => {
           width: calc(100% - 255px);
 
           min-width: 0;
+
           min-height: 100vh;
 
           margin-left: 255px;
@@ -317,9 +496,9 @@ const AdminLayout = () => {
             margin-left: 235px;
           }
 
-          .sidebar-logo {
-            padding-left: 16px;
-            padding-right: 16px;
+          .admin-sidebar-logo {
+            padding-left: 15px;
+            padding-right: 15px;
           }
 
           .admin-nav {
@@ -328,6 +507,11 @@ const AdminLayout = () => {
           }
 
           .admin-nav a {
+            padding-left: 11px;
+            padding-right: 11px;
+          }
+
+          .admin-sidebar-user {
             padding-left: 12px;
             padding-right: 12px;
           }
@@ -335,13 +519,18 @@ const AdminLayout = () => {
 
 
         /* =========================================================
-           TABLET
+           TABLET / SMALL LAPTOP
            ========================================================= */
 
         @media (max-width: 900px) {
 
           .admin-layout {
             display: block;
+
+            width: 100%;
+            min-width: 0;
+
+            overflow-x: hidden;
           }
 
 
@@ -366,7 +555,7 @@ const AdminLayout = () => {
             border-bottom: 1px solid #e5e7eb;
 
             box-shadow:
-              0 2px 10px rgba(15, 23, 42, 0.05);
+              0 2px 10px rgba(15, 23, 42, 0.04);
 
             z-index: 900;
           }
@@ -398,10 +587,18 @@ const AdminLayout = () => {
             cursor: pointer;
 
             flex-shrink: 0;
+
+            transition:
+              background 0.2s ease,
+              transform 0.15s ease;
           }
 
           .admin-menu-button:hover {
             background: #f5f7fb;
+          }
+
+          .admin-menu-button:active {
+            transform: scale(0.97);
           }
 
 
@@ -416,6 +613,8 @@ const AdminLayout = () => {
             flex-direction: column;
 
             margin-left: 12px;
+
+            overflow: hidden;
           }
 
           .admin-mobile-brand strong {
@@ -423,6 +622,11 @@ const AdminLayout = () => {
 
             font-size: 15px;
             line-height: 1.2;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
 
           .admin-mobile-brand span {
@@ -432,6 +636,11 @@ const AdminLayout = () => {
 
             font-size: 10px;
             line-height: 1.2;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
 
 
@@ -462,6 +671,9 @@ const AdminLayout = () => {
 
           .admin-sidebar {
             width: min(285px, 86vw);
+
+            max-width: 285px;
+
             height: 100vh;
 
             transform: translateX(-105%);
@@ -476,17 +688,27 @@ const AdminLayout = () => {
             transform: translateX(0);
           }
 
+          .admin-sidebar-close {
+            display: flex;
+          }
+
 
           /* ---------- Main ---------- */
 
           .admin-main {
             width: 100%;
 
+            max-width: 100%;
+
+            min-width: 0;
+
             min-height: 100vh;
 
             margin-left: 0;
 
             padding-top: 70px;
+
+            overflow-x: hidden;
           }
 
 
@@ -502,8 +724,8 @@ const AdminLayout = () => {
             width: 100%;
             height: 100%;
 
-            margin: 0;
             padding: 0;
+            margin: 0;
 
             border: none;
 
@@ -512,13 +734,6 @@ const AdminLayout = () => {
             z-index: 950;
 
             cursor: pointer;
-          }
-
-
-          /* ---------- Close Button ---------- */
-
-          .admin-sidebar-close {
-            display: flex;
           }
         }
 
@@ -532,7 +747,8 @@ const AdminLayout = () => {
           .admin-mobile-header {
             height: 64px;
 
-            padding: 0 14px;
+            padding-left: 14px;
+            padding-right: 14px;
           }
 
           .admin-menu-button {
@@ -567,16 +783,31 @@ const AdminLayout = () => {
 
           .admin-sidebar {
             width: min(280px, 88vw);
+
+            max-width: 280px;
           }
 
-          .sidebar-logo {
+          .admin-sidebar-logo {
             min-height: 74px;
 
             padding: 15px;
           }
 
-          .sidebar-logo h2 {
+          .admin-brand-mark {
+            width: 40px;
+            height: 40px;
+
+            flex-basis: 40px;
+
+            border-radius: 10px;
+          }
+
+          .admin-brand-text h2 {
             font-size: 16px;
+          }
+
+          .admin-brand-text p {
+            font-size: 10px;
           }
 
           .admin-nav {
@@ -587,6 +818,10 @@ const AdminLayout = () => {
             min-height: 44px;
 
             font-size: 13px;
+          }
+
+          .admin-sidebar-user {
+            padding: 13px 11px 15px;
           }
         }
 
@@ -600,7 +835,8 @@ const AdminLayout = () => {
           .admin-mobile-header {
             height: 60px;
 
-            padding: 0 11px;
+            padding-left: 11px;
+            padding-right: 11px;
           }
 
           .admin-menu-button {
@@ -625,6 +861,8 @@ const AdminLayout = () => {
           .admin-mobile-avatar {
             width: 34px;
             height: 34px;
+
+            font-size: 12px;
           }
 
           .admin-main {
@@ -633,11 +871,35 @@ const AdminLayout = () => {
 
           .admin-sidebar {
             width: 86vw;
+
+            max-width: 280px;
           }
 
-          .sidebar-logo {
+          .admin-sidebar-logo {
             padding-left: 13px;
             padding-right: 13px;
+          }
+
+          .admin-brand-mark {
+            width: 38px;
+            height: 38px;
+
+            flex-basis: 38px;
+          }
+
+          .admin-brand-text h2 {
+            font-size: 15px;
+          }
+
+          .admin-nav {
+            padding-left: 8px;
+            padding-right: 8px;
+          }
+
+          .admin-nav a {
+            min-height: 43px;
+
+            font-size: 12.5px;
           }
         }
 
@@ -664,11 +926,55 @@ const AdminLayout = () => {
           .admin-mobile-avatar {
             width: 32px;
             height: 32px;
+
+            font-size: 11px;
           }
 
           .admin-menu-button {
             width: 34px;
             height: 34px;
+
+            font-size: 18px;
+          }
+
+          .admin-sidebar {
+            width: 88vw;
+          }
+
+          .admin-sidebar-logo {
+            padding-left: 11px;
+            padding-right: 11px;
+          }
+
+          .admin-brand-mark {
+            width: 36px;
+            height: 36px;
+
+            flex-basis: 36px;
+
+            font-size: 13px;
+          }
+
+          .admin-brand-text h2 {
+            font-size: 14px;
+          }
+
+          .admin-brand-text p {
+            display: none;
+          }
+
+          .admin-nav {
+            padding-left: 7px;
+            padding-right: 7px;
+          }
+
+          .admin-nav a {
+            min-height: 42px;
+
+            padding-left: 10px;
+            padding-right: 10px;
+
+            font-size: 12px;
           }
         }
 
@@ -681,7 +987,8 @@ const AdminLayout = () => {
 
           .admin-sidebar,
           .admin-nav a,
-          .admin-sidebar .logout-button {
+          .admin-sidebar .logout-button,
+          .admin-menu-button {
             transition: none;
           }
         }
@@ -744,35 +1051,29 @@ const AdminLayout = () => {
           }`}
         >
 
-          {/* Sidebar Logo */}
+          {/* ================= SIDEBAR HEADER ================= */}
 
-          <div className="sidebar-logo">
+          <div className="admin-sidebar-logo">
 
-            <h2>Cloud Matrix</h2>
+            <div className="admin-brand-mark">
+              CM
+            </div>
 
-            <p>Attendance System</p>
+
+            <div className="admin-brand-text">
+
+              <h2>Cloud Matrix</h2>
+
+              <p>Attendance System</p>
+
+            </div>
+
 
             <button
               type="button"
               className="admin-sidebar-close"
               onClick={closeSidebar}
               aria-label="Close navigation"
-              style={{
-                display: "none",
-                position: "absolute",
-                right: "12px",
-                top: "20px",
-                width: "34px",
-                height: "34px",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "none",
-                borderRadius: "8px",
-                background: "#f3f4f6",
-                color: "#374151",
-                fontSize: "24px",
-                cursor: "pointer",
-              }}
             >
               ×
             </button>
@@ -780,90 +1081,145 @@ const AdminLayout = () => {
           </div>
 
 
-          {/* =================================================
-              NAVIGATION
-              ================================================= */}
+          {/* ================= NAVIGATION ================= */}
 
           <nav className="admin-nav">
 
             <Link
               to="/admin/dashboard"
-              className={isActive("/admin/dashboard") ? "active" : ""}
+              className={
+                isActive("/admin/dashboard")
+                  ? "active"
+                  : ""
+              }
               onClick={closeSidebar}
             >
-              Dashboard
+              <span className="admin-nav-icon">▣</span>
+              <span>Dashboard</span>
             </Link>
+
 
             <Link
               to="/admin/employees"
-              className={isActive("/admin/employees") ? "active" : ""}
+              className={
+                isActive("/admin/employees")
+                  ? "active"
+                  : ""
+              }
               onClick={closeSidebar}
             >
-              Employees
+              <span className="admin-nav-icon">♙</span>
+              <span>Employees</span>
             </Link>
+
 
             <Link
               to="/admin/attendance"
-              className={isActive("/admin/attendance") ? "active" : ""}
+              className={
+                isActive("/admin/attendance")
+                  ? "active"
+                  : ""
+              }
               onClick={closeSidebar}
             >
-              Attendance
+              <span className="admin-nav-icon">◷</span>
+              <span>Attendance</span>
             </Link>
+
 
             <Link
               to="/admin/leave"
-              className={isActive("/admin/leave") ? "active" : ""}
+              className={
+                isActive("/admin/leave")
+                  ? "active"
+                  : ""
+              }
               onClick={closeSidebar}
             >
-              Leave
+              <span className="admin-nav-icon">▤</span>
+              <span>Leave</span>
             </Link>
+
 
             <Link
               to="/admin/remote-requests"
               className={
-                isActive("/admin/remote-requests") ? "active" : ""
+                isActive("/admin/remote-requests")
+                  ? "active"
+                  : ""
               }
               onClick={closeSidebar}
             >
-              Remote Requests
+              <span className="admin-nav-icon">⌂</span>
+              <span>Remote Requests</span>
             </Link>
+
 
             <Link
               to="/admin/overtime"
-              className={isActive("/admin/overtime") ? "active" : ""}
+              className={
+                isActive("/admin/overtime")
+                  ? "active"
+                  : ""
+              }
               onClick={closeSidebar}
             >
-              Overtime
+              <span className="admin-nav-icon">◉</span>
+              <span>Overtime</span>
             </Link>
+
 
             <Link
               to="/admin/holidays"
-              className={isActive("/admin/holidays") ? "active" : ""}
+              className={
+                isActive("/admin/holidays")
+                  ? "active"
+                  : ""
+              }
               onClick={closeSidebar}
             >
-              Holidays
+              <span className="admin-nav-icon">▦</span>
+              <span>Holidays</span>
             </Link>
+
 
             <Link
               to="/admin/settings"
-              className={isActive("/admin/settings") ? "active" : ""}
+              className={
+                isActive("/admin/settings")
+                  ? "active"
+                  : ""
+              }
               onClick={closeSidebar}
             >
-              Settings
+              <span className="admin-nav-icon">⚙</span>
+              <span>Settings</span>
             </Link>
 
           </nav>
 
 
-          {/* =================================================
-              SIDEBAR USER
-              ================================================= */}
+          {/* ================= USER SECTION ================= */}
 
-          <div className="sidebar-user">
+          <div className="admin-sidebar-user">
 
-            <p>
-              {user?.email || "Admin"}
-            </p>
+            <div className="admin-sidebar-avatar">
+              {user?.email?.charAt(0)?.toUpperCase() || "A"}
+            </div>
+
+
+            <div className="admin-user-info">
+
+              <strong>
+                Admin
+              </strong>
+
+              <span>
+                {user?.email || ""}
+              </span>
+
+            </div>
+
 
             <button
               type="button"
