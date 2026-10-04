@@ -1,0 +1,1423 @@
+/* =========================================================
+   ADMIN DASHBOARD
+   CloudMatrix Attendance System
+   Responsive: Desktop / Laptop / Tablet / Mobile
+   ========================================================= */
+
+.admin-dashboard {
+  width: 100%;
+  max-width: 1500px;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.admin-dashboard *,
+.admin-dashboard *::before,
+.admin-dashboard *::after {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.admin-dashboard-loading {
+  width: 100%;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  color: #64748b;
+  text-align: center;
+}
+
+.admin-dashboard-loading p {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+.dashboard-spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #dbeafe;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: dashboardSpin 0.8s linear infinite;
+}
+
+@keyframes dashboardSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.admin-dashboard-error {
+  width: 100%;
+  min-height: 55vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.error-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.admin-dashboard-error h2 {
+  margin: 0 0 8px;
+  color: #111827;
+  font-size: 22px;
+}
+
+.admin-dashboard-error p {
+  max-width: 500px;
+  margin: 0 0 20px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-retry-button {
+  border: none;
+  border-radius: 9px;
+  padding: 10px 18px;
+  background: #2563eb;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.dashboard-retry-button:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.admin-dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+
+.admin-dashboard-header > div:first-child {
+  min-width: 0;
+}
+
+.dashboard-eyebrow {
+  margin-bottom: 8px;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.admin-dashboard-header h1 {
+  margin: 0;
+  color: #111827;
+  font-size: clamp(25px, 2.5vw, 32px);
+  line-height: 1.2;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.admin-dashboard-header p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-dashboard-header p strong {
+  color: #334155;
+  font-weight: 700;
+}
+
+.dashboard-refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+  white-space: nowrap;
+}
+
+.dashboard-refresh-button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.dashboard-refresh-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.refresh-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.refresh-icon.spinning {
+  animation: dashboardSpin 0.8s linear infinite;
+}
+
+
+/* =========================================================
+   DAY STATUS BANNER
+========================================================= */
+
+.dashboard-day-banner {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 15px 18px;
+  border: 1px solid;
+  border-radius: 14px;
+}
+
+.day-banner-icon {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  font-size: 19px;
+}
+
+.dashboard-day-banner > div:nth-child(2) {
+  min-width: 0;
+}
+
+.dashboard-day-banner > div:nth-child(2) span {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.dashboard-day-banner > div:nth-child(2) strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.day-banner-date {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+
+/* Working */
+
+.dashboard-day-banner.working {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.dashboard-day-banner.working .day-banner-icon {
+  background: #dcfce7;
+}
+
+.dashboard-day-banner.working > div:nth-child(2) strong {
+  color: #15803d;
+}
+
+
+/* Weekend */
+
+.dashboard-day-banner.weekend {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.dashboard-day-banner.weekend .day-banner-icon {
+  background: #f1f5f9;
+}
+
+.dashboard-day-banner.weekend > div:nth-child(2) strong {
+  color: #475569;
+}
+
+
+/* Holiday */
+
+.dashboard-day-banner.holiday {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.dashboard-day-banner.holiday .day-banner-icon {
+  background: #fef3c7;
+}
+
+.dashboard-day-banner.holiday > div:nth-child(2) strong {
+  color: #b45309;
+}
+
+
+/* =========================================================
+   MAIN SUMMARY
+========================================================= */
+
+.admin-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+  min-width: 0;
+}
+
+.admin-summary-card {
+  position: relative;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 3px 14px rgba(15, 23, 42, 0.035);
+  overflow: hidden;
+}
+
+.admin-summary-card::after {
+  content: "";
+  position: absolute;
+  right: -25px;
+  bottom: -25px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  opacity: 0.45;
+}
+
+.summary-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-bottom: 17px;
+}
+
+.summary-icon {
+  width: 38px;
+  min-width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.summary-label {
+  min-width: 0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin-summary-card > strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #111827;
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.admin-summary-card > p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+/* Employees */
+
+.admin-summary-card.employees .summary-icon {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+
+/* Present */
+
+.admin-summary-card.present .summary-icon {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+
+/* Leave */
+
+.admin-summary-card.leave .summary-icon {
+  background: #fefce8;
+  color: #ca8a04;
+}
+
+
+/* Absent */
+
+.admin-summary-card.absent .summary-icon {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+/* =========================================================
+   SECONDARY STATS
+========================================================= */
+
+.admin-secondary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+  min-width: 0;
+}
+
+.secondary-stat-card {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.secondary-stat-card span {
+  min-width: 0;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.secondary-stat-card strong {
+  flex-shrink: 0;
+  color: #111827;
+  font-size: 17px;
+}
+
+.status-text.working {
+  color: #15803d !important;
+}
+
+.status-text.weekend {
+  color: #64748b !important;
+}
+
+.status-text.holiday {
+  color: #b45309 !important;
+}
+
+
+/* =========================================================
+   DASHBOARD PANELS
+========================================================= */
+
+.dashboard-panel {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.035);
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  min-width: 0;
+  padding: 20px 22px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.panel-header > div:first-child {
+  min-width: 0;
+}
+
+.panel-eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #2563eb;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 17px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.panel-header p {
+  margin: 5px 0 0;
+  color: #94a3b8;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ATTENDANCE OVERVIEW
+========================================================= */
+
+.attendance-overview-content {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(280px, 1.2fr);
+  align-items: center;
+  gap: 35px;
+  padding: 28px;
+  min-width: 0;
+}
+
+.attendance-circle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.attendance-circle {
+  --attendance: 0%;
+
+  width: 190px;
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      #2563eb var(--attendance),
+      #eaf0f7 var(--attendance)
+    );
+
+  position: relative;
+}
+
+.attendance-circle::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.attendance-circle-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.attendance-circle-inner strong {
+  color: #111827;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.attendance-circle-inner span {
+  margin-top: 5px;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   ATTENDANCE BREAKDOWN
+========================================================= */
+
+.attendance-breakdown {
+  width: 100%;
+  min-width: 0;
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 13px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.breakdown-row:last-child {
+  border-bottom: none;
+}
+
+.breakdown-row > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.breakdown-row > strong {
+  flex-shrink: 0;
+  color: #111827;
+  font-size: 14px;
+}
+
+.breakdown-dot {
+  width: 8px;
+  min-width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.breakdown-dot.present {
+  background: #22c55e;
+}
+
+.breakdown-dot.absent {
+  background: #ef4444;
+}
+
+.breakdown-dot.leave {
+  background: #eab308;
+}
+
+.breakdown-dot.half {
+  background: #f97316;
+}
+
+.breakdown-dot.missed {
+  background: #8b5cf6;
+}
+
+
+/* =========================================================
+   DEPARTMENT PANEL
+========================================================= */
+
+.department-count {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.dashboard-table-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.dashboard-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.dashboard-table th {
+  padding: 13px 18px;
+  text-align: left;
+  background: #f8fafc;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashboard-table td {
+  padding: 14px 18px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.dashboard-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.dashboard-table tbody tr:hover {
+  background: #fafcff;
+}
+
+
+/* =========================================================
+   DEPARTMENT NAME
+========================================================= */
+
+.department-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
+}
+
+.department-avatar {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.department-name strong {
+  min-width: 0;
+  color: #1e293b;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   TABLE NUMBERS
+========================================================= */
+
+.table-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  font-weight: 700;
+}
+
+.table-number.present {
+  color: #15803d;
+}
+
+.table-number.absent {
+  color: #dc2626;
+}
+
+.table-number.leave {
+  color: #ca8a04;
+}
+
+.table-number.half {
+  color: #ea580c;
+}
+
+
+/* =========================================================
+   DEPARTMENT ATTENDANCE
+========================================================= */
+
+.department-attendance {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 130px;
+}
+
+.progress-track {
+  width: 90px;
+  height: 6px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #e5e7eb;
+}
+
+.progress-fill {
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: #2563eb;
+  transition: width 0.3s ease;
+}
+
+.department-attendance > span {
+  color: #334155;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   EMPTY
+========================================================= */
+
+.dashboard-empty {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  text-align: center;
+}
+
+.dashboard-empty > div {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  background: #eff6ff;
+  font-size: 22px;
+}
+
+.dashboard-empty p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   LAPTOP
+========================================================= */
+
+@media (max-width: 1200px) {
+  .admin-dashboard {
+    padding: 28px;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-secondary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-overview-content {
+    grid-template-columns: minmax(220px, 0.7fr) minmax(260px, 1.3fr);
+    gap: 25px;
+  }
+
+  .dashboard-table {
+    min-width: 820px;
+  }
+}
+
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
+========================================================= */
+
+@media (max-width: 900px) {
+  .admin-dashboard {
+    padding: 24px;
+  }
+
+  .admin-dashboard-header {
+    align-items: flex-start;
+  }
+
+  .dashboard-day-banner {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .day-banner-date {
+    grid-column: 2;
+    text-align: left;
+    margin-top: -5px;
+  }
+
+  .attendance-overview-content {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .attendance-circle {
+    width: 175px;
+    height: 175px;
+  }
+
+  .dashboard-table {
+    min-width: 800px;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 760px) {
+  .admin-dashboard {
+    padding: 20px;
+  }
+
+  .admin-dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .dashboard-refresh-button {
+    width: 100%;
+  }
+
+  .dashboard-day-banner {
+    gap: 11px;
+    padding: 14px;
+  }
+
+  .day-banner-icon {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .admin-summary-card {
+    padding: 16px;
+  }
+
+  .admin-summary-card > strong {
+    font-size: 25px;
+  }
+
+  .admin-secondary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .dashboard-panel {
+    border-radius: 13px;
+  }
+
+  .panel-header {
+    padding: 18px;
+  }
+
+  .attendance-overview-content {
+    padding: 22px 18px;
+  }
+
+  .dashboard-table {
+    min-width: 760px;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+  .admin-dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-eyebrow {
+    font-size: 9px;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .admin-dashboard-header p {
+    font-size: 12px;
+  }
+
+  .dashboard-day-banner {
+    grid-template-columns: auto minmax(0, 1fr);
+    margin-bottom: 16px;
+  }
+
+  .day-banner-date {
+    grid-column: 2;
+    font-size: 11px;
+  }
+
+  .admin-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .admin-summary-card {
+    padding: 15px;
+  }
+
+  .summary-card-top {
+    margin-bottom: 13px;
+  }
+
+  .admin-summary-card > strong {
+    font-size: 24px;
+  }
+
+  .admin-secondary-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .secondary-stat-card {
+    padding: 13px 14px;
+  }
+
+  .dashboard-panel {
+    margin-bottom: 16px;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px;
+  }
+
+  .panel-header h2 {
+    font-size: 16px;
+  }
+
+  .panel-header p {
+    font-size: 10px;
+  }
+
+  .department-count {
+    align-self: flex-start;
+  }
+
+  .attendance-overview-content {
+    padding: 20px 16px;
+  }
+
+  .attendance-circle {
+    width: 160px;
+    height: 160px;
+  }
+
+  .attendance-circle-inner strong {
+    font-size: 27px;
+  }
+
+  .breakdown-row {
+    padding: 11px 0;
+  }
+
+  .breakdown-row > div {
+    font-size: 11px;
+  }
+
+  .dashboard-table {
+    min-width: 730px;
+  }
+
+  .dashboard-table th {
+    font-size: 8px;
+  }
+
+  .dashboard-table td {
+    font-size: 11px;
+  }
+
+  .progress-track {
+    width: 75px;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+  .admin-dashboard {
+    padding: 13px;
+  }
+
+  .admin-dashboard-header {
+    gap: 13px;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 22px;
+  }
+
+  .admin-dashboard-header p {
+    font-size: 11px;
+  }
+
+  .dashboard-refresh-button {
+    min-height: 40px;
+    padding: 9px 13px;
+    font-size: 11px;
+  }
+
+  .dashboard-day-banner {
+    padding: 12px;
+  }
+
+  .day-banner-icon {
+    width: 35px;
+    min-width: 35px;
+    height: 35px;
+    font-size: 16px;
+  }
+
+  .dashboard-day-banner > div:nth-child(2) span {
+    font-size: 9px;
+  }
+
+  .dashboard-day-banner > div:nth-child(2) strong {
+    font-size: 12px;
+  }
+
+  .day-banner-date {
+    font-size: 10px;
+  }
+
+  .admin-summary-card {
+    padding: 13px;
+  }
+
+  .summary-icon {
+    width: 35px;
+    min-width: 35px;
+    height: 35px;
+    font-size: 15px;
+  }
+
+  .summary-label {
+    font-size: 11px;
+  }
+
+  .admin-summary-card > strong {
+    font-size: 23px;
+  }
+
+  .admin-summary-card > p {
+    font-size: 10px;
+  }
+
+  .secondary-stat-card {
+    padding: 12px;
+  }
+
+  .secondary-stat-card span {
+    font-size: 10px;
+  }
+
+  .secondary-stat-card strong {
+    font-size: 15px;
+  }
+
+  .panel-header {
+    padding: 14px;
+  }
+
+  .attendance-overview-content {
+    padding: 18px 14px;
+  }
+
+  .attendance-circle {
+    width: 145px;
+    height: 145px;
+  }
+
+  .attendance-circle-inner strong {
+    font-size: 25px;
+  }
+
+  .attendance-circle-inner span {
+    font-size: 10px;
+  }
+
+  .dashboard-table {
+    min-width: 710px;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .department-avatar {
+    width: 31px;
+    min-width: 31px;
+    height: 31px;
+    font-size: 11px;
+  }
+
+  .department-name {
+    gap: 8px;
+  }
+
+  .department-name strong {
+    font-size: 11px;
+  }
+
+  .progress-track {
+    width: 65px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 390px) {
+  .admin-dashboard {
+    padding: 10px;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 21px;
+  }
+
+  .dashboard-eyebrow {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .dashboard-day-banner {
+    gap: 9px;
+    padding: 11px;
+  }
+
+  .day-banner-icon {
+    width: 33px;
+    min-width: 33px;
+    height: 33px;
+    font-size: 15px;
+  }
+
+  .admin-summary-card {
+    padding: 12px;
+  }
+
+  .summary-card-top {
+    gap: 8px;
+  }
+
+  .admin-summary-card > strong {
+    font-size: 22px;
+  }
+
+  .dashboard-panel {
+    border-radius: 11px;
+  }
+
+  .panel-header {
+    padding: 13px;
+  }
+
+  .attendance-overview-content {
+    padding: 16px 13px;
+  }
+
+  .attendance-circle {
+    width: 135px;
+    height: 135px;
+  }
+
+  .attendance-circle-inner strong {
+    font-size: 23px;
+  }
+
+  .breakdown-row {
+    gap: 8px;
+  }
+
+  .breakdown-row > div {
+    font-size: 10px;
+  }
+
+  .breakdown-row > strong {
+    font-size: 12px;
+  }
+
+  .dashboard-table {
+    min-width: 690px;
+  }
+}
+
+
+/* =========================================================
+   EXTRA SMALL DEVICES
+========================================================= */
+
+@media (max-width: 340px) {
+  .admin-dashboard {
+    padding: 8px;
+  }
+
+  .admin-dashboard-header h1 {
+    font-size: 20px;
+  }
+
+  .admin-dashboard-header p {
+    font-size: 10px;
+  }
+
+  .dashboard-refresh-button {
+    min-height: 38px;
+    font-size: 10px;
+  }
+
+  .dashboard-day-banner {
+    padding: 10px;
+  }
+
+  .day-banner-icon {
+    width: 31px;
+    min-width: 31px;
+    height: 31px;
+  }
+
+  .admin-summary-card {
+    padding: 11px;
+  }
+
+  .summary-icon {
+    width: 33px;
+    min-width: 33px;
+    height: 33px;
+    font-size: 14px;
+  }
+
+  .admin-summary-card > strong {
+    font-size: 21px;
+  }
+
+  .secondary-stat-card {
+    padding: 11px;
+  }
+
+  .panel-header {
+    padding: 12px;
+  }
+
+  .attendance-overview-content {
+    padding: 14px 11px;
+  }
+
+  .attendance-circle {
+    width: 125px;
+    height: 125px;
+  }
+
+  .attendance-circle-inner strong {
+    font-size: 21px;
+  }
+
+  .dashboard-table {
+    min-width: 670px;
+  }
+}

@@ -1,14 +1,25 @@
-
 /* =========================================================
    MY ATTENDANCE
    Clean employee attendance UI
+   Responsive: Desktop / Laptop / Tablet / Mobile / Small
    ========================================================= */
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 .attendance-page {
+  width: 100%;
+  max-width: 1500px;
+  min-width: 0;
   min-height: 100%;
+  margin: 0 auto;
   padding: 32px 36px 50px;
   background: #f6f8fc;
   color: #172033;
+  overflow-x: hidden;
 }
 
 /* =========================================================
@@ -16,6 +27,7 @@
    ========================================================= */
 
 .attendance-page-header {
+  width: 100%;
   margin-bottom: 24px;
 }
 
@@ -33,12 +45,16 @@
   font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.7px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .attendance-page-header > div > p:last-child {
   margin: 7px 0 0;
   color: #667085;
   font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -49,6 +65,7 @@
   display: flex;
   align-items: center;
   gap: 11px;
+  width: 100%;
   margin-bottom: 20px;
   padding: 13px 15px;
   border: 1px solid;
@@ -83,13 +100,17 @@
 }
 
 .attendance-message p {
+  min-width: 0;
   flex: 1;
   margin: 0;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .attendance-message button {
+  flex-shrink: 0;
   border: 0;
   background: transparent;
   color: currentColor;
@@ -115,11 +136,14 @@
    ========================================================= */
 
 .today-section {
+  width: 100%;
   margin-bottom: 26px;
 }
 
 .today-main-card {
   position: relative;
+  width: 100%;
+  min-width: 0;
   overflow: hidden;
   padding: 28px 30px 20px;
   border: 1px solid #e3eaf3;
@@ -151,6 +175,11 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
+  min-width: 0;
+}
+
+.today-card-header > div:first-child {
+  min-width: 0;
 }
 
 .today-card-header .dashboard-eyebrow {
@@ -167,6 +196,8 @@
   font-size: 21px;
   font-weight: 800;
   letter-spacing: -0.4px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -177,6 +208,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
+  flex-shrink: 0;
   padding: 7px 12px;
   border-radius: 30px;
   font-size: 11px;
@@ -187,6 +219,7 @@
 .today-status .status-dot {
   width: 7px;
   height: 7px;
+  flex-shrink: 0;
   border-radius: 50%;
 }
 
@@ -236,12 +269,14 @@
   letter-spacing: -2px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .today-time-area p {
   margin: 9px 0 0;
   color: #98a2b3;
   font-size: 11px;
+  line-height: 1.4;
 }
 
 /* =========================================================
@@ -252,13 +287,15 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
   border-top: 1px solid #edf0f5;
   border-bottom: 1px solid #edf0f5;
 }
 
 .today-detail-item {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 6px;
   padding: 16px 18px;
@@ -272,12 +309,14 @@
   color: #98a2b3;
   font-size: 10px;
   font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .today-detail-item strong {
   color: #273142;
   font-size: 14px;
   font-weight: 750;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -301,6 +340,7 @@
   justify-content: center;
   gap: 9px;
   min-width: 215px;
+  max-width: 100%;
   padding: 13px 25px;
   border: 0;
   border-radius: 12px;
@@ -348,6 +388,7 @@
   justify-content: center;
   width: 22px;
   height: 22px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.16);
   font-size: 12px;
@@ -361,6 +402,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: 100%;
   color: #16844b;
   font-size: 12px;
   font-weight: 650;
@@ -372,22 +414,30 @@
   justify-content: center;
   width: 25px;
   height: 25px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #eaf9f0;
   color: #16844b;
   font-weight: 800;
 }
 
+.completed-message > div {
+  min-width: 0;
+}
+
 .completed-message strong {
   display: block;
   color: #16844b;
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .completed-message p {
   margin: 2px 0 0;
   color: #7a8495;
   font-size: 10px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -409,6 +459,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -416,6 +468,8 @@
    ========================================================= */
 
 .month-overview {
+  width: 100%;
+  min-width: 0;
   margin-bottom: 26px;
   padding: 25px;
   border: 1px solid #e3eaf3;
@@ -442,12 +496,14 @@
   font-size: 19px;
   font-weight: 800;
   letter-spacing: -0.3px;
+  line-height: 1.3;
 }
 
 .section-title-row > div > p:last-child {
   margin: 5px 0 0;
   color: #98a2b3;
   font-size: 11px;
+  line-height: 1.5;
 }
 
 /* =========================================================
@@ -456,7 +512,7 @@
 
 .month-summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -464,7 +520,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-width: 0;
   min-height: 68px;
+  gap: 10px;
   padding: 14px 16px;
   border: 1px solid #edf0f5;
   border-radius: 13px;
@@ -472,12 +530,15 @@
 }
 
 .month-summary-card span {
+  min-width: 0;
   color: #667085;
   font-size: 11px;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .month-summary-card strong {
+  flex-shrink: 0;
   color: #172033;
   font-size: 22px;
   font-weight: 800;
@@ -488,6 +549,8 @@
    ========================================================= */
 
 .attendance-history-section {
+  width: 100%;
+  min-width: 0;
   padding: 25px;
   border: 1px solid #e3eaf3;
   border-radius: 22px;
@@ -507,6 +570,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   margin-bottom: 18px;
   padding-bottom: 17px;
   border-bottom: 1px solid #edf0f5;
@@ -515,10 +579,12 @@
 .filter-group {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 7px;
 }
 
 .filter-group > span {
+  flex-shrink: 0;
   color: #98a2b3;
   font-size: 10px;
   font-weight: 650;
@@ -526,6 +592,7 @@
 
 .filter-group select {
   min-width: 125px;
+  max-width: 100%;
   padding: 8px 11px;
   border: 1px solid #e0e5ed;
   border-radius: 9px;
@@ -542,6 +609,7 @@
 }
 
 .clear-filters-button {
+  flex-shrink: 0;
   margin-left: auto;
   padding: 8px 12px;
   border: 0;
@@ -559,6 +627,8 @@
 
 .attendance-record-list {
   display: flex;
+  width: 100%;
+  min-width: 0;
   flex-direction: column;
   gap: 8px;
 }
@@ -568,12 +638,14 @@
   grid-template-columns:
     75px
     125px
-    minmax(115px, 1fr)
-    minmax(115px, 1fr)
+    minmax(100px, 1fr)
+    minmax(100px, 1fr)
     100px
     110px;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  min-width: 0;
   padding: 12px 14px;
   border: 1px solid #edf0f5;
   border-radius: 13px;
@@ -588,6 +660,10 @@
   border-color: #d9e6f3;
   background: #fbfdff;
   transform: translateY(-1px);
+}
+
+.attendance-record > * {
+  min-width: 0;
 }
 
 /* =========================================================
@@ -626,11 +702,13 @@
 .record-status {
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .status-badge {
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
   padding: 6px 9px;
   border-radius: 20px;
   font-size: 10px;
@@ -685,17 +763,20 @@
 .record-time {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 10px;
 }
 
 .record-time > span {
   display: none;
+  flex-shrink: 0;
 }
 
 .record-time strong {
   color: #344054;
   font-size: 12px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -704,6 +785,7 @@
 
 .record-duration {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 3px;
 }
@@ -717,6 +799,7 @@
   color: #172033;
   font-size: 12px;
   font-weight: 750;
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -726,10 +809,12 @@
 .record-method {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 8px;
   color: #667085;
   font-size: 10px;
   font-weight: 650;
+  overflow-wrap: anywhere;
 }
 
 .method-icon {
@@ -755,6 +840,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 20px;
   text-align: center;
 }
 
@@ -778,9 +864,11 @@
 }
 
 .empty-attendance p {
+  max-width: 420px;
   margin: 6px 0 14px;
   color: #98a2b3;
   font-size: 11px;
+  line-height: 1.5;
 }
 
 .empty-attendance button {
@@ -809,8 +897,10 @@
 }
 
 .attendance-pagination > span {
+  min-width: 0;
   color: #98a2b3;
   font-size: 10px;
+  line-height: 1.5;
 }
 
 .attendance-pagination button {
@@ -854,6 +944,9 @@
 .work-report-modal {
   position: relative;
   width: min(560px, 100%);
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   padding: 28px;
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 21px;
@@ -892,6 +985,7 @@
   color: #172033;
   font-size: 22px;
   font-weight: 800;
+  line-height: 1.3;
 }
 
 .modal-header p {
@@ -962,6 +1056,7 @@
 .character-info {
   display: flex;
   justify-content: space-between;
+  gap: 10px;
   margin-top: 7px;
   color: #98a2b3;
   font-size: 9px;
@@ -1046,10 +1141,35 @@
 }
 
 /* =========================================================
-   RESPONSIVE - 1100px
+   LARGE DESKTOP
+   1400px+
    ========================================================= */
 
-@media (max-width: 1100px) {
+@media (min-width: 1400px) {
+  .attendance-page {
+    padding: 36px 40px 55px;
+  }
+
+  .today-main-card {
+    padding: 30px 32px 21px;
+  }
+
+  .month-overview,
+  .attendance-history-section {
+    padding: 28px;
+  }
+}
+
+/* =========================================================
+   LAPTOP
+   1200px - 1399px
+   ========================================================= */
+
+@media (max-width: 1399px) {
+  .attendance-page {
+    padding: 30px 30px 48px;
+  }
+
   .attendance-record {
     grid-template-columns:
       65px
@@ -1067,16 +1187,21 @@
 }
 
 /* =========================================================
-   RESPONSIVE - 900px
+   SMALL LAPTOP / TABLET LANDSCAPE
+   1100px
    ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .attendance-page {
-    padding: 26px 24px 45px;
+    padding: 27px 24px 45px;
+  }
+
+  .today-main-card {
+    padding: 25px 25px 19px;
   }
 
   .today-details {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .today-detail-item:nth-child(3) {
@@ -1089,15 +1214,20 @@
   }
 
   .month-summary-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .attendance-record {
-    grid-template-columns: 55px 1fr auto;
+    grid-template-columns: 58px 1fr 1fr;
+    gap: 10px;
+  }
+
+  .record-status {
+    grid-column: 2;
   }
 
   .record-time {
-    grid-column: 2;
+    grid-column: 3;
   }
 
   .record-duration {
@@ -1106,12 +1236,110 @@
 
   .record-method {
     grid-column: 3;
-    grid-row: 2;
   }
 }
 
 /* =========================================================
-   RESPONSIVE - 650px
+   TABLET
+   900px
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .attendance-page {
+    padding: 25px 22px 42px;
+  }
+
+  .attendance-page-header h1 {
+    font-size: 28px;
+  }
+
+  .today-card-header {
+    gap: 15px;
+  }
+
+  .clock-display {
+    font-size: 46px;
+  }
+
+  .month-overview,
+  .attendance-history-section {
+    padding: 22px;
+    border-radius: 19px;
+  }
+
+  .attendance-filters {
+    flex-wrap: wrap;
+  }
+
+  .filter-group {
+    flex: 1;
+  }
+
+  .filter-group select {
+    min-width: 120px;
+    width: 100%;
+  }
+
+  .clear-filters-button {
+    margin-left: 0;
+  }
+
+  /*
+    Tablet attendance record becomes a clean 2-column card.
+    This prevents the desktop 6-column layout from becoming cramped.
+  */
+
+  .attendance-record {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 10px 14px;
+    padding: 14px;
+  }
+
+  .record-date {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .record-status {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .record-time {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .record-duration {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid #edf0f5;
+  }
+
+  .record-method {
+    grid-column: 1 / -1;
+    padding-top: 9px;
+    border-top: 1px solid #edf0f5;
+  }
+
+  .record-time > span {
+    display: block;
+    color: #98a2b3;
+    font-size: 9px;
+    font-weight: 650;
+  }
+
+  .attendance-pagination {
+    flex-wrap: wrap;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   650px
    ========================================================= */
 
 @media (max-width: 650px) {
@@ -1119,25 +1347,58 @@
     padding: 20px 15px 35px;
   }
 
+  .attendance-page-header {
+    margin-bottom: 20px;
+  }
+
+  .attendance-page-header .dashboard-eyebrow {
+    font-size: 10px;
+  }
+
   .attendance-page-header h1 {
-    font-size: 26px;
+    font-size: 25px;
+    letter-spacing: -0.5px;
   }
 
   .attendance-page-header > div > p:last-child {
-    max-width: 310px;
+    max-width: 100%;
+    margin-top: 6px;
+    font-size: 12px;
     line-height: 1.5;
   }
+
+  /* MESSAGE */
+
+  .attendance-message {
+    align-items: flex-start;
+    gap: 9px;
+    padding: 11px 12px;
+  }
+
+  .attendance-message > span:first-child {
+    width: 24px;
+    height: 24px;
+  }
+
+  .attendance-message p {
+    font-size: 11px;
+  }
+
+  /* CARDS */
 
   .today-main-card,
   .month-overview,
   .attendance-history-section {
-    padding: 19px;
+    padding: 18px;
     border-radius: 17px;
   }
 
+  /* TODAY */
+
   .today-card-header {
     flex-direction: column;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 11px;
   }
 
   .today-card-header h2 {
@@ -1148,13 +1409,20 @@
     align-self: flex-start;
   }
 
-  .clock-display {
-    font-size: 40px;
+  .today-time-area {
+    padding: 26px 0 23px;
   }
 
-  .today-time-area {
-    padding: 27px 0 23px;
+  .clock-display {
+    font-size: 40px;
+    letter-spacing: -1.5px;
   }
+
+  .today-time-area p {
+    font-size: 10px;
+  }
+
+  /* DETAILS */
 
   .today-details {
     grid-template-columns: 1fr;
@@ -1175,46 +1443,91 @@
     padding: 12px 8px;
   }
 
+  .today-detail-item strong {
+    font-size: 13px;
+  }
+
+  /* ACTION */
+
   .today-action-area {
-    min-height: 72px;
+    min-height: 70px;
+    padding: 10px 0 5px;
   }
 
   .primary-attendance-button,
   .checkout-attendance-button {
     width: 100%;
     min-width: 0;
+    padding: 12px 15px;
   }
 
   .today-footer {
     justify-content: flex-start;
   }
 
-  .month-summary-grid {
-    grid-template-columns: 1fr 1fr;
+  .today-footer span {
+    font-size: 9px;
   }
+
+  /* MONTH */
+
+  .section-title-row h2 {
+    font-size: 17px;
+  }
+
+  .section-title-row > div > p:last-child {
+    font-size: 10px;
+  }
+
+  .month-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .month-summary-card {
+    min-height: 62px;
+    padding: 11px 12px;
+  }
+
+  .month-summary-card span {
+    font-size: 10px;
+  }
+
+  .month-summary-card strong {
+    font-size: 19px;
+  }
+
+  /* FILTERS */
 
   .attendance-filters {
     align-items: stretch;
     flex-direction: column;
+    gap: 9px;
   }
 
   .filter-group {
+    width: 100%;
     justify-content: space-between;
   }
 
   .filter-group select {
     flex: 1;
+    min-width: 0;
   }
 
   .clear-filters-button {
+    width: fit-content;
     margin-left: 0;
     align-self: flex-start;
   }
 
+  /* RECORD */
+
   .attendance-record {
-    grid-template-columns: 52px 1fr;
-    gap: 10px;
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 9px 11px;
     padding: 13px;
+    border-radius: 12px;
   }
 
   .record-date {
@@ -1222,8 +1535,17 @@
     height: 46px;
   }
 
+  .record-date strong {
+    font-size: 14px;
+  }
+
   .record-status {
     grid-column: 2;
+  }
+
+  .status-badge {
+    font-size: 9px;
+    padding: 5px 8px;
   }
 
   .record-time {
@@ -1240,6 +1562,10 @@
     font-weight: 650;
   }
 
+  .record-time strong {
+    font-size: 11px;
+  }
+
   .record-duration {
     grid-column: 1 / -1;
     flex-direction: row;
@@ -1247,32 +1573,76 @@
     justify-content: space-between;
   }
 
+  .record-duration > span {
+    font-size: 9px;
+  }
+
+  .record-duration strong {
+    font-size: 11px;
+  }
+
   .record-method {
     grid-column: 1 / -1;
     padding-top: 8px;
     border-top: 1px solid #edf0f5;
+    font-size: 9px;
   }
 
+  .method-icon {
+    width: 27px;
+    height: 27px;
+    font-size: 13px;
+  }
+
+  /* PAGINATION */
+
   .attendance-pagination {
-    align-items: center;
+    align-items: stretch;
     flex-direction: column;
+    gap: 9px;
   }
 
   .attendance-pagination > span {
     order: 1;
+    text-align: center;
   }
 
   .attendance-pagination button {
     width: 100%;
   }
 
+  /* EMPTY */
+
+  .empty-attendance {
+    min-height: 190px;
+    padding: 15px;
+  }
+
+  /* MODAL */
+
+  .work-report-modal-overlay {
+    align-items: center;
+    padding: 14px;
+  }
+
   .work-report-modal {
-    padding: 21px;
+    width: 100%;
+    max-height: calc(100vh - 28px);
+    padding: 20px;
     border-radius: 18px;
   }
 
   .modal-header h2 {
     font-size: 19px;
+  }
+
+  .modal-header p {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .modal-body textarea {
+    min-height: 135px;
   }
 
   .modal-footer {
@@ -1286,10 +1656,11 @@
 }
 
 /* =========================================================
-   RESPONSIVE - 400px
+   SMALL MOBILE
+   480px
    ========================================================= */
 
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .attendance-page {
     padding: 17px 12px 30px;
   }
@@ -1302,17 +1673,188 @@
   .month-overview,
   .attendance-history-section {
     padding: 16px;
+    border-radius: 15px;
   }
 
   .clock-display {
     font-size: 36px;
   }
 
+  .today-status {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .today-detail-item {
+    padding: 11px 6px;
+  }
+
+  .month-summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
   .month-summary-card {
-    padding: 12px;
+    min-height: 58px;
+    padding: 10px;
+  }
+
+  .month-summary-card span {
+    font-size: 9px;
   }
 
   .month-summary-card strong {
+    font-size: 17px;
+  }
+
+  .attendance-record {
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 11px;
+  }
+
+  .record-date {
+    width: 43px;
+    height: 43px;
+  }
+
+  .record-date strong {
+    font-size: 13px;
+  }
+
+  .record-date span {
+    font-size: 7px;
+  }
+
+  .record-time strong,
+  .record-duration strong {
+    font-size: 10px;
+  }
+
+  .record-method {
+    font-size: 8px;
+  }
+
+  .method-icon {
+    width: 25px;
+    height: 25px;
+    font-size: 12px;
+  }
+
+  .work-report-modal-overlay {
+    padding: 10px;
+  }
+
+  .work-report-modal {
+    max-height: calc(100vh - 20px);
+    padding: 17px;
+    border-radius: 16px;
+  }
+
+  .modal-header {
+    padding-right: 35px;
+  }
+
+  .modal-header h2 {
     font-size: 18px;
+  }
+
+  .modal-close-button {
+    width: 29px;
+    height: 29px;
+    font-size: 17px;
+  }
+
+  .modal-body textarea {
+    min-height: 120px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+   360px
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .attendance-page {
+    padding: 14px 9px 25px;
+  }
+
+  .attendance-page-header h1 {
+    font-size: 21px;
+  }
+
+  .attendance-page-header > div > p:last-child {
+    font-size: 11px;
+  }
+
+  .today-main-card,
+  .month-overview,
+  .attendance-history-section {
+    padding: 13px;
+  }
+
+  .today-card-header h2 {
+    font-size: 17px;
+  }
+
+  .clock-display {
+    font-size: 32px;
+  }
+
+  .today-detail-item {
+    padding: 10px 4px;
+  }
+
+  .month-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .month-summary-card {
+    min-height: 54px;
+  }
+
+  .attendance-record {
+    grid-template-columns: 43px minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .record-date {
+    width: 40px;
+    height: 40px;
+  }
+
+  .record-date strong {
+    font-size: 12px;
+  }
+
+  .status-badge {
+    font-size: 8px;
+    padding: 4px 7px;
+  }
+
+  .record-time strong,
+  .record-duration strong {
+    font-size: 9px;
+  }
+
+  .record-method {
+    font-size: 8px;
+  }
+
+  .method-icon {
+    width: 23px;
+    height: 23px;
+    font-size: 11px;
+  }
+
+  .primary-attendance-button,
+  .checkout-attendance-button {
+    font-size: 11px;
+    padding: 11px 12px;
+  }
+
+  .work-report-modal {
+    padding: 14px;
   }
 }

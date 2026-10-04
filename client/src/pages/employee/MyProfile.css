@@ -1,17 +1,31 @@
-.my-profile-page {
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 32px 36px 60px;
+/* =========================================================
+   MY PROFILE
+   CloudMatrix Attendance System
+   Responsive: Desktop / Laptop / Tablet / Mobile / Small
+   ========================================================= */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  color: #172033;
 }
 
-/* =========================
+.my-profile-page {
+  width: 100%;
+  max-width: 1500px;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 32px 36px 60px;
+  color: #172033;
+  overflow-x: hidden;
+}
+
+/* =========================================================
    PAGE HEADER
-========================= */
+   ========================================================= */
 
 .my-profile-header {
+  width: 100%;
   margin-bottom: 24px;
 }
 
@@ -29,18 +43,21 @@
   font-size: 32px;
   line-height: 1.15;
   letter-spacing: -0.7px;
+  overflow-wrap: anywhere;
 }
 
 .profile-header-description {
+  max-width: 700px;
   margin: 9px 0 0;
   color: #7b8595;
   font-size: 14px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
-/* =========================
+/* =========================================================
    PROFILE HERO
-========================= */
+   ========================================================= */
 
 .profile-hero {
   display: flex;
@@ -48,7 +65,10 @@
   justify-content: space-between;
   gap: 24px;
 
+  width: 100%;
+  min-width: 0;
   min-height: 150px;
+
   margin-bottom: 22px;
   padding: 26px 30px;
 
@@ -71,7 +91,9 @@
   display: flex;
   align-items: center;
   gap: 20px;
+
   min-width: 0;
+  flex: 1;
 }
 
 .profile-main-avatar {
@@ -86,11 +108,12 @@
 
   border-radius: 24px;
 
-  background: linear-gradient(
-    135deg,
-    #1678ca,
-    #075fa9
-  );
+  background:
+    linear-gradient(
+      135deg,
+      #1678ca,
+      #075fa9
+    );
 
   color: #ffffff;
 
@@ -105,6 +128,7 @@
 
 .profile-hero-info {
   min-width: 0;
+  flex: 1;
 }
 
 .profile-name-row {
@@ -112,21 +136,28 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
+  min-width: 0;
 }
 
 .profile-name-row h2 {
+  min-width: 0;
   margin: 0;
 
   color: #172033;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.4px;
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
 }
 
 .profile-active-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+
+  flex-shrink: 0;
 
   padding: 5px 10px;
 
@@ -145,6 +176,8 @@
   width: 6px;
   height: 6px;
 
+  flex-shrink: 0;
+
   border-radius: 50%;
   background: #2e9b62;
 }
@@ -155,12 +188,18 @@
   color: #657185;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
 .profile-meta {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
+
+  min-width: 0;
 
   color: #667386;
   font-size: 11px;
@@ -170,6 +209,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .profile-meta strong {
@@ -182,6 +224,7 @@
 .profile-meta-divider {
   width: 1px;
   height: 14px;
+  flex-shrink: 0;
   background: #dce3eb;
 }
 
@@ -208,6 +251,8 @@
   align-items: center;
   justify-content: center;
 
+  flex-shrink: 0;
+
   border-radius: 9px;
 
   background: #eef7ff;
@@ -230,25 +275,31 @@
 
   color: #9aa3b1;
   font-size: 9px;
+  line-height: 1.4;
 }
 
-/* =========================
+/* =========================================================
    MAIN GRID
-========================= */
+   ========================================================= */
 
 .my-profile-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
   gap: 22px;
+
+  width: 100%;
+  min-width: 0;
 }
 
-/* =========================
+/* =========================================================
    CARDS
-========================= */
+   ========================================================= */
 
 .profile-card {
   min-width: 0;
-
   overflow: hidden;
 
   background: #ffffff;
@@ -264,6 +315,8 @@
   display: flex;
   align-items: center;
   gap: 13px;
+
+  min-width: 0;
 
   padding: 22px 25px;
 
@@ -297,6 +350,10 @@
   background: #f0f9f5;
 }
 
+.profile-card-header > div {
+  min-width: 0;
+}
+
 .profile-card-header h2 {
   margin: 0;
 
@@ -306,6 +363,9 @@
   font-weight: 800;
 
   letter-spacing: -0.2px;
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
 }
 
 .profile-card-header p {
@@ -315,15 +375,22 @@
 
   font-size: 10px;
   line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
-/* =========================
+/* =========================================================
    PROFILE DETAILS
-========================= */
+   ========================================================= */
 
 .profile-details {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  min-width: 0;
 
   padding: 5px 25px 16px;
 }
@@ -354,6 +421,8 @@
   font-weight: 800;
 
   letter-spacing: 0.65px;
+
+  overflow-wrap: anywhere;
 }
 
 .profile-detail strong {
@@ -367,6 +436,7 @@
   line-height: 1.4;
 
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .profile-detail .profile-id {
@@ -375,15 +445,17 @@
 
 .profile-detail .profile-email {
   font-size: 12px;
+  word-break: break-word;
 }
 
-/* =========================
+/* =========================================================
    STATUS
-========================= */
+   ========================================================= */
 
 .status-value {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 7px;
 
   color: #258052 !important;
@@ -405,18 +477,23 @@
     0 0 0 3px #e5f6ed;
 }
 
-/* =========================
+/* =========================================================
    ACCOUNT CARD
-========================= */
+   ========================================================= */
 
 .profile-account-card {
+  width: 100%;
+  min-width: 0;
   margin-top: 22px;
 }
 
 .profile-account-grid {
   display: grid;
+
   grid-template-columns:
-    repeat(4, 1fr);
+    repeat(4, minmax(0, 1fr));
+
+  min-width: 0;
 
   padding: 18px 25px 22px;
 }
@@ -457,6 +534,10 @@
   font-size: 12px;
 }
 
+.account-item > div {
+  min-width: 0;
+}
+
 .account-item span {
   display: block;
 
@@ -468,10 +549,14 @@
   font-weight: 800;
 
   letter-spacing: 0.7px;
+
+  overflow-wrap: anywhere;
 }
 
 .account-item strong {
   display: block;
+
+  min-width: 0;
 
   color: #293446;
 
@@ -479,6 +564,7 @@
   font-weight: 750;
 
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .account-active {
@@ -489,14 +575,17 @@
   color: #258052 !important;
 }
 
-/* =========================
+/* =========================================================
    INFO NOTE
-========================= */
+   ========================================================= */
 
 .profile-info-note {
   display: flex;
   align-items: center;
   gap: 12px;
+
+  width: 100%;
+  min-width: 0;
 
   margin-top: 22px;
   padding: 15px 18px;
@@ -526,6 +615,10 @@
   font-weight: 800;
 }
 
+.profile-info-note > div {
+  min-width: 0;
+}
+
 .profile-info-note strong {
   display: block;
 
@@ -533,6 +626,8 @@
 
   font-size: 11px;
   font-weight: 750;
+
+  overflow-wrap: anywhere;
 }
 
 .profile-info-note p {
@@ -542,16 +637,130 @@
 
   font-size: 10px;
   line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
-/* =========================
-   TABLET
-========================= */
+/* =========================================================
+   LARGE DESKTOP
+   1400px+
+   ========================================================= */
+
+@media (min-width: 1400px) {
+  .my-profile-page {
+    padding: 36px 40px 65px;
+  }
+
+  .profile-hero {
+    padding: 28px 32px;
+  }
+
+  .profile-card-header {
+    padding: 24px 27px;
+  }
+
+  .profile-details {
+    padding-left: 27px;
+    padding-right: 27px;
+  }
+
+  .profile-account-grid {
+    padding-left: 27px;
+    padding-right: 27px;
+  }
+}
+
+/* =========================================================
+   LAPTOP
+   1200px - 1399px
+   ========================================================= */
+
+@media (max-width: 1399px) {
+  .my-profile-page {
+    padding: 30px 30px 55px;
+  }
+
+  .profile-hero {
+    padding: 24px 26px;
+  }
+
+  .profile-main-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 21px;
+  }
+
+  .profile-name-row h2 {
+    font-size: 22px;
+  }
+
+  .profile-readonly {
+    padding: 9px 12px;
+  }
+
+  .profile-details {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .profile-account-grid {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .account-item {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* =========================================================
+   TABLET LANDSCAPE / SMALL LAPTOP
+   1050px
+   ========================================================= */
 
 @media (max-width: 1050px) {
+  .my-profile-page {
+    padding: 27px 24px 50px;
+  }
+
+  .profile-hero {
+    gap: 18px;
+    padding: 22px;
+  }
+
+  .profile-main-avatar {
+    width: 74px;
+    height: 74px;
+    border-radius: 19px;
+    font-size: 25px;
+  }
+
+  .profile-hero-left {
+    gap: 15px;
+  }
+
+  .profile-name-row h2 {
+    font-size: 21px;
+  }
+
+  .profile-meta {
+    gap: 8px;
+  }
+
+  .profile-readonly {
+    padding: 8px 10px;
+  }
+
   .profile-account-grid {
-    grid-template-columns: 1fr 1fr;
-    row-gap: 18px;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    row-gap: 16px;
+  }
+
+  .account-item {
+    padding: 7px 15px;
   }
 
   .account-item:nth-child(3) {
@@ -564,45 +773,98 @@
   }
 }
 
-/* =========================
-   MOBILE / SMALL TABLET
-========================= */
+/* =========================================================
+   TABLET
+   900px
+   ========================================================= */
 
 @media (max-width: 900px) {
   .my-profile-page {
-    padding: 28px 24px 50px;
+    padding: 25px 22px 45px;
   }
 
-  .my-profile-grid {
-    grid-template-columns: 1fr;
+  .my-profile-header {
+    margin-bottom: 20px;
   }
+
+  .my-profile-header h1 {
+    font-size: 29px;
+  }
+
+  .profile-header-description {
+    font-size: 13px;
+  }
+
+  .profile-hero {
+    align-items: flex-start;
+  }
+
+  /*
+     Hide the small read-only information panel when
+     the available width becomes limited.
+  */
 
   .profile-readonly {
     display: none;
   }
+
+  .my-profile-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .profile-card {
+    border-radius: 18px;
+  }
+
+  .profile-account-card {
+    margin-top: 18px;
+  }
 }
 
-/* =========================
+/* =========================================================
    MOBILE
-========================= */
+   600px
+   ========================================================= */
 
 @media (max-width: 600px) {
   .my-profile-page {
     padding: 20px 15px 40px;
   }
 
+  /* HEADER */
+
+  .my-profile-header {
+    margin-bottom: 19px;
+  }
+
+  .profile-eyebrow {
+    margin-bottom: 6px;
+    font-size: 9px;
+  }
+
   .my-profile-header h1 {
-    font-size: 27px;
+    font-size: 26px;
+    letter-spacing: -0.5px;
   }
 
   .profile-header-description {
+    margin-top: 7px;
     font-size: 12px;
+    line-height: 1.5;
   }
 
-  .profile-hero {
-    align-items: flex-start;
+  /* HERO */
 
-    padding: 20px;
+  .profile-hero {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 17px;
+
+    min-height: auto;
+
+    margin-bottom: 18px;
+    padding: 19px;
 
     border-radius: 18px;
   }
@@ -621,38 +883,75 @@
     font-size: 22px;
   }
 
+  .profile-name-row {
+    gap: 7px;
+  }
+
   .profile-name-row h2 {
     font-size: 19px;
   }
 
+  .profile-active-badge {
+    padding: 4px 8px;
+    font-size: 8px;
+  }
+
   .profile-designation {
-    font-size: 12px;
+    margin: 5px 0 11px;
+    font-size: 11px;
   }
 
   .profile-meta {
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+
+    font-size: 10px;
   }
 
   .profile-meta-divider {
     display: none;
   }
 
-  .profile-card-header {
-    padding: 19px 20px;
+  /* CARDS */
+
+  .profile-card {
+    border-radius: 17px;
   }
+
+  .profile-card-header {
+    gap: 11px;
+    padding: 18px 19px;
+  }
+
+  .profile-section-icon {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 10px;
+
+    font-size: 15px;
+  }
+
+  .profile-card-header h2 {
+    font-size: 16px;
+  }
+
+  .profile-card-header p {
+    font-size: 9px;
+  }
+
+  /* PROFILE DETAILS */
 
   .profile-details {
     grid-template-columns: 1fr;
 
-    padding: 3px 20px 12px;
+    padding: 3px 19px 12px;
   }
 
   .profile-detail,
   .profile-detail:nth-child(even) {
     padding: 14px 0;
-
     border-left: 0;
   }
 
@@ -660,17 +959,34 @@
     border-top: 1px solid #edf0f4;
   }
 
+  .profile-detail span {
+    font-size: 8px;
+  }
+
+  .profile-detail strong {
+    font-size: 12px;
+  }
+
+  .profile-detail .profile-email {
+    font-size: 11px;
+  }
+
+  /* ACCOUNT */
+
+  .profile-account-card {
+    margin-top: 18px;
+  }
+
   .profile-account-grid {
     grid-template-columns: 1fr;
 
-    padding: 10px 20px 18px;
+    padding: 8px 19px 16px;
   }
 
   .account-item,
   .account-item:first-child,
   .account-item:nth-child(3) {
     padding: 13px 0;
-
     border-left: 0;
   }
 
@@ -678,7 +994,316 @@
     border-top: 1px solid #edf0f4;
   }
 
+  .account-item-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .account-item span {
+    font-size: 8px;
+  }
+
+  .account-item strong {
+    font-size: 11px;
+  }
+
+  /* NOTE */
+
   .profile-info-note {
     align-items: flex-start;
+    gap: 10px;
+
+    margin-top: 18px;
+    padding: 13px 14px;
+  }
+
+  .profile-info-note-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+
+  .profile-info-note strong {
+    font-size: 10px;
+  }
+
+  .profile-info-note p {
+    font-size: 9px;
+    line-height: 1.5;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .my-profile-page {
+    padding: 17px 12px 32px;
+  }
+
+  .my-profile-header h1 {
+    font-size: 23px;
+  }
+
+  .profile-header-description {
+    font-size: 11px;
+  }
+
+  .profile-hero {
+    padding: 16px;
+    border-radius: 15px;
+  }
+
+  .profile-hero-left {
+    gap: 11px;
+  }
+
+  .profile-main-avatar {
+    width: 57px;
+    height: 57px;
+
+    border-radius: 15px;
+
+    font-size: 19px;
+  }
+
+  .profile-name-row h2 {
+    font-size: 17px;
+  }
+
+  .profile-active-badge {
+    padding: 4px 7px;
+    font-size: 7px;
+  }
+
+  .profile-designation {
+    margin: 4px 0 9px;
+    font-size: 10px;
+  }
+
+  .profile-meta {
+    font-size: 9px;
+  }
+
+  .profile-card-header {
+    padding: 16px;
+  }
+
+  .profile-section-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 9px;
+    font-size: 14px;
+  }
+
+  .profile-card-header h2 {
+    font-size: 15px;
+  }
+
+  .profile-card-header p {
+    font-size: 8px;
+  }
+
+  .profile-details {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .profile-detail {
+    padding: 12px 0;
+  }
+
+  .profile-detail span {
+    font-size: 7px;
+  }
+
+  .profile-detail strong {
+    font-size: 11px;
+  }
+
+  .profile-detail .profile-email {
+    font-size: 10px;
+  }
+
+  .profile-account-grid {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .account-item {
+    padding: 11px 0;
+  }
+
+  .account-item-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .account-item span {
+    margin-bottom: 4px;
+    font-size: 7px;
+  }
+
+  .account-item strong {
+    font-size: 10px;
+  }
+
+  .profile-info-note {
+    padding: 12px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+   360px
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .my-profile-page {
+    padding: 14px 9px 28px;
+  }
+
+  .my-profile-header {
+    margin-bottom: 16px;
+  }
+
+  .profile-eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.2px;
+  }
+
+  .my-profile-header h1 {
+    font-size: 21px;
+  }
+
+  .profile-header-description {
+    font-size: 10px;
+  }
+
+  .profile-hero {
+    padding: 13px;
+  }
+
+  .profile-hero-left {
+    gap: 9px;
+  }
+
+  .profile-main-avatar {
+    width: 50px;
+    height: 50px;
+
+    border-radius: 13px;
+
+    font-size: 17px;
+  }
+
+  .profile-name-row {
+    gap: 5px;
+  }
+
+  .profile-name-row h2 {
+    font-size: 15px;
+  }
+
+  .profile-active-badge {
+    padding: 3px 6px;
+    font-size: 6px;
+  }
+
+  .profile-designation {
+    font-size: 9px;
+  }
+
+  .profile-meta {
+    font-size: 8px;
+  }
+
+  .profile-card-header {
+    padding: 14px;
+  }
+
+  .profile-section-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .profile-card-header h2 {
+    font-size: 14px;
+  }
+
+  .profile-card-header p {
+    font-size: 7px;
+  }
+
+  .profile-details {
+    padding: 2px 14px 10px;
+  }
+
+  .profile-detail {
+    padding: 11px 0;
+    gap: 5px;
+  }
+
+  .profile-detail span {
+    font-size: 7px;
+  }
+
+  .profile-detail strong {
+    font-size: 10px;
+  }
+
+  .profile-detail .profile-email {
+    font-size: 9px;
+  }
+
+  .profile-account-card {
+    margin-top: 15px;
+  }
+
+  .profile-account-grid {
+    padding: 6px 14px 12px;
+  }
+
+  .account-item {
+    gap: 9px;
+    padding: 10px 0;
+  }
+
+  .account-item-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+
+  .account-item span {
+    font-size: 6px;
+  }
+
+  .account-item strong {
+    font-size: 9px;
+  }
+
+  .profile-info-note {
+    gap: 8px;
+    margin-top: 15px;
+    padding: 10px;
+  }
+
+  .profile-info-note-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+
+  .profile-info-note strong {
+    font-size: 9px;
+  }
+
+  .profile-info-note p {
+    font-size: 8px;
   }
 }

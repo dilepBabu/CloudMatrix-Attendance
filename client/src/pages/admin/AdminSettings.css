@@ -1,8 +1,29 @@
+/* =========================================================
+   SETTINGS PAGE
+   Cloud Matrix Attendance System
+   Responsive: Desktop / Laptop / Tablet / Mobile / Small Phone
+   ========================================================= */
+
 .settings-page {
-  padding: 30px;
+  width: 100%;
   max-width: 1100px;
+  min-width: 0;
   margin: 0 auto;
+  padding: 30px;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
+
+.settings-page *,
+.settings-page *::before,
+.settings-page *::after {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .settings-header {
   margin-bottom: 28px;
@@ -10,34 +31,64 @@
 
 .settings-eyebrow {
   display: inline-block;
+
+  margin-bottom: 8px;
+
   font-size: 11px;
   font-weight: 700;
+
   letter-spacing: 1.5px;
-  margin-bottom: 8px;
+
   opacity: 0.6;
 }
 
 .settings-header h1 {
   margin: 0;
+
   font-size: 30px;
   font-weight: 750;
+
+  line-height: 1.2;
+
+  overflow-wrap: anywhere;
 }
 
 .settings-header p {
   margin: 8px 0 0;
+
   color: #6b7280;
+
   font-size: 14px;
+  line-height: 1.5;
+
+  overflow-wrap: anywhere;
 }
 
+
+/* =========================================================
+   ALERT
+   ========================================================= */
+
 .settings-alert {
+  width: 100%;
+
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   padding: 13px 16px;
+
   border-radius: 12px;
+
   margin-bottom: 20px;
+
   font-size: 14px;
   font-weight: 600;
+
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
 .settings-success {
@@ -52,56 +103,112 @@
   border: 1px solid #fecaca;
 }
 
+
+/* =========================================================
+   MAIN CARD
+   ========================================================= */
+
 .settings-card {
+  width: 100%;
+
   background: #ffffff;
+
   border: 1px solid #e5e7eb;
   border-radius: 20px;
+
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, 0.06);
 }
+
+
+/* =========================================================
+   CARD HEADER
+   ========================================================= */
 
 .settings-card-header {
   display: flex;
   align-items: center;
+
   gap: 16px;
+
   padding: 26px 28px;
 }
 
 .settings-icon {
   width: 48px;
   height: 48px;
+
+  min-width: 48px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   background: #eff6ff;
+
   border-radius: 14px;
+
   font-size: 23px;
+}
+
+.settings-card-header > div:last-child {
+  min-width: 0;
 }
 
 .settings-card-header h2 {
   margin: 0;
+
   font-size: 19px;
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
 }
 
 .settings-card-header p {
   margin: 5px 0 0;
+
   color: #6b7280;
+
   font-size: 13px;
+  line-height: 1.5;
+
+  overflow-wrap: anywhere;
 }
 
+
+/* =========================================================
+   DIVIDER
+   ========================================================= */
+
 .settings-divider {
+  width: 100%;
   height: 1px;
+
   background: #e5e7eb;
 }
 
+
+/* =========================================================
+   SETTINGS GRID
+   ========================================================= */
+
 .settings-grid {
+  width: 100%;
+
   display: grid;
-  grid-template-columns: 1fr 1fr;
+
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
   gap: 22px;
+
   padding: 28px;
 }
 
 .settings-field {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
 }
@@ -110,137 +217,262 @@
   grid-column: 1 / -1;
 }
 
+
+/* =========================================================
+   LABELS
+   ========================================================= */
+
 .settings-field label {
   font-size: 13px;
   font-weight: 700;
+
   margin-bottom: 8px;
+
   color: #374151;
+
+  line-height: 1.4;
 }
+
+
+/* =========================================================
+   INPUTS
+   ========================================================= */
 
 .settings-field input,
 .settings-field textarea,
 .radius-input-wrapper input {
   width: 100%;
-  box-sizing: border-box;
+  max-width: 100%;
+
   border: 1px solid #d1d5db;
+
   border-radius: 11px;
+
   padding: 12px 14px;
+
   font-size: 14px;
+
   outline: none;
-  transition: 0.2s ease;
-  background: #fff;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  background: #ffffff;
+
+  color: #111827;
 }
 
 .settings-field input:focus,
 .settings-field textarea:focus,
 .radius-input-wrapper input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .settings-field textarea {
   resize: vertical;
+
   min-height: 90px;
+
   font-family: inherit;
+
+  line-height: 1.5;
 }
 
 .settings-help {
   margin-top: 6px;
+
   color: #9ca3af;
+
   font-size: 11px;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
+
+
+/* =========================================================
+   SETTINGS SECTION
+   ========================================================= */
 
 .settings-section {
   margin: 0 28px 24px;
+
   padding: 22px;
+
   background: #f8fafc;
+
   border: 1px solid #e5e7eb;
+
   border-radius: 16px;
+
+  min-width: 0;
 }
 
 .settings-section-title {
   display: flex;
+
   gap: 12px;
+
   align-items: flex-start;
+
+  min-width: 0;
 }
 
 .settings-section-title > span {
   font-size: 21px;
+
+  flex-shrink: 0;
+}
+
+.settings-section-title > div {
+  min-width: 0;
 }
 
 .settings-section-title h3 {
   margin: 0;
+
   font-size: 15px;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
 .settings-section-title p {
   margin: 5px 0 0;
+
   color: #6b7280;
+
   font-size: 13px;
+
   line-height: 1.5;
+
+  overflow-wrap: anywhere;
 }
 
+
+/* =========================================================
+   RADIUS INPUT
+   ========================================================= */
+
 .radius-input-wrapper {
-  display: flex;
-  align-items: center;
+  width: 100%;
   max-width: 320px;
+
+  display: flex;
+  align-items: stretch;
+
   margin-top: 18px;
 }
 
 .radius-input-wrapper input {
+  min-width: 0;
+
+  flex: 1;
+
   border-radius: 11px 0 0 11px;
 }
 
 .radius-input-wrapper span {
-  height: 43px;
+  min-height: 43px;
+
   display: flex;
   align-items: center;
+  justify-content: center;
+
   padding: 0 14px;
+
   background: #e5e7eb;
+
   border-radius: 0 11px 11px 0;
+
   font-size: 13px;
   font-weight: 600;
+
   color: #4b5563;
+
+  flex-shrink: 0;
 }
 
 .radius-info {
   display: flex;
+
   gap: 8px;
+
   margin-top: 14px;
+
   color: #6b7280;
+
   font-size: 12px;
+
+  line-height: 1.5;
+
+  min-width: 0;
 }
 
 .radius-info p {
   margin: 0;
+
   line-height: 1.5;
+
+  overflow-wrap: anywhere;
 }
+
+
+/* =========================================================
+   ATTENDANCE TOGGLE
+   ========================================================= */
 
 .attendance-toggle-section {
   display: flex;
+
   justify-content: space-between;
   align-items: center;
+
   gap: 20px;
+
+  min-width: 0;
+}
+
+.attendance-toggle-section > * {
+  min-width: 0;
 }
 
 .settings-toggle {
   border: none;
+
   background: transparent;
+
   cursor: pointer;
+
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   padding: 0;
+
+  flex-shrink: 0;
 }
 
 .toggle-track {
   width: 48px;
   height: 27px;
+
   background: #d1d5db;
+
   border-radius: 999px;
+
   padding: 3px;
+
   box-sizing: border-box;
-  transition: 0.2s ease;
+
+  transition: background 0.2s ease;
+
+  flex-shrink: 0;
 }
 
 .settings-toggle.active .toggle-track {
@@ -249,12 +481,18 @@
 
 .toggle-thumb {
   display: block;
+
   width: 21px;
   height: 21px;
+
   background: white;
+
   border-radius: 50%;
-  transition: 0.2s ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+
+  transition: transform 0.2s ease;
+
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 .settings-toggle.active .toggle-thumb {
@@ -264,150 +502,134 @@
 .toggle-text {
   font-size: 13px;
   font-weight: 700;
+
   color: #6b7280;
+
+  white-space: nowrap;
 }
 
 .settings-toggle.active .toggle-text {
   color: #15803d;
 }
 
-.settings-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 20px 28px;
-  border-top: 1px solid #e5e7eb;
-  background: #fafafa;
-}
 
-.settings-save-btn {
-  border: none;
-  border-radius: 11px;
-  padding: 12px 20px;
-  background: #2563eb;
-  color: white;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: 0.2s ease;
-}
-
-.settings-save-btn:hover {
-  background: #1d4ed8;
-  transform: translateY(-1px);
-}
-
-.settings-save-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.settings-loading {
-  padding: 50px;
-  text-align: center;
-  color: #6b7280;
-}
-
-@media (max-width: 700px) {
-  .settings-page {
-    padding: 18px;
-  }
-
-  .settings-grid {
-    grid-template-columns: 1fr;
-    padding: 20px;
-  }
-
-  .settings-field-full {
-    grid-column: auto;
-  }
-
-  .settings-card-header {
-    padding: 20px;
-  }
-
-  .settings-section {
-    margin: 0 20px 20px;
-    padding: 18px;
-  }
-
-  .attendance-toggle-section {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .settings-footer {
-    padding: 18px 20px;
-  }
-
-  .settings-save-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
+/* =========================================================
+   LOCATION DETECTION
+   ========================================================= */
 
 .location-detect-area {
+  width: auto;
+
   margin: 24px 28px 0;
+
   padding: 18px 20px;
+
   background: #eff6ff;
+
   border: 1px solid #bfdbfe;
+
   border-radius: 14px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 20px;
+
+  min-width: 0;
+}
+
+.location-detect-area > div {
+  min-width: 0;
 }
 
 .location-detect-area h3 {
   margin: 0;
+
   font-size: 14px;
+
   color: #1e3a8a;
+
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
 }
 
 .location-detect-area p {
   margin: 5px 0 0;
+
   color: #64748b;
+
   font-size: 12px;
+
   line-height: 1.5;
+
+  overflow-wrap: anywhere;
 }
 
 .detect-location-btn {
   border: none;
+
   border-radius: 10px;
+
   padding: 11px 16px;
+
   background: #2563eb;
+
   color: white;
+
   font-size: 13px;
   font-weight: 700;
+
   cursor: pointer;
+
   white-space: nowrap;
+
   display: flex;
   align-items: center;
+  justify-content: center;
+
   gap: 8px;
-  transition: 0.2s ease;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+
+  flex-shrink: 0;
 }
 
-.detect-location-btn:hover {
+.detect-location-btn:hover:not(:disabled) {
   background: #1d4ed8;
+
   transform: translateY(-1px);
 }
 
 .detect-location-btn:disabled {
   opacity: 0.65;
+
   cursor: not-allowed;
+
   transform: none;
 }
+
+
+/* =========================================================
+   LOCATION SPINNER
+   ========================================================= */
 
 .location-spinner {
   width: 13px;
   height: 13px;
+
   border: 2px solid rgba(255, 255, 255, 0.4);
+
   border-top-color: white;
+
   border-radius: 50%;
+
   animation: locationSpin 0.8s linear infinite;
+
+  flex-shrink: 0;
 }
 
 @keyframes locationSpin {
@@ -416,39 +638,599 @@
   }
 }
 
+
+/* =========================================================
+   LOCATION OR
+   ========================================================= */
+
 .location-or {
   display: flex;
   align-items: center;
+
   gap: 12px;
+
   margin: 20px 28px 0;
+
   color: #9ca3af;
+
   font-size: 10px;
   font-weight: 700;
+
   letter-spacing: 1px;
 }
 
 .location-or::before,
 .location-or::after {
   content: "";
+
   height: 1px;
+
   background: #e5e7eb;
+
   flex: 1;
+
+  min-width: 0;
 }
 
-@media (max-width: 700px) {
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.settings-footer {
+  width: 100%;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  padding: 20px 28px;
+
+  border-top: 1px solid #e5e7eb;
+
+  background: #fafafa;
+}
+
+.settings-save-btn {
+  border: none;
+
+  border-radius: 11px;
+
+  padding: 12px 20px;
+
+  background: #2563eb;
+
+  color: white;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.settings-save-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+
+  transform: translateY(-1px);
+}
+
+.settings-save-btn:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.settings-loading {
+  width: 100%;
+
+  padding: 50px 20px;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   LARGE TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+  .settings-page {
+    padding: 28px 24px 40px;
+  }
+
+  .settings-grid {
+    gap: 18px;
+
+    padding: 24px;
+  }
+
+  .settings-section {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
   .location-detect-area {
-    margin: 20px 20px 0;
-    flex-direction: column;
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
+  .location-or {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+
+  .settings-footer {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .settings-page {
+    padding: 24px 20px 36px;
+  }
+
+  .settings-header {
+    margin-bottom: 22px;
+  }
+
+  .settings-header h1 {
+    font-size: 27px;
+  }
+
+  .settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+
+    gap: 18px;
+
+    padding: 22px;
+  }
+
+  .settings-field-full {
+    grid-column: auto;
+  }
+
+  .settings-card-header {
+    padding: 22px;
+  }
+
+  .settings-section {
+    margin: 0 22px 20px;
+
+    padding: 20px;
+  }
+
+  .location-detect-area {
+    margin: 20px 22px 0;
+  }
+
+  .location-or {
+    margin-left: 22px;
+    margin-right: 22px;
+  }
+
+  .settings-footer {
+    padding: 18px 22px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .settings-page {
+    padding: 18px 14px 30px;
+  }
+
+  .settings-header {
+    margin-bottom: 18px;
+  }
+
+  .settings-eyebrow {
+    font-size: 10px;
+
+    letter-spacing: 1.2px;
+  }
+
+  .settings-header h1 {
+    font-size: 24px;
+  }
+
+  .settings-header p {
+    font-size: 13px;
+  }
+
+
+  /* Card */
+
+  .settings-card {
+    border-radius: 16px;
+  }
+
+
+  /* Card Header */
+
+  .settings-card-header {
     align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 18px;
+  }
+
+  .settings-icon {
+    width: 42px;
+    height: 42px;
+
+    min-width: 42px;
+
+    border-radius: 11px;
+
+    font-size: 20px;
+  }
+
+  .settings-card-header h2 {
+    font-size: 17px;
+  }
+
+  .settings-card-header p {
+    font-size: 12px;
+  }
+
+
+  /* Grid */
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+
+    gap: 17px;
+
+    padding: 18px;
+  }
+
+
+  /* Fields */
+
+  .settings-field label {
+    font-size: 12px;
+
+    margin-bottom: 7px;
+  }
+
+  .settings-field input,
+  .settings-field textarea,
+  .radius-input-wrapper input {
+    padding: 11px 12px;
+
+    font-size: 13px;
+  }
+
+
+  /* Section */
+
+  .settings-section {
+    margin: 0 18px 18px;
+
+    padding: 17px;
+
+    border-radius: 14px;
+  }
+
+  .settings-section-title {
+    gap: 9px;
+  }
+
+  .settings-section-title > span {
+    font-size: 19px;
+  }
+
+  .settings-section-title h3 {
+    font-size: 14px;
+  }
+
+  .settings-section-title p {
+    font-size: 12px;
+  }
+
+
+  /* Radius */
+
+  .radius-input-wrapper {
+    max-width: 100%;
+
+    margin-top: 15px;
+  }
+
+  .radius-input-wrapper span {
+    padding: 0 12px;
+
+    font-size: 12px;
+  }
+
+  .radius-info {
+    font-size: 11px;
+  }
+
+
+  /* Toggle */
+
+  .attendance-toggle-section {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 16px;
+  }
+
+
+  /* Location */
+
+  .location-detect-area {
+    margin: 18px 18px 0;
+
+    padding: 16px;
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 14px;
+  }
+
+  .location-detect-area h3 {
+    font-size: 13px;
+  }
+
+  .location-detect-area p {
+    font-size: 11px;
   }
 
   .detect-location-btn {
     width: 100%;
-    justify-content: center;
+
+    min-height: 42px;
   }
 
   .location-or {
-    margin-left: 20px;
-    margin-right: 20px;
+    margin: 17px 18px 0;
+
+    gap: 9px;
+
+    font-size: 9px;
+  }
+
+
+  /* Footer */
+
+  .settings-footer {
+    padding: 16px 18px;
+  }
+
+  .settings-save-btn {
+    width: 100%;
+
+    min-height: 43px;
+
+    padding: 11px 16px;
+  }
+
+
+  /* Alert */
+
+  .settings-alert {
+    align-items: flex-start;
+
+    padding: 12px 13px;
+
+    font-size: 12px;
+  }
+
+
+  /* Loading */
+
+  .settings-loading {
+    padding: 40px 15px;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+  .settings-page {
+    padding: 14px 10px 24px;
+  }
+
+  .settings-header {
+    margin-bottom: 16px;
+  }
+
+  .settings-header h1 {
+    font-size: 22px;
+  }
+
+  .settings-header p {
+    font-size: 12px;
+  }
+
+  .settings-card {
+    border-radius: 14px;
+  }
+
+  .settings-card-header {
+    padding: 16px;
+  }
+
+  .settings-icon {
+    width: 38px;
+    height: 38px;
+
+    min-width: 38px;
+
+    font-size: 18px;
+  }
+
+  .settings-card-header h2 {
+    font-size: 16px;
+  }
+
+  .settings-card-header p {
+    font-size: 11px;
+  }
+
+  .settings-grid {
+    padding: 16px;
+
+    gap: 15px;
+  }
+
+  .settings-section {
+    margin-left: 16px;
+    margin-right: 16px;
+
+    padding: 15px;
+  }
+
+  .location-detect-area {
+    margin-left: 16px;
+    margin-right: 16px;
+
+    padding: 14px;
+  }
+
+  .location-or {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .settings-footer {
+    padding: 14px 16px;
+  }
+
+  .toggle-text {
+    font-size: 12px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONE
+   ========================================================= */
+
+@media (max-width: 330px) {
+
+  .settings-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .settings-header h1 {
+    font-size: 20px;
+  }
+
+  .settings-card-header {
+    padding: 14px;
+  }
+
+  .settings-card-header {
+    gap: 9px;
+  }
+
+  .settings-icon {
+    width: 35px;
+    height: 35px;
+
+    min-width: 35px;
+
+    font-size: 16px;
+  }
+
+  .settings-grid {
+    padding: 14px;
+  }
+
+  .settings-section {
+    margin-left: 14px;
+    margin-right: 14px;
+
+    padding: 13px;
+  }
+
+  .location-detect-area {
+    margin-left: 14px;
+    margin-right: 14px;
+
+    padding: 13px;
+  }
+
+  .location-or {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
+
+  .settings-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .radius-input-wrapper span {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .settings-field input,
+  .settings-field textarea,
+  .radius-input-wrapper input,
+  .toggle-track,
+  .toggle-thumb,
+  .detect-location-btn,
+  .settings-save-btn {
+    transition: none;
+  }
+
+  .location-spinner {
+    animation: none;
   }
 }
