@@ -62,7 +62,7 @@ const ChangePassword = () => {
 
       // Give the user a moment to see the success message.
       setTimeout(() => {
-        navigate("/login", { replace: true });
+        navigate("/", { replace: true });
       }, 1200);
     } catch (error) {
       setError(
