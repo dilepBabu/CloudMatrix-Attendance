@@ -1,13 +1,43 @@
 /* =========================================================
    EMPLOYEE DASHBOARD
    CloudMatrix Attendance System
+
+   Responsive:
+   Desktop / Laptop / Tablet / Mobile / Small Phones
+   ========================================================= */
+
+
+/* =========================================================
+   GLOBAL BOX SIZING / OVERFLOW SAFETY
+   ========================================================= */
+
+.employee-layout,
+.employee-layout *,
+.employee-layout *::before,
+.employee-layout *::after {
+  box-sizing: border-box;
+}
+
+.employee-layout {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   DASHBOARD CONTAINER
    ========================================================= */
 
 .employee-dashboard {
   width: 100%;
-  max-width: 1500px;
-  margin: 0 auto;
+  max-width: none;
+
+  margin: 0;
+
   padding: 30px 34px 50px;
+
+  min-width: 0;
+
   box-sizing: border-box;
 }
 
@@ -18,25 +48,32 @@
 
 .employee-dashboard-loading {
   min-height: 60vh;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   color: #64748b;
 }
 
 .dashboard-spinner {
   width: 40px;
   height: 40px;
+
   border: 4px solid #e5edf4;
   border-top-color: #0066b3;
+
   border-radius: 50%;
+
   animation: dashboard-spin 0.8s linear infinite;
+
   margin-bottom: 15px;
 }
 
 .employee-dashboard-loading p {
   margin: 0;
+
   font-size: 14px;
   color: #64748b;
 }
@@ -54,38 +91,54 @@
 
 .employee-dashboard-error {
   min-height: 60vh;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   text-align: center;
+
   padding: 30px;
+
+  box-sizing: border-box;
 }
 
 .error-symbol {
   width: 56px;
   height: 56px;
+
   border-radius: 16px;
+
   background: #fee2e2;
   color: #dc2626;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 25px;
   font-weight: 800;
+
   margin-bottom: 18px;
 }
 
 .employee-dashboard-error h2 {
   margin: 0 0 8px;
+
   color: #172033;
+
   font-size: 22px;
 }
 
 .employee-dashboard-error p {
   margin: 0;
+
   color: #64748b;
+
   font-size: 14px;
+
+  max-width: 500px;
 }
 
 
@@ -94,31 +147,50 @@
    ========================================================= */
 
 .dashboard-header {
+  width: 100%;
+  min-width: 0;
+
   margin-bottom: 25px;
 }
 
 .dashboard-header-content {
+  width: 100%;
+  min-width: 0;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 25px;
+}
+
+.dashboard-header-content > * {
+  min-width: 0;
 }
 
 .dashboard-eyebrow {
   display: block;
+
   margin: 0 0 8px;
+
   color: #0066b3;
+
   font-size: 10px;
   font-weight: 800;
+
   letter-spacing: 1.5px;
 }
 
 .dashboard-header h1 {
   margin: 0;
+
   color: #172033;
+
   font-size: 31px;
   line-height: 1.2;
+
   font-weight: 750;
+
   letter-spacing: -0.5px;
 }
 
@@ -128,7 +200,9 @@
 
 .dashboard-header p {
   margin: 8px 0 0;
+
   color: #718096;
+
   font-size: 14px;
   line-height: 1.5;
 }
@@ -141,61 +215,90 @@
 .employee-profile-card {
   display: flex;
   align-items: center;
+
   gap: 13px;
+
+  width: auto;
   min-width: 280px;
+  max-width: 360px;
+
   padding: 11px 17px 11px 11px;
+
   background: #ffffff;
+
   border: 1px solid #e5ebf1;
+
   border-radius: 14px;
+
   box-sizing: border-box;
+
+  flex-shrink: 0;
 }
 
 .employee-avatar {
   width: 48px;
   height: 48px;
+
   flex-shrink: 0;
+
   border-radius: 13px;
+
   background: linear-gradient(
     135deg,
     #0066b3,
     #00a9e0
   );
+
   color: #ffffff;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 18px;
   font-weight: 800;
 }
 
 .employee-profile-info {
   min-width: 0;
+
   display: flex;
   flex-direction: column;
 }
 
 .employee-profile-info strong {
   color: #172033;
+
   font-size: 14px;
   font-weight: 700;
+
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
 .employee-profile-info span {
   margin-top: 3px;
+
   color: #0066b3;
+
   font-size: 11px;
   font-weight: 700;
 }
 
 .employee-profile-info small {
   margin-top: 3px;
+
   color: #7b8798;
+
   font-size: 10px;
+
   white-space: nowrap;
+
   overflow: hidden;
+
   text-overflow: ellipsis;
 }
 
@@ -205,24 +308,44 @@
    ========================================================= */
 
 .dashboard-stats {
+  width: 100%;
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
   gap: 15px;
+
   margin-bottom: 15px;
 }
 
 .stat-card {
   position: relative;
+
   display: flex;
   align-items: center;
+
   gap: 14px;
+
+  width: 100%;
+  min-width: 0;
+
   min-height: 105px;
+
   padding: 19px;
+
   background: #ffffff;
+
   border: 1px solid #e5ebf1;
+
   border-radius: 15px;
+
   box-sizing: border-box;
+
   overflow: hidden;
+
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease,
@@ -231,61 +354,94 @@
 
 .stat-card::after {
   content: "";
+
   position: absolute;
+
   width: 75px;
   height: 75px;
+
   right: -28px;
   bottom: -30px;
+
   border-radius: 50%;
+
   opacity: 0.35;
+
+  pointer-events: none;
 }
 
 .stat-card:hover {
   transform: translateY(-2px);
+
   border-color: #d9e4ed;
-  box-shadow: 0 8px 24px rgba(23, 32, 51, 0.06);
+
+  box-shadow:
+    0 8px 24px rgba(23, 32, 51, 0.06);
 }
 
 .stat-card-icon {
   width: 46px;
   height: 46px;
+
   flex-shrink: 0;
+
   border-radius: 12px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   font-size: 19px;
   font-weight: 800;
 }
 
 .stat-card-content {
   min-width: 0;
+
+  overflow: hidden;
+
   display: flex;
   flex-direction: column;
 }
 
 .stat-card-content span {
   color: #718096;
+
   font-size: 12px;
   font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stat-card-content strong {
   margin-top: 3px;
+
   color: #172033;
+
   font-size: 26px;
   line-height: 1.1;
+
   font-weight: 750;
 }
 
 .stat-card-content small {
   margin-top: 4px;
+
   color: #9aa5b4;
+
   font-size: 10px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 
-/* Present */
+/* =========================================================
+   STAT COLORS
+   ========================================================= */
 
 .stat-present .stat-card-icon {
   background: #dcfce7;
@@ -296,9 +452,6 @@
   background: #bbf7d0;
 }
 
-
-/* Absent */
-
 .stat-absent .stat-card-icon {
   background: #fee2e2;
   color: #dc2626;
@@ -308,9 +461,6 @@
   background: #fecaca;
 }
 
-
-/* Leave */
-
 .stat-leave .stat-card-icon {
   background: #fef3c7;
   color: #b45309;
@@ -319,9 +469,6 @@
 .stat-leave::after {
   background: #fde68a;
 }
-
-
-/* Overtime */
 
 .stat-overtime .stat-card-icon {
   background: #e0e7ff;
@@ -338,9 +485,16 @@
    ========================================================= */
 
 .secondary-stats {
+  width: 100%;
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
   gap: 15px;
+
   margin-bottom: 25px;
 }
 
@@ -348,21 +502,40 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 15px;
+
+  min-width: 0;
+
   padding: 15px 17px;
+
   background: #f8fafc;
+
   border: 1px solid #e8edf2;
+
   border-radius: 12px;
+
+  overflow: hidden;
 }
 
 .secondary-stat span {
+  min-width: 0;
+
   color: #718096;
+
   font-size: 11px;
   font-weight: 600;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .secondary-stat strong {
+  flex-shrink: 0;
+
   color: #172033;
+
   font-size: 17px;
   font-weight: 750;
 }
@@ -373,10 +546,19 @@
    ========================================================= */
 
 .calendar-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   background: #ffffff;
+
   border: 1px solid #e3e9ef;
+
   border-radius: 17px;
+
   overflow: hidden;
+
+  box-sizing: border-box;
 }
 
 
@@ -385,48 +567,162 @@
    ========================================================= */
 
 .calendar-card-header {
+  width: 100%;
+  min-width: 0;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 20px;
+
   padding: 23px 25px 20px;
+
   border-bottom: 1px solid #edf1f5;
+}
+
+.calendar-card-header > * {
+  min-width: 0;
 }
 
 .calendar-card-header h2 {
   margin: 0;
+
   color: #172033;
+
   font-size: 21px;
   line-height: 1.2;
+
   font-weight: 750;
 }
 
 .calendar-card-header p {
   margin: 5px 0 0;
+
   color: #8a96a8;
+
   font-size: 11px;
 }
 
 .calendar-summary-badge {
   display: flex;
   align-items: center;
+
   gap: 9px;
+
+  flex-shrink: 0;
+
   padding: 9px 13px;
+
   background: #f0f8fd;
+
   border: 1px solid #d9edf8;
+
   border-radius: 10px;
 }
 
 .calendar-summary-badge strong {
   color: #0066b3;
+
   font-size: 16px;
   font-weight: 800;
 }
 
 .calendar-summary-badge span {
   color: #668298;
+
   font-size: 10px;
   font-weight: 600;
+}
+
+
+/* =========================================================
+   CALENDAR NAVIGATION
+   ========================================================= */
+
+.calendar-navigation {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 14px 25px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #edf1f5;
+}
+
+.calendar-current-month {
+  min-width: 0;
+
+  color: #172033;
+
+  font-size: 15px;
+  font-weight: 750;
+
+  text-align: center;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.calendar-nav-button {
+  min-width: 0;
+  min-height: 40px;
+
+  padding: 8px 14px;
+
+  border: 1px solid #dce5ec;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #344054;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.15s ease;
+
+  box-sizing: border-box;
+}
+
+.calendar-nav-button:first-child {
+  justify-self: start;
+}
+
+.calendar-nav-button:last-child {
+  justify-self: end;
+}
+
+.calendar-nav-button:hover:not(:disabled) {
+  background: #f0f8fd;
+
+  border-color: #b9dced;
+
+  color: #0066b3;
+}
+
+.calendar-nav-button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
 }
 
 
@@ -435,28 +731,44 @@
    ========================================================= */
 
 .calendar-legend {
+  width: 100%;
+  min-width: 0;
+
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+
   gap: 15px;
+
   padding: 13px 25px;
+
   background: #fbfcfd;
+
   border-bottom: 1px solid #edf1f5;
+
+  overflow: hidden;
 }
 
 .calendar-legend span {
   display: flex;
   align-items: center;
+
   gap: 6px;
+
   color: #667085;
+
   font-size: 10px;
   font-weight: 600;
+
+  white-space: nowrap;
 }
 
 .legend-dot {
   width: 8px;
   height: 8px;
+
   flex-shrink: 0;
+
   border-radius: 50%;
 }
 
@@ -490,19 +802,36 @@
    ========================================================= */
 
 .calendar-weekdays {
+  width: 100%;
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+
+  grid-template-columns:
+    repeat(7, minmax(0, 1fr));
+
   background: #f8fafc;
+
   border-bottom: 1px solid #e7ecf2;
+
+  overflow: hidden;
 }
 
 .calendar-weekdays div {
+  min-width: 0;
+
   padding: 12px 6px;
+
   text-align: center;
+
   color: #8792a2;
+
   font-size: 10px;
   font-weight: 800;
+
   letter-spacing: 0.5px;
+
+  overflow: hidden;
 }
 
 
@@ -511,8 +840,16 @@
    ========================================================= */
 
 .calendar-grid {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+
+  grid-template-columns:
+    repeat(7, minmax(0, 1fr));
+
+  overflow: hidden;
 }
 
 
@@ -522,12 +859,26 @@
 
 .calendar-day {
   position: relative;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   min-height: 105px;
+
   padding: 11px;
+
   background: #ffffff;
+
+  border: 0;
+
   border-right: 1px solid #edf1f5;
   border-bottom: 1px solid #edf1f5;
+
   box-sizing: border-box;
+
+  overflow: hidden;
+
   transition:
     background 0.15s ease,
     box-shadow 0.15s ease;
@@ -537,14 +888,51 @@
   border-right: 0;
 }
 
+.calendar-day:not(.empty) {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 100%;
+  max-width: 100%;
+
+  font-family: inherit;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
 .calendar-day:not(.empty):hover {
   background: #fafcff;
-  box-shadow: inset 0 0 0 1px #dce8f2;
+
+  box-shadow:
+    inset 0 0 0 1px #dce8f2;
+
   z-index: 1;
+}
+
+.calendar-day:not(.empty):focus-visible {
+  outline: 2px solid #0066b3;
+
+  outline-offset: -2px;
 }
 
 .calendar-day.empty {
   background: #fafbfc;
+
+  cursor: default;
+}
+
+.calendar-day.selected {
+  box-shadow:
+    inset 0 0 0 2px #0066b3 !important;
+
+  z-index: 2;
+}
+
+.calendar-day.selected .calendar-day-number {
+  box-shadow:
+    0 0 0 2px #cce7f5;
 }
 
 
@@ -555,13 +943,21 @@
 .calendar-day-number {
   width: 29px;
   height: 29px;
+
+  max-width: 100%;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 50%;
+
   color: #344054;
+
   font-size: 13px;
   font-weight: 700;
+
+  flex-shrink: 0;
 }
 
 
@@ -572,31 +968,51 @@
 .calendar-day-status {
   display: flex;
   align-items: center;
+
   gap: 7px;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   margin-top: 14px;
+
+  overflow: hidden;
 }
 
 .status-icon {
   width: 28px;
   height: 28px;
+
   flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 8px;
+
   font-size: 12px;
   font-weight: 800;
 }
 
 .calendar-day-status span {
+  min-width: 0;
+  max-width: 100%;
+
   font-size: 9px;
   font-weight: 700;
+
   line-height: 1.2;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 }
 
 
 /* =========================================================
-   PRESENT
+   CALENDAR STATUS COLORS
    ========================================================= */
 
 .calendar-day.present {
@@ -612,11 +1028,6 @@
   color: #15803d;
 }
 
-
-/* =========================================================
-   ABSENT
-   ========================================================= */
-
 .calendar-day.absent {
   background: #fffafa;
 }
@@ -629,11 +1040,6 @@
 .calendar-day.absent .calendar-day-status span {
   color: #dc2626;
 }
-
-
-/* =========================================================
-   ON LEAVE
-   ========================================================= */
 
 .calendar-day.on-leave {
   background: #fffdf7;
@@ -648,11 +1054,6 @@
   color: #b45309;
 }
 
-
-/* =========================================================
-   HOLIDAY
-   ========================================================= */
-
 .calendar-day.holiday {
   background: #f7faff;
 }
@@ -665,11 +1066,6 @@
 .calendar-day.holiday .calendar-day-status span {
   color: #2563eb;
 }
-
-
-/* =========================================================
-   WEEKEND
-   ========================================================= */
 
 .calendar-day.weekend {
   background: #fafbfc;
@@ -684,11 +1080,6 @@
   color: #64748b;
 }
 
-
-/* =========================================================
-   HALF DAY
-   ========================================================= */
-
 .calendar-day.half-day {
   background: #faf8ff;
 }
@@ -702,11 +1093,6 @@
   color: #7c3aed;
 }
 
-
-/* =========================================================
-   MISSED CHECKOUT
-   ========================================================= */
-
 .calendar-day.missed-checkout {
   background: #fffaf7;
 }
@@ -719,11 +1105,6 @@
 .calendar-day.missed-checkout .calendar-day-status span {
   color: #ea580c;
 }
-
-
-/* =========================================================
-   UPCOMING
-   ========================================================= */
 
 .calendar-day.upcoming {
   background: #ffffff;
@@ -745,368 +1126,8 @@
 
 .calendar-day.today .calendar-day-number {
   background: #0066b3;
+
   color: #ffffff;
-}
-
-
-/* =========================================================
-   RESPONSIVE — 1200px
-   ========================================================= */
-
-@media (max-width: 1200px) {
-  .dashboard-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .secondary-stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-
-/* =========================================================
-   RESPONSIVE — 900px
-   ========================================================= */
-
-@media (max-width: 900px) {
-  .employee-dashboard {
-    padding: 24px 20px 40px;
-  }
-
-  .dashboard-header-content {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .employee-profile-card {
-    width: 100%;
-  }
-
-  .calendar-day {
-    min-height: 95px;
-  }
-}
-
-
-/* =========================================================
-   RESPONSIVE — 650px
-   ========================================================= */
-
-@media (max-width: 650px) {
-  .employee-dashboard {
-    padding: 20px 13px 30px;
-  }
-
-  .dashboard-header {
-    margin-bottom: 20px;
-  }
-
-  .dashboard-eyebrow {
-    font-size: 9px;
-    margin-bottom: 6px;
-  }
-
-  .dashboard-header h1 {
-    font-size: 25px;
-  }
-
-  .dashboard-header p {
-    font-size: 13px;
-  }
-
-  .employee-profile-card {
-    padding: 10px;
-  }
-
-  .employee-avatar {
-    width: 44px;
-    height: 44px;
-  }
-
-  .dashboard-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .stat-card {
-    min-height: 92px;
-    padding: 13px;
-    gap: 10px;
-  }
-
-  .stat-card-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    font-size: 16px;
-  }
-
-  .stat-card-content span {
-    font-size: 10px;
-  }
-
-  .stat-card-content strong {
-    font-size: 21px;
-  }
-
-  .stat-card-content small {
-    font-size: 9px;
-  }
-
-  .secondary-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .secondary-stat {
-    padding: 12px;
-  }
-
-  .secondary-stat span {
-    font-size: 9px;
-  }
-
-  .secondary-stat strong {
-    font-size: 15px;
-  }
-
-  .calendar-card-header {
-    padding: 17px;
-  }
-
-  .calendar-card-header h2 {
-    font-size: 18px;
-  }
-
-  .calendar-summary-badge {
-    padding: 7px 9px;
-  }
-
-  .calendar-summary-badge span {
-    display: none;
-  }
-
-  .calendar-legend {
-    gap: 9px;
-    padding: 12px 17px;
-  }
-
-  .calendar-legend span {
-    font-size: 8px;
-  }
-
-  .calendar-weekdays div {
-    padding: 10px 3px;
-    font-size: 8px;
-  }
-
-  .calendar-day {
-    min-height: 78px;
-    padding: 7px;
-  }
-
-  .calendar-day-number {
-    width: 25px;
-    height: 25px;
-    font-size: 11px;
-  }
-
-  .calendar-day-status {
-    margin-top: 9px;
-    justify-content: center;
-  }
-
-  .status-icon {
-    width: 23px;
-    height: 23px;
-    border-radius: 6px;
-    font-size: 10px;
-  }
-
-  .calendar-day-status span {
-    display: none;
-  }
-}
-
-
-/* =========================================================
-   RESPONSIVE — 420px
-   ========================================================= */
-
-@media (max-width: 420px) {
-  .dashboard-stats {
-    grid-template-columns: 1fr;
-  }
-
-  .secondary-stats {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .employee-profile-info small {
-    max-width: 190px;
-  }
-
-  .calendar-card-header {
-    align-items: flex-start;
-  }
-
-  .calendar-summary-badge {
-    display: none;
-  }
-
-  .calendar-day {
-    min-height: 68px;
-    padding: 5px;
-  }
-
-  .calendar-day-number {
-    width: 23px;
-    height: 23px;
-    font-size: 10px;
-  }
-
-  .calendar-day-status {
-    margin-top: 7px;
-  }
-
-  .status-icon {
-    width: 21px;
-    height: 21px;
-    font-size: 9px;
-  }
-}
-
-
-/* =========================================================
-   REDUCED MOTION
-   ========================================================= */
-
-@media (prefers-reduced-motion: reduce) {
-  .dashboard-spinner {
-    animation: none;
-  }
-
-  .stat-card {
-    transition: none;
-  }
-
-  .calendar-day {
-    transition: none;
-  }
-}
-/* =========================================================
-   CALENDAR MONTH NAVIGATION
-   ========================================================= */
-
-.calendar-navigation {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 15px;
-  padding: 14px 25px;
-  background: #ffffff;
-  border-bottom: 1px solid #edf1f5;
-}
-
-.calendar-current-month {
-  color: #172033;
-  font-size: 15px;
-  font-weight: 750;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.calendar-nav-button {
-  min-height: 40px;
-  padding: 8px 14px;
-  border: 1px solid #dce5ec;
-  border-radius: 9px;
-  background: #ffffff;
-  color: #344054;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.calendar-nav-button:first-child {
-  justify-self: start;
-}
-
-.calendar-nav-button:last-child {
-  justify-self: end;
-}
-
-.calendar-nav-button:hover:not(:disabled) {
-  background: #f0f8fd;
-  border-color: #b9dced;
-  color: #0066b3;
-}
-
-.calendar-nav-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* Mobile */
-@media (max-width: 650px) {
-  .calendar-navigation {
-    padding: 11px 17px;
-    gap: 8px;
-  }
-
-  .calendar-current-month {
-    font-size: 13px;
-  }
-
-  .calendar-nav-button {
-    min-height: 36px;
-    padding: 7px 10px;
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 420px) {
-  .calendar-nav-button span {
-    display: none;
-  }
-
-  .calendar-nav-button {
-    width: 38px;
-    padding: 6px;
-    font-size: 18px;
-  }
-
-  .calendar-current-month {
-    font-size: 12px;
-  }
-}
-/* =========================================================
-   CLICKABLE CALENDAR DAYS
-   ========================================================= */
-
-.calendar-day:not(.empty) {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.calendar-day:not(.empty):focus-visible {
-  outline: 2px solid #0066b3;
-  outline-offset: -2px;
-}
-
-.calendar-day.selected {
-  box-shadow: inset 0 0 0 2px #0066b3 !important;
-  z-index: 2;
-}
-
-.calendar-day.selected .calendar-day-number {
-  box-shadow: 0 0 0 2px #cce7f5;
 }
 
 
@@ -1115,45 +1136,78 @@
    ========================================================= */
 
 .selected-day-details {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   margin: 0;
+
   padding: 24px 25px 26px;
+
   background: #f8fafc;
+
   border-top: 1px solid #e3e9ef;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
 }
 
 .selected-day-details-header {
   display: flex;
+
   align-items: flex-start;
   justify-content: space-between;
+
   gap: 20px;
+
+  min-width: 0;
+
   margin-bottom: 20px;
+}
+
+.selected-day-details-header > * {
+  min-width: 0;
 }
 
 .selected-day-details-header h3 {
   margin: 0;
+
   color: #172033;
+
   font-size: 20px;
   line-height: 1.3;
+
   font-weight: 750;
 }
 
 .selected-day-details-header p {
   margin: 5px 0 0;
+
   color: #7b8798;
+
   font-size: 11px;
 }
 
 .close-details-button {
   width: 36px;
   height: 36px;
+
   flex-shrink: 0;
+
   border: 1px solid #dce5ec;
+
   border-radius: 9px;
+
   background: #ffffff;
+
   color: #64748b;
+
   font-size: 22px;
   line-height: 1;
+
   cursor: pointer;
+
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
@@ -1162,7 +1216,9 @@
 
 .close-details-button:hover {
   background: #f1f5f9;
+
   border-color: #cbd5e1;
+
   color: #172033;
 }
 
@@ -1174,22 +1230,38 @@
 .selected-day-status {
   display: flex;
   align-items: center;
+
   gap: 12px;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   padding: 14px;
+
   margin-bottom: 18px;
+
   background: #ffffff;
+
   border: 1px solid #e5ebf1;
+
   border-radius: 12px;
+
+  overflow: hidden;
 }
 
 .selected-status-icon {
   width: 42px;
   height: 42px;
+
   flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 11px;
+
   font-size: 16px;
   font-weight: 800;
 }
@@ -1235,21 +1307,30 @@
 }
 
 .selected-day-status div:last-child {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
+
   gap: 3px;
+
+  overflow: hidden;
 }
 
 .selected-day-status span {
   color: #8a96a8;
+
   font-size: 10px;
   font-weight: 600;
 }
 
 .selected-day-status strong {
   color: #172033;
+
   font-size: 14px;
   font-weight: 750;
+
+  overflow-wrap: anywhere;
 }
 
 
@@ -1258,36 +1339,60 @@
    ========================================================= */
 
 .attendance-details-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   background: #ffffff;
+
   border: 1px solid #e5ebf1;
+
   border-radius: 12px;
+
   overflow: hidden;
 }
 
 .details-section-title {
   padding: 13px 15px;
+
   background: #fbfcfd;
+
   border-bottom: 1px solid #edf1f5;
+
   color: #344054;
+
   font-size: 11px;
   font-weight: 800;
+
   text-transform: uppercase;
+
   letter-spacing: 0.7px;
 }
 
 .attendance-details-grid {
+  width: 100%;
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
 }
 
 .attendance-detail-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 15px;
+
   min-width: 0;
+
   padding: 13px 15px;
+
   border-bottom: 1px solid #edf1f5;
+
+  overflow: hidden;
 }
 
 .attendance-detail-row:nth-child(odd) {
@@ -1299,16 +1404,24 @@
 }
 
 .attendance-detail-row span {
+  min-width: 0;
+
   color: #7b8798;
+
   font-size: 10px;
   font-weight: 600;
 }
 
 .attendance-detail-row strong {
+  min-width: 0;
+
   color: #172033;
+
   font-size: 11px;
   font-weight: 750;
+
   text-align: right;
+
   overflow-wrap: anywhere;
 }
 
@@ -1320,104 +1433,130 @@
 .day-information-box {
   display: flex;
   align-items: flex-start;
+
   gap: 12px;
+
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   margin-top: 12px;
+
   padding: 14px;
+
   background: #ffffff;
+
   border: 1px solid #e5ebf1;
+
   border-radius: 12px;
+
+  overflow: hidden;
 }
 
 .day-information-icon {
   width: 34px;
   height: 34px;
+
   flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 9px;
+
   font-size: 11px;
   font-weight: 800;
 }
 
 .day-information-box > div:last-child {
   min-width: 0;
+
+  overflow: hidden;
 }
 
 .day-information-box span {
   display: block;
+
   margin-bottom: 3px;
+
   color: #8a96a8;
+
   font-size: 9px;
   font-weight: 700;
+
   text-transform: uppercase;
+
   letter-spacing: 0.5px;
 }
 
 .day-information-box strong {
   display: block;
+
   color: #172033;
+
   font-size: 12px;
   font-weight: 750;
+
+  overflow-wrap: anywhere;
 }
 
 .day-information-box p {
   margin: 4px 0 0;
+
   color: #718096;
+
   font-size: 10px;
   line-height: 1.5;
+
   overflow-wrap: anywhere;
 }
 
-
-/* Holiday */
-
 .holiday-info {
   border-color: #dbeafe;
+
   background: #f8fbff;
 }
 
 .holiday-info .day-information-icon {
   background: #dbeafe;
+
   color: #2563eb;
 }
 
-
-/* Leave */
-
 .leave-info {
   border-color: #fde68a;
+
   background: #fffdf7;
 }
 
 .leave-info .day-information-icon {
   background: #fef3c7;
+
   color: #b45309;
 }
 
-
-/* Remote */
-
 .remote-info {
   border-color: #cce7f5;
+
   background: #f7fcff;
 }
 
 .remote-info .day-information-icon {
   background: #dff4fc;
+
   color: #0066b3;
 }
 
-
-/* Overtime */
-
 .overtime-info {
   border-color: #ddd6fe;
+
   background: #faf9ff;
 }
 
 .overtime-info .day-information-icon {
   background: #ede9fe;
+
   color: #7c3aed;
 }
 
@@ -1427,44 +1566,1236 @@
    ========================================================= */
 
 .no-day-details {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
   margin-top: 12px;
+
   padding: 18px;
+
   text-align: center;
+
   background: #ffffff;
+
   border: 1px solid #e5ebf1;
+
   border-radius: 12px;
+
+  overflow: hidden;
 }
 
 .no-day-details span {
   display: block;
+
   color: #344054;
+
   font-size: 12px;
   font-weight: 700;
 }
 
 .no-day-details p {
   margin: 5px 0 0;
+
   color: #8a96a8;
+
   font-size: 10px;
 }
 
 
 /* =========================================================
-   DETAILS RESPONSIVE
+   EMPLOYEE LAYOUT
    ========================================================= */
 
-@media (max-width: 650px) {
+.employee-layout {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+
+  display: flex;
+
+  background: #f6f8fb;
+}
+
+
+/* =========================================================
+   SIDEBAR - DESKTOP
+   ========================================================= */
+
+.employee-sidebar {
+  width: 260px;
+  min-width: 260px;
+
+  height: 100vh;
+
+  position: sticky;
+
+  top: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  flex-shrink: 0;
+
+  background: #ffffff;
+
+  border-right: 1px solid #e5ebf1;
+
+  z-index: 1000;
+}
+
+
+/* =========================================================
+   SIDEBAR BRAND
+   ========================================================= */
+
+.employee-sidebar-logo {
+  min-height: 82px;
+
+  padding: 18px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  border-bottom: 1px solid #edf1f5;
+
+  box-sizing: border-box;
+}
+
+.employee-brand-mark {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    #0066b3,
+    #00a9e0
+  );
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.employee-brand-text {
+  min-width: 0;
+}
+
+.employee-brand-text h2 {
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.employee-brand-text p {
+  margin: 3px 0 0;
+
+  color: #7b8798;
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.employee-nav {
+  flex: 1;
+  min-height: 0;
+
+  padding: 18px 12px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  overflow-y: auto;
+}
+
+.employee-nav a {
+  min-height: 44px;
+
+  padding: 10px 13px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  border-radius: 10px;
+
+  color: #667085;
+
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+
+  box-sizing: border-box;
+}
+
+.employee-nav a span:first-child {
+  width: 20px;
+
+  flex-shrink: 0;
+
+  text-align: center;
+
+  color: #8492a6;
+
+  font-size: 16px;
+}
+
+.employee-nav a:hover {
+  background: #f2f8fc;
+
+  color: #0066b3;
+}
+
+.employee-nav a.active {
+  background: #eaf5fb;
+
+  color: #0066b3;
+}
+
+.employee-nav a.active span:first-child {
+  color: #0066b3;
+}
+
+
+/* =========================================================
+   SIDEBAR USER
+   ========================================================= */
+
+.employee-sidebar-user {
+  padding: 14px;
+
+  border-top: 1px solid #edf1f5;
+
+  display: grid;
+
+  grid-template-columns:
+    40px minmax(0, 1fr);
+
+  gap: 10px;
+}
+
+.employee-sidebar-avatar {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  border-radius: 11px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(
+    135deg,
+    #0066b3,
+    #00a9e0
+  );
+
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.employee-user-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+.employee-user-info strong {
+  color: #172033;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.employee-user-info span {
+  margin-top: 3px;
+
+  color: #8995a6;
+
+  font-size: 9px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.logout-button {
+  grid-column: 1 / -1;
+
+  width: 100%;
+
+  min-height: 38px;
+
+  margin-top: 4px;
+
+  border: 1px solid #e5ebf1;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #d14343;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.logout-button:hover {
+  background: #fff5f5;
+
+  border-color: #f1caca;
+}
+
+.logout-button:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+   IMPORTANT:
+   Flexbox owns the remaining width.
+   Never calculate width using sidebar width.
+   ========================================================= */
+
+.employee-main {
+  flex: 1 1 auto;
+
+  width: auto;
+  max-width: none;
+
+  min-width: 0;
+
+  margin: 0;
+  padding: 0;
+
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   MOBILE HEADER
+   ========================================================= */
+
+.employee-mobile-header {
+  display: none;
+}
+
+.employee-menu-button {
+  display: none;
+}
+
+.employee-mobile-brand {
+  display: none;
+}
+
+.employee-mobile-avatar {
+  display: none;
+}
+
+.employee-sidebar-overlay {
+  display: none;
+}
+
+.employee-sidebar-close {
+  display: none;
+}
+
+
+/* =========================================================
+   LAPTOP
+   901px - 1399px
+   ========================================================= */
+
+@media (max-width: 1399px) and (min-width: 901px) {
+
+  .employee-sidebar {
+    width: 250px;
+    min-width: 250px;
+  }
+
+  .employee-main {
+    width: auto;
+    min-width: 0;
+  }
+
+  .employee-dashboard {
+    width: 100%;
+    max-width: none;
+
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL LAPTOP / TABLET LANDSCAPE
+   901px - 1200px
+   ========================================================= */
+
+@media (max-width: 1200px) and (min-width: 901px) {
+
+  .employee-sidebar {
+    width: 235px;
+    min-width: 235px;
+  }
+
+  .employee-main {
+    width: auto;
+  }
+
+  .employee-dashboard {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .employee-nav a {
+    font-size: 12px;
+
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .dashboard-header-content {
+    gap: 18px;
+  }
+
+  .employee-profile-card {
+    min-width: 250px;
+    max-width: 320px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 28px;
+  }
+
+  .stat-card {
+    padding: 16px;
+    gap: 11px;
+  }
+
+  .stat-card-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET / MOBILE
+   <= 900px
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .employee-layout {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+    min-height: 100vh;
+
+    overflow-x: hidden;
+  }
+
+
+  /* -----------------------------------------
+     Mobile Header
+     ----------------------------------------- */
+
+  .employee-mobile-header {
+    width: 100%;
+    max-width: 100%;
+
+    height: 60px;
+
+    padding: 0 16px;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    position: sticky;
+
+    top: 0;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e5ebf1;
+
+    z-index: 900;
+  }
+
+
+  .employee-menu-button {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid #e5ebf1;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    color: #0066b3;
+
+    font-size: 22px;
+
+    cursor: pointer;
+  }
+
+
+  .employee-mobile-brand {
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+    overflow: hidden;
+  }
+
+  .employee-mobile-brand strong {
+    color: #172033;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    white-space: nowrap;
+  }
+
+  .employee-mobile-brand span {
+    margin-top: 2px;
+
+    color: #8492a6;
+
+    font-size: 9px;
+
+    white-space: nowrap;
+  }
+
+
+  .employee-mobile-avatar {
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+      135deg,
+      #0066b3,
+      #00a9e0
+    );
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    font-weight: 800;
+  }
+
+
+  /* -----------------------------------------
+     Main
+     ----------------------------------------- */
+
+  .employee-main {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+  }
+
+
+  /* -----------------------------------------
+     Sidebar Drawer
+     ----------------------------------------- */
+
+  .employee-sidebar {
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 76%;
+    max-width: 280px;
+    min-width: 0;
+
+    height: 100vh;
+    min-height: 100vh;
+
+    transform: translateX(-105%);
+
+    transition:
+      transform 0.25s ease;
+
+    background: #ffffff;
+
+    box-shadow:
+      8px 0 30px rgba(23, 32, 51, 0.15);
+
+    z-index: 1100;
+  }
+
+
+  .employee-sidebar.employee-sidebar-open {
+    transform: translateX(0);
+  }
+
+
+  /* -----------------------------------------
+     Overlay
+     ----------------------------------------- */
+
+  .employee-sidebar-overlay {
+    display: block;
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    border: 0;
+
+    background:
+      rgba(23, 32, 51, 0.28);
+
+    z-index: 1050;
+
+    cursor: pointer;
+  }
+
+
+  /* -----------------------------------------
+     Close button
+     ----------------------------------------- */
+
+  .employee-sidebar-close {
+    display: flex;
+
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    margin-left: auto;
+
+    padding: 0;
+
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+
+    border-radius: 9px;
+
+    background: #f3f6f9;
+
+    color: #667085;
+
+    font-size: 23px;
+
+    line-height: 1;
+
+    cursor: pointer;
+  }
+
+
+  /* -----------------------------------------
+     Sidebar
+     ----------------------------------------- */
+
+  .employee-sidebar-logo {
+    min-height: 72px;
+
+    padding: 14px;
+
+    gap: 10px;
+  }
+
+  .employee-brand-mark {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 11px;
+  }
+
+  .employee-brand-text h2 {
+    font-size: 16px;
+  }
+
+  .employee-brand-text p {
+    font-size: 9px;
+  }
+
+  .employee-nav {
+    padding: 15px 10px;
+
+    gap: 4px;
+  }
+
+  .employee-nav a {
+    min-height: 44px;
+
+    padding: 9px 12px;
+
+    font-size: 13px;
+  }
+
+  .employee-sidebar-user {
+    padding: 13px;
+  }
+
+
+  /* -----------------------------------------
+     Dashboard
+     ----------------------------------------- */
+
+  .employee-dashboard {
+    width: 100%;
+    max-width: 100%;
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+  }
+
+
+  /* -----------------------------------------
+     Calendar safety
+     ----------------------------------------- */
+
+  .calendar-card,
+  .calendar-card-header,
+  .calendar-navigation,
+  .calendar-legend,
+  .calendar-weekdays,
+  .calendar-grid,
   .selected-day-details {
-    padding: 18px 17px 20px;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+   768px - 900px
+   ========================================================= */
+
+@media (max-width: 900px) and (min-width: 768px) {
+
+  .employee-mobile-header {
+    height: 64px;
+
+    padding: 0 18px;
+  }
+
+  .employee-sidebar {
+    width: 300px;
+
+    max-width: 300px;
+  }
+
+  .employee-dashboard {
+    padding:
+      22px
+      20px
+      38px;
+  }
+
+
+  /* Header */
+
+  .dashboard-header-content {
+    gap: 16px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 27px;
+  }
+
+  .dashboard-header p {
+    font-size: 13px;
+  }
+
+  .employee-profile-card {
+    min-width: 240px;
+    max-width: 300px;
+  }
+
+
+  /* Calendar */
+
+  .calendar-card-header {
+    padding: 18px 20px;
+  }
+
+  .calendar-card-header h2 {
+    font-size: 19px;
+  }
+
+  .calendar-navigation {
+    padding:
+      12px
+      20px;
+  }
+
+  .calendar-legend {
+    padding:
+      12px
+      20px;
+
+    gap: 11px;
+  }
+
+  .calendar-weekdays div {
+    padding:
+      11px
+      4px;
+  }
+
+  .calendar-day {
+    min-height: 90px;
+
+    padding: 8px;
+  }
+
+  .calendar-day-status {
+    gap: 5px;
+
+    margin-top: 10px;
+  }
+
+  .status-icon {
+    width: 24px;
+    height: 24px;
+
+    border-radius: 7px;
+
+    font-size: 10px;
+  }
+
+  .calendar-day-status span {
+    font-size: 8px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL TABLET / LARGE PHONE
+   <= 767px
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+  .employee-mobile-header {
+    height: 58px;
+
+    padding: 0 14px;
+  }
+
+  .employee-menu-button {
+    width: 40px;
+    height: 40px;
+
+    font-size: 21px;
+  }
+
+  .employee-mobile-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .employee-sidebar {
+    width: 78%;
+
+    max-width: 275px;
+  }
+
+
+  /* Dashboard */
+
+  .employee-dashboard {
+    padding:
+      20px
+      15px
+      32px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 18px;
+  }
+
+  .dashboard-header-content {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 16px;
+  }
+
+  .employee-profile-card {
+    width: 100%;
+
+    max-width: none;
+
+    min-width: 0;
+  }
+
+
+  /* Statistics */
+
+  .dashboard-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+  }
+
+  .secondary-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    min-height: 90px;
+
+    padding: 13px;
+
+    gap: 10px;
+  }
+
+  .stat-card-icon {
+    width: 39px;
+    height: 39px;
+
+    border-radius: 10px;
+
+    font-size: 16px;
+  }
+
+  .stat-card-content span {
+    font-size: 10px;
+  }
+
+  .stat-card-content strong {
+    font-size: 21px;
+  }
+
+  .stat-card-content small {
+    font-size: 9px;
+  }
+
+  .secondary-stat {
+    padding: 12px;
+  }
+
+  .secondary-stat span {
+    font-size: 9px;
+  }
+
+  .secondary-stat strong {
+    font-size: 15px;
+  }
+
+
+  /* -----------------------------------------
+     Calendar
+     ----------------------------------------- */
+
+  .calendar-card {
+    width: 100%;
+    max-width: 100%;
+
+    border-radius: 14px;
+  }
+
+  .calendar-card-header {
+    width: 100%;
+
+    padding: 17px;
+
+    gap: 10px;
+  }
+
+  .calendar-card-header h2 {
+    font-size: 18px;
+  }
+
+  .calendar-card-header p {
+    font-size: 9px;
+  }
+
+  .calendar-summary-badge {
+    padding: 7px 9px;
+  }
+
+  .calendar-summary-badge strong {
+    font-size: 14px;
+  }
+
+  .calendar-summary-badge span {
+    display: none;
+  }
+
+
+  /* Calendar navigation */
+
+  .calendar-navigation {
+    width: 100%;
+
+    grid-template-columns:
+      auto
+      minmax(0, 1fr)
+      auto;
+
+    gap: 8px;
+
+    padding:
+      10px
+      14px;
+  }
+
+  .calendar-current-month {
+    min-width: 0;
+
+    font-size: 12px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .calendar-nav-button {
+    min-width: 36px;
+    min-height: 35px;
+
+    padding:
+      6px
+      9px;
+
+    font-size: 10px;
+  }
+
+
+  /* Legend */
+
+  .calendar-legend {
+    width: 100%;
+
+    gap: 8px;
+
+    padding:
+      11px
+      14px;
+  }
+
+  .calendar-legend span {
+    font-size: 8px;
+  }
+
+
+  /* Weekdays */
+
+  .calendar-weekdays {
+    width: 100%;
+
+    grid-template-columns:
+      repeat(7, minmax(0, 1fr));
+  }
+
+  .calendar-weekdays div {
+    min-width: 0;
+
+    padding:
+      9px
+      2px;
+
+    font-size: 8px;
+
+    overflow: hidden;
+  }
+
+
+  /* Calendar grid */
+
+  .calendar-grid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    grid-template-columns:
+      repeat(7, minmax(0, 1fr));
+  }
+
+  .calendar-day {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+
+    min-height: 74px;
+
+    padding: 6px;
+  }
+
+  .calendar-day-number {
+    width: 24px;
+    height: 24px;
+
+    font-size: 10px;
+  }
+
+  .calendar-day-status {
+    width: 100%;
+    max-width: 100%;
+
+    margin-top: 8px;
+
+    justify-content: center;
+  }
+
+  .status-icon {
+    width: 22px;
+    height: 22px;
+
+    font-size: 9px;
+  }
+
+  .calendar-day-status span {
+    display: none;
+  }
+
+
+  /* -----------------------------------------
+     Selected details
+     ----------------------------------------- */
+
+  .selected-day-details {
+    width: 100%;
+    max-width: 100%;
+
+    padding:
+      18px
+      17px
+      20px;
   }
 
   .selected-day-details-header {
     gap: 12px;
+
     margin-bottom: 15px;
   }
 
   .selected-day-details-header h3 {
     font-size: 17px;
+
+    overflow-wrap: anywhere;
   }
 
   .selected-day-details-header p {
@@ -1492,27 +2823,737 @@
     border-right: 0;
   }
 
-  .attendance-detail-row:nth-last-child(-n + 2) {
+  .attendance-detail-row {
     border-bottom: 1px solid #edf1f5;
   }
 
   .attendance-detail-row:last-child {
     border-bottom: 0;
   }
+
 }
 
-@media (max-width: 420px) {
-  .selected-day-details-header h3 {
+
+/* =========================================================
+   MOBILE
+   <= 650px
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  .employee-mobile-header {
+    height: 58px;
+
+    padding: 0 12px;
+  }
+
+  .employee-menu-button {
+    width: 38px;
+    height: 38px;
+
+    font-size: 20px;
+  }
+
+  .employee-mobile-avatar {
+    width: 35px;
+    height: 35px;
+
+    border-radius: 9px;
+  }
+
+  .employee-mobile-brand strong {
+    font-size: 13px;
+  }
+
+  .employee-mobile-brand span {
+    font-size: 8px;
+  }
+
+  .employee-sidebar {
+    width: 78%;
+
+    max-width: 270px;
+  }
+
+
+  /* Dashboard */
+
+  .employee-dashboard {
+    padding:
+      18px
+      12px
+      28px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 18px;
+  }
+
+  .dashboard-eyebrow {
+    font-size: 9px;
+
+    margin-bottom: 6px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
+
+    letter-spacing: -0.3px;
+  }
+
+  .dashboard-header p {
+    font-size: 12px;
+  }
+
+  .employee-profile-card {
+    padding: 10px;
+  }
+
+  .employee-avatar {
+    width: 44px;
+    height: 44px;
+
+    border-radius: 11px;
+  }
+
+  .employee-profile-info strong {
+    font-size: 13px;
+  }
+
+  .employee-profile-info span {
+    font-size: 10px;
+  }
+
+  .employee-profile-info small {
+    font-size: 9px;
+  }
+
+  .dashboard-stats {
+    gap: 9px;
+  }
+
+  .stat-card {
+    min-height: 88px;
+
+    padding: 12px;
+  }
+
+  .stat-card-icon {
+    width: 36px;
+    height: 36px;
+
     font-size: 15px;
+  }
+
+  .stat-card-content strong {
+    font-size: 20px;
+  }
+
+  .secondary-stats {
+    gap: 9px;
+  }
+
+  .secondary-stat {
+    padding: 11px;
+  }
+
+
+  /* Calendar */
+
+  .calendar-card {
+    border-radius: 14px;
+  }
+
+  .calendar-card-header {
+    gap: 8px;
+
+    padding: 14px;
+  }
+
+  .calendar-card-header h2 {
+    font-size: 16px;
+  }
+
+  .calendar-summary-badge {
+    flex-shrink: 0;
+
+    padding: 7px 9px;
+  }
+
+  .calendar-navigation {
+    grid-template-columns:
+      38px
+      minmax(0, 1fr)
+      38px;
+
+    gap: 6px;
+
+    padding:
+      9px
+      10px;
+  }
+
+  .calendar-current-month {
+    font-size: 11px;
+  }
+
+  .calendar-nav-button {
+    width: 38px;
+    height: 36px;
+
+    min-width: 38px;
+    min-height: 36px;
+
+    padding: 5px;
+
+    font-size: 17px;
+  }
+
+  .calendar-nav-button span {
+    display: none;
+  }
+
+  .calendar-legend {
+    gap: 7px;
+
+    padding:
+      10px
+      11px;
+  }
+
+  .calendar-legend span {
+    font-size: 7px;
+  }
+
+  .legend-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .calendar-weekdays div {
+    padding:
+      8px
+      1px;
+
+    font-size: 7px;
+
+    letter-spacing: 0;
+  }
+
+  .calendar-day {
+    min-height: 67px;
+
+    padding: 5px;
+  }
+
+  .calendar-day-number {
+    width: 22px;
+    height: 22px;
+
+    font-size: 9px;
+  }
+
+  .calendar-day-status {
+    margin-top: 7px;
+  }
+
+  .status-icon {
+    width: 20px;
+    height: 20px;
+
+    border-radius: 5px;
+
+    font-size: 8px;
+  }
+
+
+  /* Details */
+
+  .selected-day-details {
+    padding:
+      14px
+      11px
+      16px;
+  }
+
+  .selected-day-details-header {
+    gap: 8px;
+  }
+
+  .selected-day-details-header h3 {
+    font-size: 14px;
+  }
+
+  .selected-day-details-header p {
+    font-size: 9px;
+  }
+
+  .close-details-button {
+    width: 32px;
+    height: 32px;
+
+    font-size: 19px;
+  }
+
+  .selected-day-status {
+    padding: 10px;
+  }
+
+  .selected-status-icon {
+    width: 34px;
+    height: 34px;
+
+    font-size: 14px;
+  }
+
+  .selected-day-status span {
+    font-size: 9px;
   }
 
   .selected-day-status strong {
     font-size: 12px;
   }
 
+  .details-section-title {
+    padding:
+      11px
+      12px;
+
+    font-size: 10px;
+  }
+
+  .attendance-detail-row {
+    padding:
+      10px
+      12px;
+  }
+
+  .attendance-detail-row span {
+    font-size: 9px;
+  }
+
+  .attendance-detail-row strong {
+    font-size: 10px;
+  }
+
+  .day-information-box {
+    gap: 9px;
+
+    padding: 10px;
+  }
+
+  .day-information-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .day-information-box span {
+    font-size: 8px;
+  }
+
+  .day-information-box strong {
+    font-size: 11px;
+  }
+
+  .day-information-box p {
+    font-size: 9px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL PHONE
+   <= 480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .employee-mobile-header {
+    height: 56px;
+
+    padding: 0 10px;
+  }
+
+  .employee-menu-button {
+    width: 38px;
+    height: 38px;
+
+    font-size: 20px;
+  }
+
+  .employee-mobile-avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .employee-sidebar {
+    width: 78%;
+
+    max-width: 260px;
+  }
+
+
+  /* Dashboard */
+
+  .employee-dashboard {
+    padding:
+      16px
+      10px
+      25px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 22px;
+  }
+
+  .dashboard-header p {
+    font-size: 11px;
+  }
+
+  .employee-profile-card {
+    min-width: 0;
+  }
+
+  .dashboard-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-card {
+    min-height: 84px;
+
+    padding: 10px;
+
+    gap: 8px;
+  }
+
+  .stat-card-icon {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 9px;
+
+    font-size: 14px;
+  }
+
+  .stat-card-content span {
+    font-size: 9px;
+  }
+
+  .stat-card-content strong {
+    font-size: 18px;
+  }
+
+  .stat-card-content small {
+    font-size: 8px;
+  }
+
+  .secondary-stat {
+    padding: 10px;
+  }
+
+  .secondary-stat span {
+    font-size: 8px;
+  }
+
+  .secondary-stat strong {
+    font-size: 14px;
+  }
+
+
+  /* Calendar */
+
+  .calendar-card-header {
+    padding: 12px;
+  }
+
+  .calendar-card-header h2 {
+    font-size: 15px;
+  }
+
+  .calendar-card-header p {
+    font-size: 8px;
+  }
+
+  .calendar-summary-badge {
+    padding:
+      6px
+      8px;
+  }
+
+  .calendar-summary-badge strong {
+    font-size: 13px;
+  }
+
+  .calendar-navigation {
+    grid-template-columns:
+      36px
+      minmax(0, 1fr)
+      36px;
+
+    padding:
+      8px
+      8px;
+  }
+
+  .calendar-nav-button {
+    width: 36px;
+    height: 34px;
+
+    min-width: 36px;
+    min-height: 34px;
+
+    padding: 4px;
+
+    font-size: 16px;
+  }
+
+  .calendar-current-month {
+    font-size: 10px;
+  }
+
+  .calendar-legend {
+    gap: 6px;
+
+    padding:
+      9px
+      9px;
+  }
+
+  .calendar-legend span {
+    font-size: 6.5px;
+  }
+
+  .legend-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .calendar-weekdays div {
+    padding:
+      7px
+      0;
+
+    font-size: 6.5px;
+
+    letter-spacing: 0;
+  }
+
+  .calendar-day {
+    min-height: 63px;
+
+    padding: 4px;
+  }
+
+  .calendar-day-number {
+    width: 21px;
+    height: 21px;
+
+    font-size: 9px;
+  }
+
+  .calendar-day-status {
+    margin-top: 6px;
+  }
+
+  .status-icon {
+    width: 19px;
+    height: 19px;
+
+    border-radius: 5px;
+
+    font-size: 8px;
+  }
+
+
+  /* Details */
+
+  .selected-day-details {
+    padding:
+      13px
+      10px
+      15px;
+  }
+
+  .selected-day-details-header {
+    gap: 7px;
+  }
+
+  .selected-day-details-header h3 {
+    font-size: 14px;
+  }
+
+  .selected-day-details-header p {
+    font-size: 8px;
+  }
+
+  .close-details-button {
+    width: 31px;
+    height: 31px;
+
+    font-size: 18px;
+  }
+
+  .selected-day-status {
+    padding: 9px;
+  }
+
+  .selected-status-icon {
+    width: 32px;
+    height: 32px;
+
+    font-size: 13px;
+  }
+
+  .selected-day-status span {
+    font-size: 8px;
+  }
+
+  .selected-day-status strong {
+    font-size: 11px;
+  }
+
+  .details-section-title {
+    padding:
+      10px
+      11px;
+
+    font-size: 9px;
+  }
+
+  .attendance-detail-row {
+    padding:
+      9px
+      11px;
+  }
+
+  .attendance-detail-row span {
+    font-size: 8px;
+  }
+
+  .attendance-detail-row strong {
+    font-size: 9px;
+  }
+
+  .day-information-box {
+    gap: 8px;
+
+    padding: 9px;
+  }
+
+  .day-information-icon {
+    width: 29px;
+    height: 29px;
+  }
+
+  .day-information-box span {
+    font-size: 7px;
+  }
+
+  .day-information-box strong {
+    font-size: 10px;
+  }
+
+  .day-information-box p {
+    font-size: 8px;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONE
+   <= 420px
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+  .employee-sidebar {
+    width: 80%;
+
+    max-width: 250px;
+  }
+
+  .employee-dashboard {
+    padding:
+      14px
+      8px
+      22px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 7px;
+  }
+
+  .stat-card {
+    min-height: 80px;
+
+    padding: 9px;
+  }
+
+  .stat-card-icon {
+    width: 31px;
+    height: 31px;
+
+    font-size: 13px;
+  }
+
+  .stat-card-content strong {
+    font-size: 17px;
+  }
+
+  .secondary-stats {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 7px;
+  }
+
+  .secondary-stat {
+    padding: 9px;
+  }
+
+  .calendar-card {
+    border-radius: 12px;
+  }
+
+  .calendar-day {
+    min-height: 60px;
+
+    padding: 4px;
+  }
+
+  .calendar-day-number {
+    width: 20px;
+    height: 20px;
+
+    font-size: 8px;
+  }
+
+  .calendar-day-status {
+    margin-top: 5px;
+  }
+
+  .status-icon {
+    width: 18px;
+    height: 18px;
+
+    font-size: 7px;
+  }
+
+  .selected-day-details-header h3 {
+    font-size: 13px;
+  }
+
   .attendance-detail-row {
     align-items: flex-start;
+
     flex-direction: column;
+
     gap: 4px;
   }
 
@@ -1520,7 +3561,203 @@
     text-align: left;
   }
 
-  .day-information-box {
-    padding: 12px;
+}
+
+
+/* =========================================================
+   EXTRA SMALL PHONE
+   <= 359px
+   ========================================================= */
+
+@media (max-width: 359px) {
+
+  .employee-mobile-header {
+    height: 54px;
+
+    padding: 0 8px;
   }
+
+  .employee-menu-button {
+    width: 36px;
+    height: 36px;
+
+    font-size: 19px;
+  }
+
+  .employee-mobile-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .employee-sidebar {
+    width: 82%;
+
+    max-width: 235px;
+  }
+
+  .employee-sidebar-logo {
+    min-height: 66px;
+
+    padding: 11px;
+  }
+
+  .employee-brand-mark {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+
+    font-size: 11px;
+  }
+
+  .employee-brand-text h2 {
+    font-size: 14px;
+  }
+
+  .employee-brand-text p {
+    font-size: 8px;
+  }
+
+  .employee-dashboard {
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 20px;
+  }
+
+  .dashboard-header p {
+    font-size: 10px;
+  }
+
+  .employee-profile-card {
+    padding: 8px;
+
+    gap: 9px;
+  }
+
+  .employee-avatar {
+    width: 38px;
+    height: 38px;
+
+    font-size: 15px;
+  }
+
+  .employee-profile-info strong {
+    font-size: 11px;
+  }
+
+  .employee-profile-info span {
+    font-size: 9px;
+  }
+
+  .employee-profile-info small {
+    font-size: 8px;
+  }
+
+  .stat-card {
+    padding: 8px;
+
+    gap: 6px;
+  }
+
+  .stat-card-icon {
+    width: 28px;
+    height: 28px;
+
+    font-size: 12px;
+  }
+
+  .stat-card-content strong {
+    font-size: 16px;
+  }
+
+  .calendar-day {
+    min-height: 56px;
+
+    padding: 3px;
+  }
+
+  .calendar-day-number {
+    width: 18px;
+    height: 18px;
+
+    font-size: 8px;
+  }
+
+  .status-icon {
+    width: 17px;
+    height: 17px;
+
+    font-size: 7px;
+  }
+
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   >= 1400px
+   ========================================================= */
+
+@media (min-width: 1400px) {
+
+  .employee-dashboard {
+    width: 100%;
+    max-width: none;
+
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .dashboard-stats,
+  .secondary-stats {
+    gap: 18px;
+  }
+
+  .calendar-day {
+    min-height: 115px;
+
+    padding: 13px;
+  }
+
+  .calendar-day-number {
+    width: 31px;
+    height: 31px;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .dashboard-spinner {
+    animation: none;
+  }
+
+  .stat-card {
+    transition: none;
+  }
+
+  .calendar-day {
+    transition: none;
+  }
+
+  .calendar-nav-button {
+    transition: none;
+  }
+
+  .close-details-button {
+    transition: none;
+  }
+
+  .employee-sidebar {
+    transition: none;
+  }
+
 }

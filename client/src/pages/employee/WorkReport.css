@@ -1,14 +1,33 @@
 /* =========================================================
    WORK REPORT PAGE
+   CloudMatrix Attendance System
+   Responsive: Desktop / Laptop / Tablet / Mobile / Small Phone
    ========================================================= */
 
 .work-report-page {
   width: 100%;
   max-width: 1500px;
+  min-width: 0;
   margin: 0 auto;
   padding: 32px 36px 60px;
   box-sizing: border-box;
   color: #172033;
+  overflow-x: hidden;
+}
+
+.work-report-page,
+.work-report-page * {
+  box-sizing: border-box;
+}
+
+.work-report-page h1,
+.work-report-page h2,
+.work-report-page h3,
+.work-report-page p,
+.work-report-page span,
+.work-report-page strong,
+.work-report-page label {
+  overflow-wrap: anywhere;
 }
 
 /* =========================================================
@@ -21,6 +40,11 @@
   justify-content: space-between;
   gap: 30px;
   margin-bottom: 28px;
+  min-width: 0;
+}
+
+.work-report-page-header > div:first-child {
+  min-width: 0;
 }
 
 .work-report-breadcrumb {
@@ -47,6 +71,7 @@
 }
 
 .work-report-page-header p {
+  max-width: 720px;
   margin: 9px 0 0;
   color: #7a8495;
   font-size: 14px;
@@ -59,6 +84,7 @@
 
 .work-report-date-card {
   min-width: 215px;
+  max-width: 100%;
   padding: 14px 17px;
   display: flex;
   align-items: center;
@@ -67,6 +93,7 @@
   border: 1px solid #e7ebf1;
   border-radius: 15px;
   box-shadow: 0 8px 25px rgba(20, 35, 60, 0.06);
+  flex-shrink: 0;
 }
 
 .work-report-date-icon {
@@ -84,6 +111,7 @@
 }
 
 .work-report-date-card > div:last-child {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -114,6 +142,7 @@
   padding: 14px 17px;
   border-radius: 13px;
   border: 1px solid;
+  min-width: 0;
 }
 
 .work-report-message.success {
@@ -142,6 +171,7 @@
 
 .work-report-message > div:nth-child(2) {
   flex: 1;
+  min-width: 0;
 }
 
 .work-report-message strong {
@@ -157,6 +187,7 @@
 }
 
 .work-report-message button {
+  flex-shrink: 0;
   border: 0;
   background: transparent;
   color: currentColor;
@@ -171,12 +202,18 @@
    ========================================================= */
 
 .work-report-layout {
+  width: 100%;
+  min-width: 0;
   display: grid;
   grid-template-columns:
     minmax(0, 1.65fr)
-    minmax(300px, 0.75fr);
+    minmax(280px, 0.75fr);
   gap: 22px;
   align-items: start;
+}
+
+.work-report-layout > * {
+  min-width: 0;
 }
 
 /* =========================================================
@@ -188,6 +225,8 @@
 .work-report-info-card,
 .work-report-state-card,
 .work-report-history {
+  width: 100%;
+  min-width: 0;
   background: #ffffff;
   border: 1px solid #e8ecf2;
   border-radius: 20px;
@@ -209,6 +248,10 @@
   gap: 25px;
   padding: 27px 29px 23px;
   border-bottom: 1px solid #edf0f4;
+}
+
+.work-report-card-header > div:first-child {
+  min-width: 0;
 }
 
 .work-report-label {
@@ -245,6 +288,7 @@
   align-items: center;
   gap: 7px;
   flex-shrink: 0;
+  max-width: 100%;
   padding: 7px 11px;
   border-radius: 30px;
   font-size: 11px;
@@ -254,6 +298,7 @@
 .report-status span {
   width: 7px;
   height: 7px;
+  flex-shrink: 0;
   border-radius: 50%;
 }
 
@@ -281,6 +326,7 @@
 
 .work-report-form {
   padding: 28px 29px 30px;
+  min-width: 0;
 }
 
 .work-report-form label {
@@ -292,8 +338,11 @@
 }
 
 .work-report-form textarea {
+  display: block;
   width: 100%;
+  min-width: 0;
   min-height: 225px;
+  max-width: 100%;
   padding: 17px 18px;
   box-sizing: border-box;
   resize: vertical;
@@ -365,6 +414,7 @@
 }
 
 .work-report-form-info p {
+  min-width: 0;
   margin: 0;
   color: #697586;
   font-size: 12px;
@@ -428,9 +478,14 @@
    ========================================================= */
 
 .work-report-side {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+.work-report-side > * {
+  min-width: 0;
 }
 
 /* =========================================================
@@ -461,6 +516,7 @@
 }
 
 .side-card-header h3 {
+  min-width: 0;
   margin: 0;
   color: #172033;
   font-size: 18px;
@@ -470,6 +526,7 @@
 .attendance-check-icon {
   width: 36px;
   height: 36px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -491,6 +548,7 @@
 }
 
 .attendance-status-display strong {
+  min-width: 0;
   color: #202938;
   font-size: 15px;
   font-weight: 800;
@@ -499,6 +557,7 @@
 .attendance-status-dot {
   width: 9px;
   height: 9px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #aeb7c4;
 }
@@ -514,12 +573,13 @@
 
 .attendance-times {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   border-top: 1px solid #edf0f4;
   border-bottom: 1px solid #edf0f4;
 }
 
 .attendance-times > div {
+  min-width: 0;
   padding: 17px 5px;
 }
 
@@ -557,10 +617,12 @@
 }
 
 .working-time-summary span {
+  min-width: 0;
   margin: 0;
 }
 
 .working-time-summary strong {
+  flex-shrink: 0;
   color: #1674c6;
   font-size: 16px;
   font-weight: 800;
@@ -590,6 +652,10 @@
   color: #1674c6;
   font-size: 14px;
   font-weight: 800;
+}
+
+.work-report-info-card > div:last-child {
+  min-width: 0;
 }
 
 .work-report-info-card h3 {
@@ -622,6 +688,11 @@
   padding: 13px 0;
 }
 
+.state-row span,
+.state-row strong {
+  min-width: 0;
+}
+
 .state-row + .state-row {
   border-top: 1px solid #edf0f4;
 }
@@ -635,6 +706,7 @@
   color: #344052;
   font-size: 11px;
   font-weight: 750;
+  text-align: right;
 }
 
 /* =========================================================
@@ -653,6 +725,10 @@
   gap: 25px;
   padding: 25px 27px;
   border-bottom: 1px solid #edf0f4;
+}
+
+.work-report-history-header > div:first-child {
+  min-width: 0;
 }
 
 .work-report-history-header h2 {
@@ -684,27 +760,30 @@
    ========================================================= */
 
 .work-report-history-toolbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto auto auto;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
   padding: 14px 27px;
   border-bottom: 1px solid #edf0f4;
   background: #fbfcfe;
+  min-width: 0;
 }
 
-/* SEARCH */
+/* =========================================================
+   SEARCH
+   ========================================================= */
 
 .work-report-search {
   position: relative;
-  flex: 1 1 240px;
-  min-width: 210px;
+  width: 100%;
+  min-width: 0;
 }
 
 .work-report-search input {
   width: 100%;
+  min-width: 0;
   height: 38px;
-  box-sizing: border-box;
   padding: 0 13px 0 36px;
   border: 1px solid #dfe5ec;
   border-radius: 10px;
@@ -734,15 +813,20 @@
   pointer-events: none;
 }
 
-/* FILTER */
+/* =========================================================
+   FILTER
+   ========================================================= */
 
 .work-report-filter {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 7px;
 }
 
 .work-report-filter label {
+  flex-shrink: 0;
+  margin: 0;
   color: #7d8795;
   font-size: 10px;
   font-weight: 700;
@@ -751,7 +835,7 @@
 .work-report-filter select,
 .work-report-filter input {
   height: 38px;
-  box-sizing: border-box;
+  min-width: 0;
   padding: 0 10px;
   border: 1px solid #dfe5ec;
   border-radius: 9px;
@@ -765,7 +849,7 @@
 }
 
 .work-report-filter select {
-  min-width: 110px;
+  width: 110px;
 }
 
 .work-report-filter input {
@@ -778,7 +862,9 @@
   box-shadow: 0 0 0 3px rgba(77, 145, 210, 0.08);
 }
 
-/* CLEAR */
+/* =========================================================
+   CLEAR
+   ========================================================= */
 
 .work-report-clear-filter {
   height: 38px;
@@ -818,6 +904,7 @@
 }
 
 .active-filter-chip {
+  max-width: 100%;
   padding: 5px 8px;
   border-radius: 20px;
   background: #eef6ff;
@@ -830,6 +917,8 @@
    ========================================================= */
 
 .work-report-history-list {
+  width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -844,7 +933,12 @@
   align-items: center;
   gap: 20px;
   padding: 19px 27px;
+  min-width: 0;
   transition: background 0.2s ease;
+}
+
+.work-report-history-item > * {
+  min-width: 0;
 }
 
 .work-report-history-item + .work-report-history-item {
@@ -860,6 +954,7 @@
    ========================================================= */
 
 .history-date {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -901,6 +996,7 @@
    ========================================================= */
 
 .history-attendance {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -909,6 +1005,7 @@
 
 .history-status {
   display: inline-flex;
+  max-width: 100%;
   padding: 5px 8px;
   border-radius: 20px;
   background: #f1f3f6;
@@ -934,6 +1031,7 @@
    ========================================================= */
 
 .history-times {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -980,6 +1078,7 @@
 }
 
 .work-report-empty-history button {
+  max-width: 100%;
   padding: 8px 13px;
   border: 0;
   border-radius: 8px;
@@ -1002,10 +1101,12 @@
   padding: 16px 27px;
   border-top: 1px solid #edf0f4;
   background: #fbfcfe;
+  min-width: 0;
 }
 
 .work-report-pagination button {
   min-width: 105px;
+  max-width: 100%;
   padding: 8px 13px;
   border: 1px solid #dfe5ec;
   border-radius: 9px;
@@ -1037,12 +1138,14 @@
 }
 
 .work-report-page-info {
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
   color: #8a94a3;
   font-size: 10px;
+  white-space: nowrap;
 }
 
 .work-report-page-info strong {
@@ -1088,7 +1191,61 @@
 }
 
 /* =========================================================
-   TABLET
+   LARGE LAPTOP
+   ========================================================= */
+
+@media (max-width: 1250px) {
+  .work-report-page {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .work-report-layout {
+    grid-template-columns:
+      minmax(0, 1.55fr)
+      minmax(270px, 0.8fr);
+    gap: 18px;
+  }
+
+  .work-report-card-header {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .work-report-form {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .work-report-history-item {
+    grid-template-columns:
+      125px
+      minmax(0, 1fr)
+      110px
+      130px;
+    gap: 15px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .work-report-history-toolbar {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .work-report-filter-result {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .work-report-pagination {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
    ========================================================= */
 
 @media (max-width: 1100px) {
@@ -1102,31 +1259,120 @@
 
   .work-report-side {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
   }
 
-  .work-report-state-card {
-    grid-column: span 2;
+  .work-report-side > * {
+    min-width: 0;
   }
 
+  .work-report-state-card {
+    grid-column: 1 / -1;
+  }
+
+  /* HISTORY TOOLBAR */
+
   .work-report-history-toolbar {
-    align-items: stretch;
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto
+      auto;
   }
 
   .work-report-search {
-    flex-basis: 100%;
+    grid-column: 1 / -1;
   }
+
+  /* HISTORY */
 
   .work-report-history-item {
     grid-template-columns:
-      130px
+      125px
       minmax(0, 1fr)
       110px;
   }
 
   .history-times {
     display: none;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .work-report-page {
+    padding: 24px 20px 45px;
+  }
+
+  .work-report-page-header {
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .work-report-page-header h1 {
+    font-size: 29px;
+  }
+
+  .work-report-date-card {
+    min-width: 195px;
+  }
+
+  .work-report-card-header {
+    gap: 18px;
+    padding: 23px;
+  }
+
+  .work-report-form {
+    padding: 23px;
+  }
+
+  /* FILTER */
+
+  .work-report-history-toolbar {
+    grid-template-columns: 1fr 1fr;
+    padding: 14px 21px;
+  }
+
+  .work-report-search {
+    grid-column: 1 / -1;
+  }
+
+  .work-report-filter {
+    width: 100%;
+  }
+
+  .work-report-filter select,
+  .work-report-filter input {
+    flex: 1;
+    width: auto;
+  }
+
+  .work-report-clear-filter {
+    width: 100%;
+  }
+
+  .work-report-filter-result {
+    padding-left: 21px;
+    padding-right: 21px;
+  }
+
+  /* HISTORY */
+
+  .work-report-history-item {
+    grid-template-columns:
+      120px
+      minmax(0, 1fr)
+      105px;
+    gap: 13px;
+    padding: 18px 21px;
+  }
+
+  .work-report-pagination {
+    padding-left: 21px;
+    padding-right: 21px;
   }
 }
 
@@ -1139,24 +1385,79 @@
     padding: 20px 15px 40px;
   }
 
+  /* HEADER */
+
   .work-report-page-header {
     flex-direction: column;
     align-items: stretch;
-    gap: 18px;
+    gap: 17px;
+    margin-bottom: 22px;
+  }
+
+  .work-report-breadcrumb {
+    margin-bottom: 8px;
+    font-size: 12px;
   }
 
   .work-report-page-header h1 {
     font-size: 27px;
+    letter-spacing: -0.5px;
+  }
+
+  .work-report-page-header p {
+    font-size: 13px;
   }
 
   .work-report-date-card {
     width: 100%;
-    box-sizing: border-box;
+    min-width: 0;
   }
+
+  /* MESSAGE */
+
+  .work-report-message {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 13px;
+    margin-bottom: 18px;
+  }
+
+  .work-report-message-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .work-report-message strong {
+    font-size: 12px;
+  }
+
+  .work-report-message p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .work-report-message button {
+    font-size: 20px;
+  }
+
+  /* MAIN CARD */
 
   .work-report-card-header {
     flex-direction: column;
+    align-items: stretch;
     padding: 21px;
+  }
+
+  .work-report-card-header h2 {
+    font-size: 20px;
+  }
+
+  .work-report-card-header p {
+    font-size: 12px;
+  }
+
+  .report-status {
+    align-self: flex-start;
   }
 
   .work-report-form {
@@ -1165,20 +1466,61 @@
 
   .work-report-form textarea {
     min-height: 190px;
+    padding: 15px;
+    font-size: 13px;
   }
+
+  .work-report-character-count {
+    font-size: 10px;
+  }
+
+  .work-report-form-info {
+    padding: 12px;
+  }
+
+  .work-report-form-info p {
+    font-size: 11px;
+  }
+
+  .work-report-save-button {
+    min-height: 48px;
+  }
+
+  /* SIDE */
 
   .work-report-side {
     display: flex;
+    flex-direction: column;
   }
 
   .work-report-state-card {
     grid-column: auto;
   }
 
+  .work-report-attendance-card {
+    padding: 20px;
+  }
+
+  .side-card-header h3 {
+    font-size: 17px;
+  }
+
+  /* HISTORY HEADER */
+
+  .work-report-history {
+    margin-top: 20px;
+    border-radius: 17px;
+  }
+
   .work-report-history-header {
     align-items: flex-start;
     flex-direction: column;
+    gap: 13px;
     padding: 21px;
+  }
+
+  .work-report-history-header h2 {
+    font-size: 19px;
   }
 
   .work-report-history-count {
@@ -1188,8 +1530,9 @@
   /* FILTER */
 
   .work-report-history-toolbar {
-    align-items: stretch;
+    display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 10px;
     padding: 14px 21px;
   }
@@ -1200,8 +1543,8 @@
   }
 
   .work-report-filter {
-    justify-content: space-between;
     width: 100%;
+    justify-content: space-between;
   }
 
   .work-report-filter select,
@@ -1212,7 +1555,7 @@
   }
 
   .work-report-clear-filter {
-    align-self: flex-start;
+    width: 100%;
   }
 
   .work-report-filter-result {
@@ -1229,22 +1572,34 @@
     padding: 19px 21px;
   }
 
+  .history-date {
+    gap: 3px;
+  }
+
+  .history-description p {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
   .history-attendance {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
   }
 
   .history-times {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    gap: 15px;
     padding-top: 3px;
   }
 
   /* PAGINATION */
 
   .work-report-pagination {
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding: 15px 21px;
@@ -1260,12 +1615,14 @@
     grid-column: 1;
     grid-row: 2;
     justify-self: stretch;
+    width: 100%;
   }
 
   .work-report-pagination button:last-child {
     grid-column: 2;
     grid-row: 2;
     justify-self: stretch;
+    width: 100%;
   }
 }
 
@@ -1273,25 +1630,544 @@
    SMALL MOBILE
    ========================================================= */
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
+  .work-report-page {
+    padding: 17px 12px 32px;
+  }
+
+  .work-report-page-header {
+    gap: 14px;
+  }
+
   .work-report-page-header h1 {
     font-size: 24px;
+  }
+
+  .work-report-page-header p {
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .work-report-date-card {
+    padding: 12px 13px;
+    border-radius: 13px;
+  }
+
+  .work-report-date-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    font-size: 17px;
+  }
+
+  .work-report-date-card strong {
+    font-size: 12px;
+  }
+
+  /* MESSAGE */
+
+  .work-report-message {
+    padding: 11px;
+  }
+
+  .work-report-message-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .work-report-message p {
+    font-size: 10px;
+  }
+
+  /* CARDS */
+
+  .work-report-card,
+  .work-report-attendance-card,
+  .work-report-info-card,
+  .work-report-state-card,
+  .work-report-history {
+    border-radius: 15px;
+  }
+
+  .work-report-card-header {
+    padding: 18px;
   }
 
   .work-report-card-header h2 {
     font-size: 18px;
   }
 
-  .attendance-times > div + div {
-    padding-left: 12px;
+  .work-report-form {
+    padding: 18px;
   }
 
+  .work-report-form textarea {
+    min-height: 175px;
+    padding: 13px;
+    border-radius: 11px;
+    font-size: 12px;
+  }
+
+  .work-report-form label {
+    font-size: 12px;
+  }
+
+  .work-report-form-info {
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .work-report-form-info span {
+    font-size: 13px;
+  }
+
+  .work-report-form-info p {
+    font-size: 10px;
+  }
+
+  .work-report-save-button {
+    min-height: 46px;
+    border-radius: 11px;
+    font-size: 12px;
+  }
+
+  /* ATTENDANCE */
+
   .work-report-attendance-card {
-    padding: 19px;
+    padding: 18px;
+  }
+
+  .side-card-header h3 {
+    font-size: 16px;
+  }
+
+  .attendance-check-icon {
+    width: 33px;
+    height: 33px;
+  }
+
+  .attendance-status-display {
+    margin: 20px 0 17px;
+  }
+
+  .attendance-status-display strong {
+    font-size: 13px;
+  }
+
+  .attendance-times > div {
+    padding: 14px 4px;
+  }
+
+  .attendance-times > div + div {
+    padding-left: 10px;
+  }
+
+  .attendance-times strong {
+    font-size: 12px;
+  }
+
+  .working-time-summary {
+    padding-top: 14px;
+  }
+
+  .working-time-summary strong {
+    font-size: 14px;
+  }
+
+  /* INFO */
+
+  .work-report-info-card {
+    padding: 16px;
+  }
+
+  .info-card-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  /* STATE */
+
+  .work-report-state-card {
+    padding: 5px 15px;
+  }
+
+  .state-row {
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  /* HISTORY */
+
+  .work-report-history-header {
+    padding: 18px;
+  }
+
+  .work-report-history-header h2 {
+    font-size: 17px;
+  }
+
+  .work-report-history-header p {
+    font-size: 10px;
+  }
+
+  .work-report-history-count {
+    padding: 7px 10px;
+    font-size: 10px;
+  }
+
+  .work-report-history-toolbar {
+    padding: 12px 15px;
+  }
+
+  .work-report-filter {
+    gap: 6px;
+  }
+
+  .work-report-filter label {
+    font-size: 9px;
+  }
+
+  .work-report-filter select,
+  .work-report-filter input {
+    height: 36px;
+    font-size: 9px;
+  }
+
+  .work-report-clear-filter {
+    height: 36px;
+    font-size: 9px;
+  }
+
+  .work-report-filter-result {
+    padding: 10px 15px;
+    font-size: 9px;
+  }
+
+  .work-report-history-item {
+    gap: 11px;
+    padding: 17px 15px;
+  }
+
+  .history-date strong {
+    font-size: 12px;
+  }
+
+  .history-date span {
+    font-size: 9px;
+  }
+
+  .history-description p {
+    font-size: 11px;
+  }
+
+  .history-status {
+    font-size: 8px;
+  }
+
+  .history-attendance > span:last-child,
+  .history-times span {
+    font-size: 9px;
+  }
+
+  /* PAGINATION */
+
+  .work-report-pagination {
+    padding: 13px 15px;
   }
 
   .work-report-pagination button {
     min-width: 0;
-    padding: 8px;
+    width: 100%;
+    padding: 8px 7px;
+    font-size: 9px;
+  }
+
+  .work-report-page-info {
+    font-size: 9px;
+  }
+
+  .work-report-page-info strong {
+    min-width: 23px;
+    height: 23px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL PHONES
+   360px / 320px
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .work-report-page {
+    padding: 14px 9px 28px;
+  }
+
+  .work-report-page-header h1 {
+    font-size: 22px;
+  }
+
+  .work-report-breadcrumb {
+    font-size: 10px;
+    gap: 6px;
+  }
+
+  .work-report-page-header p {
+    font-size: 11px;
+  }
+
+  .work-report-date-card {
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .work-report-date-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .work-report-date-card span {
+    font-size: 8px;
+    letter-spacing: 0.8px;
+  }
+
+  .work-report-date-card strong {
+    font-size: 10px;
+  }
+
+  /* MAIN CARD */
+
+  .work-report-card-header {
+    padding: 15px;
+  }
+
+  .work-report-form {
+    padding: 15px;
+  }
+
+  .work-report-card-header h2 {
+    font-size: 16px;
+  }
+
+  .work-report-card-header p {
+    font-size: 10px;
+  }
+
+  .work-report-label {
+    font-size: 8px;
+  }
+
+  .report-status {
+    padding: 6px 9px;
+    font-size: 9px;
+  }
+
+  .work-report-form textarea {
+    min-height: 160px;
+    font-size: 11px;
+  }
+
+  .work-report-form-info p {
+    font-size: 9px;
+  }
+
+  .work-report-save-button {
+    min-height: 44px;
+    font-size: 11px;
+  }
+
+  /* ATTENDANCE */
+
+  .work-report-attendance-card {
+    padding: 15px;
+  }
+
+  .side-card-header h3 {
+    font-size: 14px;
+  }
+
+  .attendance-check-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .attendance-status-display strong {
+    font-size: 12px;
+  }
+
+  .attendance-times span,
+  .working-time-summary span {
+    font-size: 8px;
+  }
+
+  .attendance-times strong {
+    font-size: 10px;
+  }
+
+  .working-time-summary strong {
+    font-size: 12px;
+  }
+
+  /* INFO */
+
+  .work-report-info-card {
+    padding: 13px;
+  }
+
+  .info-card-icon {
+    width: 29px;
+    height: 29px;
+    font-size: 12px;
+  }
+
+  .work-report-info-card h3 {
+    font-size: 11px;
+  }
+
+  .work-report-info-card p {
+    font-size: 9px;
+  }
+
+  /* STATE */
+
+  .work-report-state-card {
+    padding: 4px 12px;
+  }
+
+  .state-row {
+    gap: 8px;
+  }
+
+  .state-row span,
+  .state-row strong {
+    font-size: 9px;
+  }
+
+  /* HISTORY */
+
+  .work-report-history-header {
+    padding: 15px;
+  }
+
+  .work-report-history-header h2 {
+    font-size: 15px;
+  }
+
+  .work-report-history-header p {
+    font-size: 9px;
+  }
+
+  .work-report-history-toolbar {
+    padding: 10px 12px;
+  }
+
+  .work-report-filter {
+    gap: 5px;
+  }
+
+  .work-report-filter label {
+    font-size: 8px;
+  }
+
+  .work-report-filter select,
+  .work-report-filter input {
+    height: 34px;
+    padding: 0 7px;
+    font-size: 8px;
+  }
+
+  .work-report-clear-filter {
+    height: 34px;
+    font-size: 8px;
+  }
+
+  .work-report-filter-result {
+    padding: 9px 12px;
+    font-size: 8px;
+  }
+
+  .work-report-history-item {
+    padding: 15px 12px;
+  }
+
+  .history-date strong {
+    font-size: 11px;
+  }
+
+  .history-description p {
+    font-size: 10px;
+    line-height: 1.55;
+  }
+
+  .history-attendance > span:last-child,
+  .history-times span {
+    font-size: 8px;
+  }
+
+  .history-status {
+    padding: 4px 7px;
+    font-size: 7px;
+  }
+
+  /* PAGINATION */
+
+  .work-report-pagination {
+    padding: 11px 12px;
+    gap: 7px;
+  }
+
+  .work-report-pagination button {
+    padding: 7px 4px;
+    font-size: 8px;
+  }
+
+  .work-report-page-info {
+    font-size: 8px;
+  }
+}
+
+/* =========================================================
+   EXTRA SAFETY FOR NARROW SCREENS
+   ========================================================= */
+
+@media (max-width: 330px) {
+  .work-report-page {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .work-report-filter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .work-report-filter label {
+    display: block;
+  }
+
+  .work-report-filter select,
+  .work-report-filter input {
+    width: 100%;
+    flex: none;
+  }
+
+  .attendance-times {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-times > div + div {
+    padding-left: 4px;
+    border-left: 0;
+    border-top: 1px solid #edf0f4;
+  }
+
+  .history-attendance,
+  .history-times {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-attendance {
+    justify-content: flex-start;
   }
 }

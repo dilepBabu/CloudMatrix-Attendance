@@ -1,17 +1,42 @@
+/* =========================================================
+   EMPLOYEE OVERTIME PAGE
+   CloudMatrix Attendance System
+   Responsive: Desktop / Laptop / Tablet / Mobile / Small
+   ========================================================= */
+
 .employee-overtime-page {
+  width: 100%;
+  max-width: 1500px;
   min-height: 100%;
-  padding: 28px;
+  margin: 0 auto;
+  padding: 30px 34px 50px;
   background: #f7f9fc;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-/* HEADER */
+.employee-overtime-page *,
+.employee-overtime-page *::before,
+.employee-overtime-page *::after {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
 
 .overtime-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 24px;
   margin-bottom: 24px;
+  min-width: 0;
+}
+
+.overtime-header > div:first-child {
+  min-width: 0;
 }
 
 .overtime-eyebrow {
@@ -27,17 +52,21 @@
   font-size: 30px;
   line-height: 1.2;
   color: #172033;
+  overflow-wrap: anywhere;
 }
 
 .overtime-subtitle {
   margin: 8px 0 0;
   color: #6b7280;
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .overtime-header-icon {
   width: 58px;
   height: 58px;
+  min-width: 58px;
+  flex-shrink: 0;
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -47,16 +76,21 @@
   border: 1px solid #cde8f8;
 }
 
-/* MESSAGE */
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
 
 .overtime-message {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 13px 16px;
   border-radius: 12px;
   margin-bottom: 20px;
   border: 1px solid transparent;
+  min-width: 0;
 }
 
 .overtime-message.success {
@@ -74,6 +108,7 @@
 .overtime-message span {
   width: 25px;
   height: 25px;
+  min-width: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -83,11 +118,17 @@
 
 .overtime-message p {
   flex: 1;
+  min-width: 0;
   margin: 0;
   font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .overtime-message button {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -95,16 +136,20 @@
   color: inherit;
 }
 
-/* STATS */
+
+/* =========================================================
+   STATS
+   ========================================================= */
 
 .overtime-stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 24px;
 }
 
 .overtime-stat-card {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -115,21 +160,30 @@
   box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
 }
 
+.overtime-stat-card > div:last-child {
+  min-width: 0;
+}
+
 .overtime-stat-card span {
   display: block;
   margin-bottom: 4px;
   color: #737b89;
   font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .overtime-stat-card strong {
+  display: block;
   color: #172033;
   font-size: 23px;
+  line-height: 1.2;
 }
 
 .stat-icon {
   width: 42px;
   height: 42px;
+  min-width: 42px;
   flex-shrink: 0;
   border-radius: 12px;
   display: flex;
@@ -163,10 +217,15 @@
   color: #6b7280;
 }
 
-/* APPLY CARD */
+
+/* =========================================================
+   COMMON CARDS
+   ========================================================= */
 
 .overtime-apply-card,
 .overtime-history-card {
+  width: 100%;
+  min-width: 0;
   background: #ffffff;
   border: 1px solid #e7ebf0;
   border-radius: 18px;
@@ -178,16 +237,28 @@
   margin-bottom: 24px;
 }
 
+
+/* =========================================================
+   SECTION HEADING
+   ========================================================= */
+
 .section-heading {
   display: flex;
   align-items: center;
   gap: 13px;
   margin-bottom: 24px;
+  min-width: 0;
+}
+
+.section-heading > div:last-child {
+  min-width: 0;
 }
 
 .section-heading-icon {
   width: 42px;
   height: 42px;
+  min-width: 42px;
+  flex-shrink: 0;
   border-radius: 12px;
   background: #e8f4fc;
   color: #0066b3;
@@ -203,6 +274,8 @@
   margin: 0;
   color: #172033;
   font-size: 19px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .section-heading p,
@@ -210,19 +283,25 @@
   margin: 5px 0 0;
   color: #737b89;
   font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
-/* FORM */
+
+/* =========================================================
+   FORM
+   ========================================================= */
 
 .overtime-form {
   display: grid;
-  grid-template-columns: 260px 1fr auto;
+  grid-template-columns: minmax(190px, 260px) minmax(0, 1fr) auto;
   gap: 18px;
   align-items: end;
 }
 
 .form-group {
   position: relative;
+  min-width: 0;
 }
 
 .form-group label {
@@ -237,6 +316,7 @@
 .form-group textarea,
 .overtime-filters select {
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   border: 1px solid #d9dee7;
   border-radius: 10px;
@@ -270,6 +350,7 @@
   margin-top: 6px;
   color: #8a919d;
   font-size: 11px;
+  line-height: 1.4;
 }
 
 .reason-group {
@@ -288,11 +369,12 @@
   display: flex;
   gap: 9px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .primary-button,
 .secondary-button {
-  height: 44px;
+  min-height: 44px;
   padding: 0 17px;
   border-radius: 10px;
   cursor: pointer;
@@ -331,6 +413,11 @@
   opacity: 0.6;
 }
 
+
+/* =========================================================
+   SPINNERS
+   ========================================================= */
+
 .button-spinner,
 .loading-spinner {
   width: 15px;
@@ -349,7 +436,10 @@
   }
 }
 
-/* HISTORY */
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
 
 .overtime-history-card {
   padding: 24px;
@@ -361,9 +451,15 @@
   justify-content: space-between;
   gap: 15px;
   margin-bottom: 20px;
+  min-width: 0;
+}
+
+.history-header > div:first-child {
+  min-width: 0;
 }
 
 .refresh-button {
+  flex-shrink: 0;
   border: 1px solid #d9dee7;
   background: #ffffff;
   color: #374151;
@@ -372,22 +468,29 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .refresh-button:hover:not(:disabled) {
   background: #f7f9fc;
 }
 
-/* FILTERS */
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
 
 .overtime-filters {
   display: flex;
   gap: 12px;
+  width: 100%;
   margin-bottom: 20px;
+  min-width: 0;
 }
 
 .search-box {
   flex: 1;
+  min-width: 0;
   height: 43px;
   display: flex;
   align-items: center;
@@ -399,12 +502,14 @@
 }
 
 .search-box span {
+  flex-shrink: 0;
   color: #8a919d;
   font-size: 20px;
 }
 
 .search-box input {
   width: 100%;
+  min-width: 0;
   height: 100%;
   border: 0;
   outline: none;
@@ -415,20 +520,27 @@
 
 .overtime-filters select {
   width: 170px;
+  min-width: 150px;
   height: 43px;
   padding: 0 11px;
   font-size: 13px;
 }
 
-/* REQUEST LIST */
+
+/* =========================================================
+   REQUEST LIST
+   ========================================================= */
 
 .overtime-request-list {
   display: flex;
   flex-direction: column;
   gap: 13px;
+  min-width: 0;
 }
 
 .overtime-request-card {
+  width: 100%;
+  min-width: 0;
   border: 1px solid #e6eaf0;
   border-radius: 15px;
   padding: 18px;
@@ -443,11 +555,13 @@
 .request-main {
   display: flex;
   gap: 15px;
+  min-width: 0;
 }
 
 .employee-avatar {
   width: 43px;
   height: 43px;
+  min-width: 43px;
   flex-shrink: 0;
   border-radius: 12px;
   background: #e8f4fc;
@@ -469,28 +583,40 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 15px;
+  min-width: 0;
+}
+
+.request-top > div:first-child {
+  min-width: 0;
 }
 
 .request-top h3 {
   margin: 0;
   color: #172033;
   font-size: 15px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .request-top p {
   margin: 4px 0 0;
   color: #8a919d;
   font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .overtime-status {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   padding: 6px 10px;
   border-radius: 999px;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .overtime-status.pending {
@@ -513,9 +639,14 @@
   color: #6b7280;
 }
 
+
+/* =========================================================
+   REQUEST DETAILS
+   ========================================================= */
+
 .request-details {
   display: grid;
-  grid-template-columns: 180px 1fr;
+  grid-template-columns: minmax(150px, 180px) minmax(0, 1fr);
   gap: 14px;
   margin-top: 15px;
   padding-top: 14px;
@@ -542,9 +673,17 @@
   font-weight: 600;
   line-height: 1.5;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
+
+/* =========================================================
+   ADMIN COMMENT
+   ========================================================= */
+
 .admin-comment {
+  width: 100%;
+  min-width: 0;
   margin-top: 13px;
   padding: 11px 13px;
   border-radius: 10px;
@@ -565,15 +704,20 @@
   color: #374151;
   font-size: 12px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .reviewed-info {
   margin-top: 10px;
   color: #8a919d;
   font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .request-actions {
+  display: flex;
+  flex-wrap: wrap;
   margin-top: 14px;
 }
 
@@ -586,13 +730,17 @@
   cursor: pointer;
   font-size: 11px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .cancel-request-button:hover:not(:disabled) {
   background: #fef2f2;
 }
 
-/* LOADING / EMPTY */
+
+/* =========================================================
+   LOADING / EMPTY
+   ========================================================= */
 
 .overtime-loading,
 .overtime-empty {
@@ -602,6 +750,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 20px;
 }
 
 .loading-spinner {
@@ -616,6 +765,7 @@
   margin: 0;
   color: #737b89;
   font-size: 13px;
+  line-height: 1.5;
 }
 
 .empty-icon {
@@ -636,7 +786,10 @@
   font-size: 16px;
 }
 
-/* PAGINATION */
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
 
 .overtime-pagination {
   display: flex;
@@ -648,17 +801,20 @@
   border-top: 1px solid #eef1f5;
   color: #737b89;
   font-size: 12px;
+  min-width: 0;
 }
 
 .pagination-buttons {
   display: flex;
   align-items: center;
   gap: 9px;
+  flex-shrink: 0;
 }
 
 .pagination-buttons button {
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
   border: 1px solid #d9dee7;
   border-radius: 8px;
   background: #ffffff;
@@ -680,15 +836,24 @@
   text-align: center;
 }
 
-/* RESPONSIVE */
 
-@media (max-width: 1100px) {
+/* =========================================================
+   LARGE LAPTOP / SMALL DESKTOP
+   1200px
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+  .employee-overtime-page {
+    padding: 28px 26px 45px;
+  }
+
   .overtime-stats {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .overtime-form {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(180px, 230px) minmax(0, 1fr);
   }
 
   .form-actions {
@@ -697,9 +862,104 @@
   }
 }
 
-@media (max-width: 750px) {
+
+/* =========================================================
+   LAPTOP / TABLET LANDSCAPE
+   1024px
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
   .employee-overtime-page {
-    padding: 18px;
+    padding: 24px 22px 40px;
+  }
+
+  .overtime-header {
+    gap: 18px;
+  }
+
+  .overtime-header h1 {
+    font-size: 28px;
+  }
+
+  .overtime-stats {
+    gap: 12px;
+  }
+
+  .overtime-stat-card {
+    padding: 16px;
+  }
+
+  .overtime-stat-card strong {
+    font-size: 21px;
+  }
+
+  .overtime-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   900px
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .employee-overtime-page {
+    padding: 22px 20px 36px;
+  }
+
+  .overtime-header {
+    margin-bottom: 20px;
+  }
+
+  .overtime-header h1 {
+    font-size: 26px;
+  }
+
+  .overtime-subtitle {
+    font-size: 13px;
+  }
+
+  .overtime-header-icon {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    font-size: 24px;
+    border-radius: 14px;
+  }
+
+  .overtime-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .overtime-apply-card,
+  .overtime-history-card {
+    padding: 21px;
+  }
+
+  .request-details {
+    grid-template-columns: 160px minmax(0, 1fr);
+  }
+}
+
+
+/* =========================================================
+   SMALL TABLET / LARGE MOBILE
+   768px
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .employee-overtime-page {
+    padding: 20px 18px 32px;
   }
 
   .overtime-header {
@@ -710,17 +970,37 @@
     font-size: 25px;
   }
 
-  .overtime-header-icon {
-    width: 48px;
-    height: 48px;
+  .overtime-eyebrow {
+    font-size: 11px;
+  }
+
+  .overtime-subtitle {
+    max-width: 600px;
   }
 
   .overtime-stats {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+
+  .overtime-stat-card {
+    gap: 11px;
+    padding: 15px;
+  }
+
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .overtime-stat-card strong {
+    font-size: 20px;
   }
 
   .overtime-form {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .form-actions {
@@ -732,27 +1012,150 @@
     flex-direction: column;
   }
 
-  .overtime-filters select {
+  .search-box {
     width: 100%;
   }
 
+  .overtime-filters select {
+    width: 100%;
+    min-width: 0;
+  }
+
   .request-details {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .request-top {
+    gap: 10px;
   }
 }
 
-@media (max-width: 500px) {
+
+/* =========================================================
+   MOBILE
+   600px
+   ========================================================= */
+
+@media (max-width: 600px) {
+
   .employee-overtime-page {
-    padding: 13px;
+    padding: 16px 14px 28px;
+  }
+
+  .overtime-header {
+    gap: 12px;
+  }
+
+  .overtime-header h1 {
+    font-size: 23px;
+  }
+
+  .overtime-subtitle {
+    margin-top: 6px;
+    font-size: 12px;
+  }
+
+  .overtime-header-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 12px;
+    font-size: 21px;
+  }
+
+  .overtime-message {
+    align-items: flex-start;
+    gap: 9px;
+    padding: 11px 12px;
+  }
+
+  .overtime-message span {
+    margin-top: 1px;
+  }
+
+  .overtime-message p {
+    font-size: 12px;
   }
 
   .overtime-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+
+  .overtime-stat-card {
+    gap: 9px;
+    padding: 13px;
+    border-radius: 13px;
+  }
+
+  .stat-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+
+  .overtime-stat-card span {
+    font-size: 10px;
+  }
+
+  .overtime-stat-card strong {
+    font-size: 18px;
   }
 
   .overtime-apply-card,
   .overtime-history-card {
     padding: 17px;
+    border-radius: 15px;
+  }
+
+  .section-heading {
+    gap: 10px;
+    margin-bottom: 19px;
+  }
+
+  .section-heading-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 10px;
+    font-size: 21px;
+  }
+
+  .section-heading h2,
+  .history-header h2 {
+    font-size: 17px;
+  }
+
+  .section-heading p,
+  .history-header p {
+    font-size: 11px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input {
+    height: 43px;
+  }
+
+  .form-group textarea {
+    min-height: 90px;
+  }
+
+  .form-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    padding: 0 12px;
   }
 
   .history-header {
@@ -760,12 +1163,307 @@
     flex-direction: column;
   }
 
+  .refresh-button {
+    width: 100%;
+  }
+
+  .request-main {
+    gap: 11px;
+  }
+
+  .employee-avatar {
+    width: 39px;
+    height: 39px;
+    min-width: 39px;
+    border-radius: 10px;
+    font-size: 11px;
+  }
+
   .request-top {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .overtime-status {
+    align-self: flex-start;
+  }
+
+  .request-details {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .overtime-request-card {
+    padding: 14px;
+    border-radius: 13px;
   }
 
   .overtime-pagination {
-    align-items: flex-start;
+    align-items: center;
     flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   480px
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .employee-overtime-page {
+    padding: 13px 11px 24px;
+  }
+
+  .overtime-header {
+    gap: 9px;
+  }
+
+  .overtime-header h1 {
+    font-size: 21px;
+  }
+
+  .overtime-eyebrow {
+    margin-bottom: 5px;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .overtime-subtitle {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .overtime-header-icon {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    font-size: 19px;
+    border-radius: 11px;
+  }
+
+  .overtime-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .overtime-stat-card {
+    min-height: 65px;
+  }
+
+  .overtime-apply-card,
+  .overtime-history-card {
+    padding: 14px;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+  }
+
+  .section-heading-icon {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    font-size: 19px;
+  }
+
+  .section-heading h2,
+  .history-header h2 {
+    font-size: 16px;
+  }
+
+  .section-heading p,
+  .history-header p {
+    font-size: 10px;
+  }
+
+  .overtime-form {
+    gap: 14px;
+  }
+
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .primary-button,
+  .secondary-button {
+    min-height: 43px;
+  }
+
+  .overtime-filters {
+    gap: 9px;
+  }
+
+  .search-box,
+  .overtime-filters select {
+    height: 41px;
+  }
+
+  .overtime-request-card {
+    padding: 13px;
+  }
+
+  .request-main {
+    gap: 9px;
+  }
+
+  .employee-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 9px;
+    font-size: 10px;
+  }
+
+  .request-top h3 {
+    font-size: 14px;
+  }
+
+  .request-top p {
+    font-size: 11px;
+  }
+
+  .overtime-status {
+    padding: 5px 8px;
+    font-size: 9px;
+  }
+
+  .request-details {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .detail-label {
+    font-size: 9px;
+  }
+
+  .request-detail strong {
+    font-size: 11px;
+  }
+
+  .admin-comment {
+    padding: 10px;
+  }
+
+  .admin-comment p {
+    font-size: 11px;
+  }
+
+  .reviewed-info {
+    font-size: 10px;
+  }
+
+  .cancel-request-button {
+    width: 100%;
+  }
+
+  .pagination-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   360px
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .employee-overtime-page {
+    padding: 11px 9px 20px;
+  }
+
+  .overtime-header h1 {
+    font-size: 19px;
+  }
+
+  .overtime-subtitle {
+    font-size: 10px;
+  }
+
+  .overtime-header-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    font-size: 17px;
+  }
+
+  .overtime-message {
+    padding: 10px;
+  }
+
+  .overtime-message p {
+    font-size: 11px;
+  }
+
+  .overtime-apply-card,
+  .overtime-history-card {
+    padding: 12px;
+  }
+
+  .section-heading {
+    gap: 8px;
+  }
+
+  .section-heading-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 17px;
+  }
+
+  .section-heading h2,
+  .history-header h2 {
+    font-size: 15px;
+  }
+
+  .section-heading p,
+  .history-header p {
+    font-size: 9px;
+  }
+
+  .overtime-request-card {
+    padding: 11px;
+  }
+
+  .request-main {
+    gap: 8px;
+  }
+
+  .employee-avatar {
+    width: 33px;
+    height: 33px;
+    min-width: 33px;
+    font-size: 9px;
+  }
+
+  .request-top h3 {
+    font-size: 13px;
+  }
+
+  .request-top p {
+    font-size: 10px;
+  }
+
+  .overtime-status {
+    font-size: 8px;
+  }
+
+  .request-detail strong {
+    font-size: 10px;
+  }
+
+  .admin-comment p {
+    font-size: 10px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    font-size: 12px;
   }
 }
