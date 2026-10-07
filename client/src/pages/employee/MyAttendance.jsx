@@ -261,9 +261,15 @@ const formatMinutes = (minutes) => {
     return "0h 0m";
   }
 
-  const totalMinutes = Math.max(0, Number(minutes));
+  const totalMinutes = Math.max(
+    0,
+    Number(minutes)
+  );
 
-  const hours = Math.floor(totalMinutes / 60);
+  const hours = Math.floor(
+    totalMinutes / 60
+  );
+
   const mins = totalMinutes % 60;
 
   return `${hours}h ${mins}m`;
@@ -324,7 +330,10 @@ const getBestLocation = (onGpsUpdate = null) => {
 
     const cleanup = () => {
       if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
+        navigator.geolocation.clearWatch(
+          watchId
+        );
+
         watchId = null;
       }
     };
@@ -346,9 +355,14 @@ const getBestLocation = (onGpsUpdate = null) => {
         return;
       }
 
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-      const accuracy = position.coords.accuracy;
+      const latitude =
+        position?.coords?.latitude;
+
+      const longitude =
+        position?.coords?.longitude;
+
+      const accuracy =
+        position?.coords?.accuracy;
 
       if (
         !Number.isFinite(latitude) ||
@@ -364,7 +378,10 @@ const getBestLocation = (onGpsUpdate = null) => {
         return;
       }
 
-      if (accuracy > MAX_GPS_ACCURACY) {
+      if (
+        accuracy >
+        MAX_GPS_ACCURACY
+      ) {
         reject(
           new Error(
             `GPS accuracy is too low (${Math.round(
@@ -380,57 +397,94 @@ const getBestLocation = (onGpsUpdate = null) => {
         onGpsUpdate({
           source:
             "LOCATION READY - SENDING TO BACKEND",
+
           latitude,
+
           longitude,
-          accuracy: Math.round(accuracy),
+
+          accuracy:
+            Math.round(
+              accuracy
+            ),
         });
       }
 
       resolve({
         latitude,
+
         longitude,
+
         accuracy,
       });
     };
 
-    const handlePosition = (position) => {
+    const handlePosition = (
+      position
+    ) => {
       if (finished) return;
 
       const accuracy =
         position?.coords?.accuracy;
 
-      if (!Number.isFinite(accuracy)) {
+      if (
+        !Number.isFinite(
+          accuracy
+        )
+      ) {
         return;
       }
 
       if (
         !bestPosition ||
         accuracy <
-          bestPosition.coords.accuracy
+          bestPosition.coords
+            .accuracy
       ) {
-        bestPosition = position;
+        bestPosition =
+          position;
 
         if (onGpsUpdate) {
           onGpsUpdate({
-            source: "GPS READING",
+            source:
+              "GPS READING",
+
             latitude:
-              position.coords.latitude,
+              position.coords
+                .latitude,
+
             longitude:
-              position.coords.longitude,
-            accuracy: Math.round(
-              accuracy
-            ),
+              position.coords
+                .longitude,
+
+            accuracy:
+              Math.round(
+                accuracy
+              ),
           });
         }
       }
+
+      /*
+       * Excellent GPS.
+       * Finish immediately.
+       */
 
       if (accuracy <= 50) {
         finish(position);
       }
     };
 
-    const handleError = (error) => {
+    const handleError = (
+      error
+    ) => {
       if (finished) return;
+
+      /*
+       * Do not immediately reject during
+       * the first high-accuracy attempt.
+       *
+       * We allow the fallback to run.
+       */
 
       if (fallbackStarted) {
         if (bestPosition) {
@@ -438,7 +492,9 @@ const getBestLocation = (onGpsUpdate = null) => {
         } else {
           reject(
             new Error(
-              getGpsErrorMessage(error)
+              getGpsErrorMessage(
+                error
+              )
             )
           );
         }
@@ -452,15 +508,22 @@ const getBestLocation = (onGpsUpdate = null) => {
           handleError,
           {
             enableHighAccuracy: true,
+
             maximumAge: 0,
+
             timeout:
               HIGH_ACCURACY_TIMEOUT,
           }
         );
     } catch (error) {
       reject(error);
+
       return;
     }
+
+    /*
+     * Normal GPS fallback.
+     */
 
     setTimeout(() => {
       if (finished) return;
@@ -468,11 +531,17 @@ const getBestLocation = (onGpsUpdate = null) => {
       fallbackStarted = true;
 
       if (onGpsUpdate) {
-        onGpsUpdate((previous) => ({
-          ...(previous || {}),
-          source:
-            "NORMAL GPS FALLBACK",
-        }));
+        onGpsUpdate(
+          (
+            previous
+          ) => ({
+            ...(previous ||
+              {}),
+
+            source:
+              "NORMAL GPS FALLBACK",
+          })
+        );
       }
 
       navigator.geolocation.getCurrentPosition(
@@ -480,50 +549,72 @@ const getBestLocation = (onGpsUpdate = null) => {
           if (finished) return;
 
           const accuracy =
-            position?.coords?.accuracy;
+            position?.coords
+              ?.accuracy;
 
           if (
-            Number.isFinite(accuracy) &&
+            Number.isFinite(
+              accuracy
+            ) &&
             (!bestPosition ||
               accuracy <
-                bestPosition.coords
+                bestPosition
+                  .coords
                   .accuracy)
           ) {
-            bestPosition = position;
+            bestPosition =
+              position;
           }
 
           if (bestPosition) {
-            finish(bestPosition);
+            finish(
+              bestPosition
+            );
           } else {
             finish(position);
           }
         },
+
         (error) => {
           if (finished) return;
 
           if (bestPosition) {
-            finish(bestPosition);
+            finish(
+              bestPosition
+            );
           } else {
             reject(
               new Error(
-                getGpsErrorMessage(error)
+                getGpsErrorMessage(
+                  error
+                )
               )
             );
           }
         },
+
         {
-          enableHighAccuracy: false,
+          enableHighAccuracy:
+            false,
+
           maximumAge: 10000,
+
           timeout: 15000,
         }
       );
     }, FALLBACK_DELAY);
 
+    /*
+     * Final timeout.
+     */
+
     setTimeout(() => {
       if (finished) return;
 
       if (bestPosition) {
-        finish(bestPosition);
+        finish(
+          bestPosition
+        );
       } else {
         reject(
           new Error(
@@ -544,36 +635,54 @@ const MyAttendance = () => {
      ATTENDANCE STATE
      ======================================================= */
 
-  const [attendance, setAttendance] =
-    useState([]);
+  const [
+    attendance,
+    setAttendance,
+  ] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-  const [actionLoading, setActionLoading] =
-    useState(false);
+  const [
+    actionLoading,
+    setActionLoading,
+  ] = useState(false);
 
-  const [message, setMessage] =
-    useState("");
+  const [
+    message,
+    setMessage,
+  ] = useState("");
 
-  const [messageType, setMessageType] =
-    useState("");
+  const [
+    messageType,
+    setMessageType,
+  ] = useState("");
 
   /* =======================================================
      FILTER STATE
      ======================================================= */
 
-  const [search, setSearch] =
-    useState("");
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-  const [statusFilter, setStatusFilter] =
-    useState("ALL");
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState("ALL");
 
-  const [methodFilter, setMethodFilter] =
-    useState("ALL");
+  const [
+    methodFilter,
+    setMethodFilter,
+  ] = useState("ALL");
 
-  const [currentPage, setCurrentPage] =
-    useState(1);
+  const [
+    currentPage,
+    setCurrentPage,
+  ] = useState(1);
 
   const recordsPerPage = 10;
 
@@ -601,127 +710,243 @@ const MyAttendance = () => {
     setWorkReportExists,
   ] = useState(false);
 
+  /*
+   * Keep the attendance ID for which
+   * checkout was opened.
+   *
+   * This is important for overnight
+   * attendance and prevents a stale
+   * report from being used for another
+   * attendance.
+   */
+
+  const [
+    checkoutAttendanceId,
+    setCheckoutAttendanceId,
+  ] = useState(null);
+
   /* =======================================================
      CURRENT TIME
      ======================================================= */
 
-  const [currentTime, setCurrentTime] =
-    useState(new Date());
+  const [
+    currentTime,
+    setCurrentTime,
+  ] = useState(
+    new Date()
+  );
 
   /* =======================================================
      GPS DEBUG
      ======================================================= */
 
-  const [gpsDebug, setGpsDebug] =
-    useState(null);
+  const [
+    gpsDebug,
+    setGpsDebug,
+  ] = useState(null);
 
   /* =======================================================
      GPS DEBUG UPDATE
      ======================================================= */
 
-  const updateGpsDebug = useCallback(
-    (gps) => {
-      setGpsDebug((previous) => {
-        if (typeof gps === "function") {
-          return gps(previous);
-        }
+  const updateGpsDebug =
+    useCallback(
+      (gps) => {
+        setGpsDebug(
+          (previous) => {
+            if (
+              typeof gps ===
+              "function"
+            ) {
+              return gps(
+                previous
+              );
+            }
 
-        return {
-          ...(previous || {}),
-          ...(gps || {}),
-        };
-      });
-    },
-    []
-  );
+            return {
+              ...(previous ||
+                {}),
+
+              ...(gps || {}),
+            };
+          }
+        );
+      },
+      []
+    );
 
   /* =======================================================
      FETCH ATTENDANCE
      ======================================================= */
 
   const fetchAttendance =
-    useCallback(async () => {
-      try {
-        setLoading(true);
+    useCallback(
+      async () => {
+        try {
+          setLoading(true);
 
-        const response =
-          await api.get(
-            "/attendance/my"
+          const response =
+            await api.get(
+              "/attendance/my"
+            );
+
+          const data =
+            response?.data;
+
+          let records = [];
+
+          if (
+            Array.isArray(data)
+          ) {
+            records = data;
+          } else if (
+            Array.isArray(
+              data?.attendance
+            )
+          ) {
+            records =
+              data.attendance;
+          } else if (
+            Array.isArray(
+              data?.records
+            )
+          ) {
+            records =
+              data.records;
+          }
+
+          setAttendance(
+            records
           );
 
-        const data =
-          response?.data;
+          return records;
+        } catch (error) {
+          console.error(
+            "FETCH ATTENDANCE ERROR:",
+            error
+          );
 
-        let records = [];
+          setMessage(
+            error?.response
+              ?.data?.message ||
+              "Failed to load attendance."
+          );
 
-        if (Array.isArray(data)) {
-          records = data;
-        } else if (
-          Array.isArray(
-            data?.attendance
-          )
-        ) {
-          records = data.attendance;
-        } else if (
-          Array.isArray(
-            data?.records
-          )
-        ) {
-          records = data.records;
+          setMessageType(
+            "error"
+          );
+
+          return [];
+        } finally {
+          setLoading(false);
         }
-
-        setAttendance(records);
-      } catch (error) {
-        console.error(
-          "FETCH ATTENDANCE ERROR:",
-          error
-        );
-
-        setMessage(
-          error?.response?.data
-            ?.message ||
-            "Failed to load attendance."
-        );
-
-        setMessageType("error");
-      } finally {
-        setLoading(false);
-      }
-    }, []);
+      },
+      []
+    );
 
   /* =======================================================
      FETCH TODAY WORK REPORT
      ======================================================= */
 
   const fetchTodayWorkReport =
-    useCallback(async () => {
-      try {
-        const response =
-          await api.get(
-            "/work-reports/my"
-          );
+    useCallback(
+      async () => {
+        try {
+          const response =
+            await api.get(
+              "/work-reports/my"
+            );
 
-        const data =
-          response?.data;
+          const data =
+            response?.data;
 
-        const report =
-          data?.workReport ||
-          data?.report ||
-          data;
+          /*
+           * Your backend may return:
+           *
+           * {
+           *   success: true,
+           *   workReports: [...]
+           * }
+           *
+           * OR:
+           *
+           * {
+           *   success: true,
+           *   workReport: {...}
+           * }
+           */
 
-        if (
-          report &&
-          report.description !==
-            undefined
-        ) {
-          setWorkReportExists(
-            true
-          );
+          let report = null;
 
-          setWorkReportDescription(
-            report.description || ""
-          );
-        } else {
+          if (
+            Array.isArray(
+              data?.workReports
+            )
+          ) {
+            const todayKey =
+              getDateKey(
+                currentTime
+              );
+
+            /*
+             * Prefer a report connected
+             * to today's attendance.
+             */
+
+            const todayReports =
+              data.workReports
+                .filter(
+                  (item) =>
+                    getDateKey(
+                      item?.date
+                    ) ===
+                    todayKey
+                )
+                .sort(
+                  (a, b) => {
+                    return (
+                      new Date(
+                        b?.createdAt ||
+                          b?.date ||
+                          0
+                      ).getTime() -
+                      new Date(
+                        a?.createdAt ||
+                          a?.date ||
+                          0
+                      ).getTime()
+                    );
+                  }
+                );
+
+            report =
+              todayReports[0] ||
+              data.workReports[0] ||
+              null;
+          } else {
+            report =
+              data?.workReport ||
+              data?.report ||
+              null;
+          }
+
+          if (
+            report &&
+            report.description !==
+              undefined
+          ) {
+            setWorkReportExists(
+              true
+            );
+
+            setWorkReportDescription(
+              report.description ||
+                ""
+            );
+
+            return report;
+          }
+
           setWorkReportExists(
             false
           );
@@ -729,29 +954,34 @@ const MyAttendance = () => {
           setWorkReportDescription(
             ""
           );
-        }
-      } catch (error) {
-        if (
-          error?.response
-            ?.status === 404
-        ) {
-          setWorkReportExists(
-            false
+
+          return null;
+        } catch (error) {
+          if (
+            error?.response
+              ?.status === 404
+          ) {
+            setWorkReportExists(
+              false
+            );
+
+            setWorkReportDescription(
+              ""
+            );
+
+            return null;
+          }
+
+          console.error(
+            "FETCH WORK REPORT ERROR:",
+            error
           );
 
-          setWorkReportDescription(
-            ""
-          );
-
-          return;
+          return null;
         }
-
-        console.error(
-          "FETCH WORK REPORT ERROR:",
-          error
-        );
-      }
-    }, []);
+      },
+      [currentTime]
+    );
 
   /* =======================================================
      INITIAL LOAD
@@ -784,7 +1014,7 @@ const MyAttendance = () => {
   /* =======================================================
      ACTIVE ATTENDANCE
      
-     IMPORTANT OVERNIGHT SHIFT FIX
+     OVERNIGHT SHIFT SUPPORT
 
      Example:
 
@@ -792,17 +1022,17 @@ const MyAttendance = () => {
      ->
      Oct 8 3:00 AM
 
-     Attendance DATE remains Oct 7.
-
-     After midnight we still find the
-     open Oct 7 attendance and use it
-     for the Check Out button.
+     The attendance DATE remains
+     Oct 7, but it is still the active
+     attendance until checkout.
      ======================================================= */
 
   const activeAttendance =
     useMemo(() => {
       const todayKey =
-        getDateKey(currentTime);
+        getDateKey(
+          currentTime
+        );
 
       /* ---------------------------------------------------
          Today's attendance
@@ -817,15 +1047,14 @@ const MyAttendance = () => {
         ) || null;
 
       /* ---------------------------------------------------
-         If today's attendance is open,
-         use it immediately.
+         Today's OPEN attendance
          --------------------------------------------------- */
 
       if (
-        todayAttendance?.checkIn
-          ?.time &&
-        !todayAttendance?.checkOut
-          ?.time
+        todayAttendance
+          ?.checkIn?.time &&
+        !todayAttendance
+          ?.checkOut?.time
       ) {
         return todayAttendance;
       }
@@ -843,57 +1072,67 @@ const MyAttendance = () => {
 
       const openAttendance =
         attendance
-          .filter((record) => {
-            if (
-              !record?.checkIn?.time
-            ) {
-              return false;
+          .filter(
+            (record) => {
+              if (
+                !record?.checkIn
+                  ?.time
+              ) {
+                return false;
+              }
+
+              if (
+                record?.checkOut
+                  ?.time
+              ) {
+                return false;
+              }
+
+              const checkInTime =
+                new Date(
+                  record.checkIn
+                    .time
+                ).getTime();
+
+              if (
+                Number.isNaN(
+                  checkInTime
+                )
+              ) {
+                return false;
+              }
+
+              const elapsed =
+                now -
+                checkInTime;
+
+              return (
+                elapsed >= 0 &&
+                elapsed <=
+                  OPEN_ATTENDANCE_WINDOW
+              );
             }
-
-            if (
-              record?.checkOut?.time
-            ) {
-              return false;
+          )
+          .sort(
+            (a, b) => {
+              return (
+                new Date(
+                  b.checkIn.time
+                ).getTime() -
+                new Date(
+                  a.checkIn.time
+                ).getTime()
+              );
             }
-
-            const checkInTime =
-              new Date(
-                record.checkIn.time
-              ).getTime();
-
-            if (
-              Number.isNaN(
-                checkInTime
-              )
-            ) {
-              return false;
-            }
-
-            const elapsed =
-              now - checkInTime;
-
-            return (
-              elapsed >= 0 &&
-              elapsed <=
-                OPEN_ATTENDANCE_WINDOW
-            );
-          })
-          .sort((a, b) => {
-            return (
-              new Date(
-                b.checkIn.time
-              ).getTime() -
-              new Date(
-                a.checkIn.time
-              ).getTime()
-            );
-          })[0] || null;
+          )[0] || null;
 
       /* ---------------------------------------------------
          Open overnight attendance wins.
          --------------------------------------------------- */
 
-      if (openAttendance) {
+      if (
+        openAttendance
+      ) {
         return openAttendance;
       }
 
@@ -901,7 +1140,10 @@ const MyAttendance = () => {
          Otherwise today's record.
          --------------------------------------------------- */
 
-      return todayAttendance || null;
+      return (
+        todayAttendance ||
+        null
+      );
     }, [
       attendance,
       currentTime,
@@ -912,12 +1154,12 @@ const MyAttendance = () => {
      ======================================================= */
 
   const hasCheckedIn =
-    !!activeAttendance?.checkIn
-      ?.time;
+    !!activeAttendance
+      ?.checkIn?.time;
 
   const hasCheckedOut =
-    !!activeAttendance?.checkOut
-      ?.time;
+    !!activeAttendance
+      ?.checkOut?.time;
 
   const isCheckedIn =
     hasCheckedIn &&
@@ -934,16 +1176,16 @@ const MyAttendance = () => {
   const liveWorkingMinutes =
     useMemo(() => {
       if (
-        !activeAttendance?.checkIn
-          ?.time
+        !activeAttendance
+          ?.checkIn?.time
       ) {
         return 0;
       }
 
       const checkInTime =
         new Date(
-          activeAttendance.checkIn
-            .time
+          activeAttendance
+            .checkIn.time
         ).getTime();
 
       if (
@@ -1000,7 +1242,9 @@ const MyAttendance = () => {
       const now =
         currentTime.getTime();
 
-      if (now <= checkInTime) {
+      if (
+        now <= checkInTime
+      ) {
         return 0;
       }
 
@@ -1031,52 +1275,54 @@ const MyAttendance = () => {
             .trim()
             .toLowerCase();
 
-        records = records.filter(
-          (record) => {
-            const date =
-              formatDate(
-                record?.date
-              ).toLowerCase();
+        records =
+          records.filter(
+            (record) => {
+              const date =
+                formatDate(
+                  record?.date
+                ).toLowerCase();
 
-            const day =
-              formatDay(
-                record?.date
-              ).toLowerCase();
+              const day =
+                formatDay(
+                  record?.date
+                ).toLowerCase();
 
-            const status =
-              formatStatus(
-                record?.status
-              ).toLowerCase();
+              const status =
+                formatStatus(
+                  record?.status
+                ).toLowerCase();
 
-            const method =
-              formatMethod(
-                getAttendanceMethod(
-                  record
+              const method =
+                formatMethod(
+                  getAttendanceMethod(
+                    record
+                  )
+                ).toLowerCase();
+
+              return (
+                date.includes(
+                  searchValue
+                ) ||
+                day.includes(
+                  searchValue
+                ) ||
+                status.includes(
+                  searchValue
+                ) ||
+                method.includes(
+                  searchValue
                 )
-              ).toLowerCase();
-
-            return (
-              date.includes(
-                searchValue
-              ) ||
-              day.includes(
-                searchValue
-              ) ||
-              status.includes(
-                searchValue
-              ) ||
-              method.includes(
-                searchValue
-              )
-            );
-          }
-        );
+              );
+            }
+          );
       }
 
       /* Status */
 
       if (
-        statusFilter !== "ALL"
+        statusFilter !==
+        "ALL"
       ) {
         records =
           records.filter(
@@ -1103,7 +1349,8 @@ const MyAttendance = () => {
       /* Method */
 
       if (
-        methodFilter !== "ALL"
+        methodFilter !==
+        "ALL"
       ) {
         records =
           records.filter(
@@ -1125,19 +1372,23 @@ const MyAttendance = () => {
 
       /* Newest first */
 
-      records.sort((a, b) => {
-        const dateA =
-          new Date(
-            a?.date || 0
-          ).getTime();
+      records.sort(
+        (a, b) => {
+          const dateA =
+            new Date(
+              a?.date || 0
+            ).getTime();
 
-        const dateB =
-          new Date(
-            b?.date || 0
-          ).getTime();
+          const dateB =
+            new Date(
+              b?.date || 0
+            ).getTime();
 
-        return dateB - dateA;
-      });
+          return (
+            dateB - dateA
+          );
+        }
+      );
 
       return records;
     }, [
@@ -1168,7 +1419,8 @@ const MyAttendance = () => {
 
       return filteredAttendance.slice(
         start,
-        start + recordsPerPage
+        start +
+          recordsPerPage
       );
     }, [
       filteredAttendance,
@@ -1191,213 +1443,23 @@ const MyAttendance = () => {
      CHECK IN
      ======================================================= */
 
-  const handleCheckIn = async () => {
-    if (actionLoading) {
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-
-      setMessage("");
-      setMessageType("");
-
-      setGpsDebug({
-        source:
-          "REQUESTING GPS LOCATION...",
-      });
-
-      const gps =
-        await getBestLocation(
-          updateGpsDebug
-        );
-
-      console.log(
-        "CHECK-IN GPS:",
-        gps
-      );
-
-      const response =
-        await api.post(
-          "/attendance/check-in",
-          {
-            latitude:
-              gps.latitude,
-
-            longitude:
-              gps.longitude,
-
-            accuracy:
-              gps.accuracy,
-          }
-        );
-
-      const data =
-        response?.data;
-
-      setMessage(
-        data?.message ||
-          "Check-in successful."
-      );
-
-      setMessageType("success");
-
-      await fetchAttendance();
-
-      await fetchTodayWorkReport();
-    } catch (error) {
-      console.error(
-        "CHECK-IN ERROR:",
-        error
-      );
-
-      const errorMessage =
-        error?.response?.data
-          ?.message ||
-        error?.message ||
-        "Check-in failed.";
-
-      setMessage(errorMessage);
-      setMessageType("error");
-
-      if (
-        error?.response?.data
-          ?.distance !==
-          undefined ||
-        error?.response?.data
-          ?.allowedRadius !==
-          undefined
-      ) {
-        setGpsDebug(
-          (previous) => ({
-            ...(previous || {}),
-
-            source:
-              "BACKEND REJECTED LOCATION",
-
-            backendDistance:
-              error.response.data
-                .distance,
-
-            backendAllowedRadius:
-              error.response.data
-                .allowedRadius,
-          })
-        );
-      }
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  /* =======================================================
-     CHECK OUT CLICK
-     ======================================================= */
-
-  const handleCheckOutClick =
+  const handleCheckIn =
     async () => {
       if (actionLoading) {
         return;
       }
 
-      if (!isCheckedIn) {
-        setMessage(
-          "No active attendance found for checkout."
-        );
-
-        setMessageType("error");
-
-        return;
-      }
-
       try {
-        setActionLoading(true);
-
-        setMessage("");
-        setMessageType("");
-
-        await fetchTodayWorkReport();
-
-        setShowWorkReportModal(
+        setActionLoading(
           true
         );
-      } catch (error) {
-        console.error(
-          "CHECKOUT PREPARATION ERROR:",
-          error
-        );
-
-        setMessage(
-          error?.response?.data
-            ?.message ||
-            "Unable to prepare checkout."
-        );
-
-        setMessageType("error");
-      } finally {
-        setActionLoading(false);
-      }
-    };
-
-  /* =======================================================
-     WORK REPORT + CHECK OUT
-     ======================================================= */
-
-  const handleWorkReportAndCheckout =
-    async () => {
-      if (workReportLoading) {
-        return;
-      }
-
-      try {
-        setWorkReportLoading(true);
 
         setMessage("");
         setMessageType("");
-
-        /* Work report required */
-
-        if (
-          !workReportDescription.trim()
-        ) {
-          setMessage(
-            "Please enter your work report before checkout."
-          );
-
-          setMessageType("error");
-
-          setWorkReportLoading(false);
-
-          return;
-        }
-
-        /* Save / update work report */
-
-        if (workReportExists) {
-          await api.put(
-            "/work-reports/my",
-            {
-              description:
-                workReportDescription.trim(),
-            }
-          );
-        } else {
-          await api.post(
-            "/work-reports",
-            {
-              description:
-                workReportDescription.trim(),
-            }
-          );
-        }
-
-        setWorkReportExists(true);
-
-        /* GPS */
 
         setGpsDebug({
           source:
-            "REQUESTING GPS LOCATION FOR CHECKOUT...",
+            "REQUESTING GPS LOCATION...",
         });
 
         const gps =
@@ -1406,15 +1468,13 @@ const MyAttendance = () => {
           );
 
         console.log(
-          "CHECK-OUT GPS:",
+          "CHECK-IN GPS:",
           gps
         );
 
-        /* Check out */
-
         const response =
           await api.post(
-            "/attendance/check-out",
+            "/attendance/check-in",
             {
               latitude:
                 gps.latitude,
@@ -1432,62 +1492,701 @@ const MyAttendance = () => {
 
         setMessage(
           data?.message ||
-            "Checkout successful."
+            "Check-in successful."
         );
 
-        setMessageType("success");
-
-        setShowWorkReportModal(
-          false
+        setMessageType(
+          "success"
         );
-
-        /* Refresh attendance */
 
         await fetchAttendance();
 
         await fetchTodayWorkReport();
       } catch (error) {
         console.error(
-          "CHECKOUT ERROR:",
+          "CHECK-IN ERROR:",
           error
         );
 
         const errorMessage =
-          error?.response?.data
-            ?.message ||
+          error?.response
+            ?.data?.message ||
           error?.message ||
-          "Checkout failed.";
+          "Check-in failed.";
 
-        setMessage(errorMessage);
-        setMessageType("error");
+        setMessage(
+          errorMessage
+        );
+
+        setMessageType(
+          "error"
+        );
 
         if (
-          error?.response?.data
-            ?.distance !==
+          error?.response
+            ?.data?.distance !==
             undefined ||
-          error?.response?.data
+          error?.response
+            ?.data
             ?.allowedRadius !==
             undefined
         ) {
           setGpsDebug(
             (previous) => ({
-              ...(previous || {}),
+              ...(previous ||
+                {}),
 
               source:
                 "BACKEND REJECTED LOCATION",
 
               backendDistance:
-                error.response.data
+                error.response
+                  .data
                   .distance,
 
               backendAllowedRadius:
-                error.response.data
+                error.response
+                  .data
                   .allowedRadius,
             })
           );
         }
       } finally {
-        setWorkReportLoading(false);
+        setActionLoading(
+          false
+        );
+      }
+    };
+
+  /* =======================================================
+     CHECK OUT CLICK
+     ======================================================= */
+
+  const handleCheckOutClick =
+    async () => {
+      if (actionLoading) {
+        return;
+      }
+
+      if (!isCheckedIn) {
+        setMessage(
+          "No active attendance found for checkout."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
+
+      try {
+        setActionLoading(
+          true
+        );
+
+        setMessage("");
+        setMessageType("");
+
+        /*
+         * Save exactly which attendance
+         * we are checking out.
+         *
+         * This is important for overnight
+         * shifts.
+         */
+
+        setCheckoutAttendanceId(
+          activeAttendance?._id ||
+            activeAttendance?.id ||
+            null
+        );
+
+        /*
+         * Load existing report.
+         *
+         * If one already exists, its
+         * description is loaded.
+         *
+         * If none exists, textarea stays
+         * empty.
+         */
+
+        await fetchTodayWorkReport();
+
+        setShowWorkReportModal(
+          true
+        );
+      } catch (error) {
+        console.error(
+          "CHECKOUT PREPARATION ERROR:",
+          error
+        );
+
+        setMessage(
+          error?.response
+            ?.data?.message ||
+            error?.message ||
+            "Unable to prepare checkout."
+        );
+
+        setMessageType(
+          "error"
+        );
+      } finally {
+        setActionLoading(
+          false
+        );
+      }
+    };
+
+  /* =======================================================
+     WORK REPORT + CHECK OUT
+     ======================================================= */
+
+  const handleWorkReportAndCheckout =
+    async () => {
+      if (
+        workReportLoading
+      ) {
+        return;
+      }
+
+      /*
+       * Always use the attendance that
+       * was selected when the modal opened.
+       */
+
+      const currentAttendanceId =
+        checkoutAttendanceId ||
+        activeAttendance?._id ||
+        activeAttendance?.id ||
+        null;
+
+      try {
+        setWorkReportLoading(
+          true
+        );
+
+        setMessage("");
+        setMessageType("");
+
+        /* =================================================
+           1. VALIDATE ATTENDANCE
+           ================================================= */
+
+        if (
+          !currentAttendanceId
+        ) {
+          setMessage(
+            "Unable to identify the active attendance. Please refresh the page and try again."
+          );
+
+          setMessageType(
+            "error"
+          );
+
+          return;
+        }
+
+        /*
+         * Make sure the selected attendance
+         * is still open.
+         */
+
+        const selectedAttendance =
+          attendance.find(
+            (record) =>
+              String(
+                record?._id ||
+                  record?.id ||
+                  ""
+              ) ===
+              String(
+                currentAttendanceId
+              )
+          ) ||
+          activeAttendance;
+
+        if (
+          !selectedAttendance
+        ) {
+          setMessage(
+            "Active attendance could not be found. Please refresh the page and try again."
+          );
+
+          setMessageType(
+            "error"
+          );
+
+          return;
+        }
+
+        if (
+          !selectedAttendance
+            ?.checkIn?.time
+        ) {
+          setMessage(
+            "No valid check-in was found for this attendance."
+          );
+
+          setMessageType(
+            "error"
+          );
+
+          return;
+        }
+
+        if (
+          selectedAttendance
+            ?.checkOut?.time
+        ) {
+          setMessage(
+            "This attendance has already been checked out."
+          );
+
+          setMessageType(
+            "error"
+          );
+
+          setShowWorkReportModal(
+            false
+          );
+
+          return;
+        }
+
+        /* =================================================
+           2. VALIDATE WORK REPORT
+           ================================================= */
+
+        const description =
+          workReportDescription.trim();
+
+        if (!description) {
+          setMessage(
+            "Please enter your work report before checkout."
+          );
+
+          setMessageType(
+            "error"
+          );
+
+          return;
+        }
+
+        if (
+          description.length < 10
+        ) {
+          setMessage(
+            "Work report must contain at least 10 characters."
+          );
+
+          setMessageType(
+            "error"
+          );
+
+          return;
+        }
+
+        if (
+          description.length > 2000
+        ) {
+          setMessage(
+            "Work report cannot exceed 2000 characters."
+          );
+
+          setMessageType(
+            "error"
+          );
+
+          return;
+        }
+
+        /* =================================================
+           3. SAVE WORK REPORT
+           ================================================= */
+
+        let reportResponse;
+
+        if (
+          workReportExists
+        ) {
+          /*
+           * Existing report:
+           * update it.
+           */
+
+          reportResponse =
+            await api.put(
+              "/work-reports/my",
+              {
+                description,
+              }
+            );
+        } else {
+          /*
+           * No report:
+           * create it.
+           */
+
+          reportResponse =
+            await api.post(
+              "/work-reports",
+              {
+                description,
+              }
+            );
+        }
+
+        /*
+         * IMPORTANT:
+         * Do not continue to checkout if
+         * backend did not confirm success.
+         */
+
+        if (
+          !reportResponse?.data
+            ?.success
+        ) {
+          throw new Error(
+            reportResponse?.data
+              ?.message ||
+              "Unable to save work report."
+          );
+        }
+
+        setWorkReportExists(
+          true
+        );
+
+        /* =================================================
+           4. VERIFY REPORT WAS SAVED
+           ================================================= */
+
+        /*
+         * Fetch the reports again.
+         *
+         * This prevents a situation where
+         * the frontend thinks the report was
+         * saved but backend checkout cannot
+         * find it.
+         */
+
+        let savedReport =
+          null;
+
+        try {
+          const verifyResponse =
+            await api.get(
+              "/work-reports/my"
+            );
+
+          const verifyData =
+            verifyResponse?.data;
+
+          const reports =
+            Array.isArray(
+              verifyData?.workReports
+            )
+              ? verifyData.workReports
+              : [];
+
+          /*
+           * First try to find report
+           * using attendanceId.
+           */
+
+          savedReport =
+            reports.find(
+              (report) =>
+                String(
+                  report?.attendanceId
+                    ?._id ||
+                    report?.attendanceId ||
+                    ""
+                ) ===
+                String(
+                  currentAttendanceId
+                )
+            ) || null;
+
+          /*
+           * If backend returns a single
+           * report instead of an array,
+           * use it.
+           */
+
+          if (
+            !savedReport &&
+            verifyData?.workReport
+          ) {
+            const singleReport =
+              verifyData.workReport;
+
+            const reportAttendanceId =
+              singleReport
+                ?.attendanceId?._id ||
+              singleReport
+                ?.attendanceId ||
+              null;
+
+            if (
+              !reportAttendanceId ||
+              String(
+                reportAttendanceId
+              ) ===
+                String(
+                  currentAttendanceId
+                )
+            ) {
+              savedReport =
+                singleReport;
+            }
+          }
+        } catch (verifyError) {
+          /*
+           * Do NOT fail checkout just
+           * because the verification GET
+           * has a problem.
+           *
+           * The POST/PUT already returned
+           * success, and backend checkout
+           * itself will verify the report.
+           */
+
+          console.warn(
+            "WORK REPORT VERIFICATION WARNING:",
+            verifyError
+          );
+        }
+
+        /*
+         * Keep the report description in state.
+         */
+
+        setWorkReportDescription(
+          description
+        );
+
+        /* =================================================
+           5. CHECK ATTENDANCE METHOD
+           ================================================= */
+
+        const attendanceMethod =
+          String(
+            selectedAttendance
+              ?.checkIn?.method ||
+              getAttendanceMethod(
+                selectedAttendance
+              ) ||
+              ""
+          ).toUpperCase();
+
+        console.log(
+          "CHECKOUT ATTENDANCE:",
+          selectedAttendance
+        );
+
+        console.log(
+          "CHECKOUT ATTENDANCE ID:",
+          currentAttendanceId
+        );
+
+        console.log(
+          "CHECKOUT METHOD:",
+          attendanceMethod
+        );
+
+        /* =================================================
+           6. GPS ONLY FOR OFFICE
+           ================================================= */
+
+        let checkoutPayload =
+          {};
+
+        /*
+         * IMPORTANT FIX:
+         *
+         * REMOTE and FIELD do NOT require
+         * GPS in your backend.
+         *
+         * Only OFFICE requires GPS.
+         */
+
+        if (
+          attendanceMethod ===
+          "OFFICE"
+        ) {
+          setGpsDebug({
+            source:
+              "REQUESTING GPS LOCATION FOR CHECKOUT...",
+          });
+
+          const gps =
+            await getBestLocation(
+              updateGpsDebug
+            );
+
+          console.log(
+            "CHECK-OUT GPS:",
+            gps
+          );
+
+          checkoutPayload = {
+            latitude:
+              gps.latitude,
+
+            longitude:
+              gps.longitude,
+
+            accuracy:
+              gps.accuracy,
+          };
+        } else {
+          /*
+           * Remote / Field:
+           * no GPS required.
+           */
+
+          setGpsDebug({
+            source:
+              `CHECKOUT METHOD ${attendanceMethod} - GPS NOT REQUIRED`,
+          });
+        }
+
+        /* =================================================
+           7. CHECK OUT
+           ================================================= */
+
+        console.log(
+          "CHECKOUT REQUEST PAYLOAD:",
+          checkoutPayload
+        );
+
+        const response =
+          await api.post(
+            "/attendance/check-out",
+            checkoutPayload
+          );
+
+        const data =
+          response?.data;
+
+        /*
+         * Backend must explicitly confirm
+         * checkout success.
+         */
+
+        if (
+          !data?.success
+        ) {
+          throw new Error(
+            data?.message ||
+              "Checkout failed."
+          );
+        }
+
+        /* =================================================
+           8. SUCCESS
+           ================================================= */
+
+        setMessage(
+          data?.message ||
+            "Work report submitted and checkout completed successfully."
+        );
+
+        setMessageType(
+          "success"
+        );
+
+        setShowWorkReportModal(
+          false
+        );
+
+        setCheckoutAttendanceId(
+          null
+        );
+
+        /*
+         * Refresh attendance first.
+         */
+
+        await fetchAttendance();
+
+        /*
+         * Refresh report after checkout.
+         */
+
+        await fetchTodayWorkReport();
+      } catch (error) {
+        console.error(
+          "WORK REPORT + CHECKOUT ERROR:",
+          error
+        );
+
+        /*
+         * IMPORTANT:
+         *
+         * If report save succeeded but
+         * checkout failed because of GPS,
+         * leave the report saved.
+         *
+         * User can simply click
+         * Submit & Check Out again.
+         */
+
+        const errorMessage =
+          error?.response
+            ?.data?.message ||
+          error?.message ||
+          "Checkout failed.";
+
+        setMessage(
+          errorMessage
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        /*
+         * Backend GPS rejection details.
+         */
+
+        if (
+          error?.response
+            ?.data?.distance !==
+            undefined ||
+          error?.response
+            ?.data
+            ?.allowedRadius !==
+            undefined
+        ) {
+          setGpsDebug(
+            (previous) => ({
+              ...(previous ||
+                {}),
+
+              source:
+                "BACKEND REJECTED LOCATION",
+
+              backendDistance:
+                error.response
+                  .data
+                  .distance,
+
+              backendAllowedRadius:
+                error.response
+                  .data
+                  .allowedRadius,
+            })
+          );
+        }
+      } finally {
+        setWorkReportLoading(
+          false
+        );
       }
     };
 
@@ -1497,12 +2196,18 @@ const MyAttendance = () => {
 
   const handleCloseWorkReportModal =
     () => {
-      if (workReportLoading) {
+      if (
+        workReportLoading
+      ) {
         return;
       }
 
       setShowWorkReportModal(
         false
+      );
+
+      setCheckoutAttendanceId(
+        null
       );
     };
 
@@ -1582,34 +2287,50 @@ const MyAttendance = () => {
 
       {/* =================================================
           GPS DEBUG
-          
-          Kept functional.
-          Uses simple inline structure so
-          it does not interfere with your
-          attendance CSS.
           ================================================= */}
 
       {gpsDebug && (
         <div
           style={{
-            marginBottom: "20px",
-            padding: "14px 16px",
+            marginBottom:
+              "20px",
+
+            padding:
+              "14px 16px",
+
             border:
               "1px solid #dce8f3",
-            borderRadius: "12px",
+
+            borderRadius:
+              "12px",
+
             background:
               "#f8fbff",
-            color: "#667085",
-            fontSize: "11px",
-            lineHeight: "1.7",
+
+            color:
+              "#667085",
+
+            fontSize:
+              "11px",
+
+            lineHeight:
+              "1.7",
           }}
         >
           <strong
             style={{
-              display: "block",
-              marginBottom: "5px",
-              color: "#1479d1",
-              fontSize: "10px",
+              display:
+                "block",
+
+              marginBottom:
+                "5px",
+
+              color:
+                "#1479d1",
+
+              fontSize:
+                "10px",
+
               letterSpacing:
                 "1px",
             }}
@@ -1717,9 +2438,7 @@ const MyAttendance = () => {
 
       <div className="today-attendance-card">
 
-        {/* -----------------------------------------------
-            HEADER
-            ----------------------------------------------- */}
+        {/* HEADER */}
 
         <div className="today-attendance-header">
 
@@ -1759,15 +2478,11 @@ const MyAttendance = () => {
 
         </div>
 
-        {/* -----------------------------------------------
-            BODY
-            ----------------------------------------------- */}
+        {/* BODY */}
 
         <div className="today-attendance-body">
 
-          {/* ---------------------------------------------
-              TIME GRID
-              --------------------------------------------- */}
+          {/* TIME GRID */}
 
           <div className="today-time-grid">
 
@@ -1849,9 +2564,7 @@ const MyAttendance = () => {
 
           </div>
 
-          {/* ---------------------------------------------
-              ACTION BUTTONS
-              --------------------------------------------- */}
+          {/* ACTION BUTTONS */}
 
           <div className="today-attendance-actions">
 
@@ -1928,9 +2641,7 @@ const MyAttendance = () => {
 
       <div className="attendance-filters-card">
 
-        {/* -----------------------------------------------
-            FILTER HEADER
-            ----------------------------------------------- */}
+        {/* FILTER HEADER */}
 
         <div className="attendance-filters-header">
 
@@ -1945,18 +2656,20 @@ const MyAttendance = () => {
           </div>
 
           <span className="attendance-count">
-            {filteredAttendance.length}{" "}
-            {filteredAttendance.length ===
-            1
-              ? "Record"
-              : "Records"}
+            {
+              filteredAttendance.length
+            }{" "}
+            {
+              filteredAttendance.length ===
+              1
+                ? "Record"
+                : "Records"
+            }
           </span>
 
         </div>
 
-        {/* -----------------------------------------------
-            FILTERS
-            ----------------------------------------------- */}
+        {/* FILTERS */}
 
         <div className="attendance-filters">
 
@@ -1969,7 +2682,9 @@ const MyAttendance = () => {
 
             <input
               type="text"
-              value={search}
+              value={
+                search
+              }
               onChange={(e) =>
                 setSearch(
                   e.target.value
@@ -1978,19 +2693,29 @@ const MyAttendance = () => {
               placeholder="Search attendance..."
               style={{
                 minWidth: 180,
-                maxWidth: "100%",
+                maxWidth:
+                  "100%",
+
                 padding:
                   "9px 11px",
+
                 border:
                   "1px solid #e0e5ed",
+
                 borderRadius: 9,
-                outline: "none",
+
+                outline:
+                  "none",
+
                 background:
                   "#ffffff",
+
                 color:
                   "#667085",
+
                 fontFamily:
                   "inherit",
+
                 fontSize: 11,
               }}
             />
@@ -2114,10 +2839,6 @@ const MyAttendance = () => {
 
       {loading ? (
 
-        /* -----------------------------------------------
-           LOADING
-           ----------------------------------------------- */
-
         <div className="attendance-loading">
           <span className="loading-spinner" />
 
@@ -2128,10 +2849,6 @@ const MyAttendance = () => {
 
       ) : paginatedAttendance.length ===
         0 ? (
-
-        /* -----------------------------------------------
-           EMPTY
-           ----------------------------------------------- */
 
         <div className="empty-attendance">
 
@@ -2174,10 +2891,6 @@ const MyAttendance = () => {
 
       ) : (
 
-        /* -----------------------------------------------
-           RECORD LIST
-           ----------------------------------------------- */
-
         <div className="attendance-record-list">
 
           {paginatedAttendance.map(
@@ -2202,9 +2915,7 @@ const MyAttendance = () => {
                   }
                 >
 
-                  {/* -----------------------------------
-                      DATE
-                      ----------------------------------- */}
+                  {/* DATE */}
 
                   <div className="record-date">
 
@@ -2222,9 +2933,7 @@ const MyAttendance = () => {
 
                   </div>
 
-                  {/* -----------------------------------
-                      STATUS
-                      ----------------------------------- */}
+                  {/* STATUS */}
 
                   <div className="record-status">
 
@@ -2240,9 +2949,7 @@ const MyAttendance = () => {
 
                   </div>
 
-                  {/* -----------------------------------
-                      CHECK IN / CHECK OUT
-                      ----------------------------------- */}
+                  {/* CHECK IN / CHECK OUT */}
 
                   <div className="record-time">
 
@@ -2284,9 +2991,7 @@ const MyAttendance = () => {
 
                   </div>
 
-                  {/* -----------------------------------
-                      WORKING TIME
-                      ----------------------------------- */}
+                  {/* WORKING TIME */}
 
                   <div className="record-duration">
 
@@ -2302,9 +3007,7 @@ const MyAttendance = () => {
 
                   </div>
 
-                  {/* -----------------------------------
-                      METHOD
-                      ----------------------------------- */}
+                  {/* METHOD */}
 
                   <div className="record-method">
 
@@ -2343,7 +3046,8 @@ const MyAttendance = () => {
           <button
             type="button"
             disabled={
-              currentPage === 1
+              currentPage ===
+              1
             }
             onClick={() =>
               setCurrentPage(
@@ -2428,9 +3132,7 @@ const MyAttendance = () => {
 
           <div className="work-report-modal">
 
-            {/* -------------------------------------------
-                MODAL HEADER
-                ------------------------------------------- */}
+            {/* MODAL HEADER */}
 
             <div className="modal-header">
 
@@ -2469,9 +3171,7 @@ const MyAttendance = () => {
 
             </div>
 
-            {/* -------------------------------------------
-                MODAL BODY
-                ------------------------------------------- */}
+            {/* MODAL BODY */}
 
             <div className="modal-body">
 
@@ -2496,22 +3196,24 @@ const MyAttendance = () => {
               />
 
               <div className="work-report-helper">
+
                 <span>
                   Work report is required
                   before checkout.
                 </span>
 
                 <span>
-                  {workReportDescription.length}{" "}
+                  {
+                    workReportDescription.length
+                  }{" "}
                   characters
                 </span>
+
               </div>
 
             </div>
 
-            {/* -------------------------------------------
-                MODAL FOOTER
-                ------------------------------------------- */}
+            {/* MODAL FOOTER */}
 
             <div className="modal-footer">
 
