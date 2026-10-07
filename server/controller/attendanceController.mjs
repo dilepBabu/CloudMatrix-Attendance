@@ -167,26 +167,62 @@ const getApprovedLeave = async (
 };
 
 // =========================================================
-// Mark previous incomplete attendance as MISSED_CHECKOUT
+// Mark genuinely stale incomplete attendance as
+// MISSED_CHECKOUT
+//
+// IMPORTANT NIGHT-SHIFT RULE:
+//
+// We do NOT mark an attendance as missed merely because
+// its calendar date is yesterday.
+//
+// Example:
+//
+// Oct 6 7:00 PM -> Check-in
+// Oct 7 3:00 AM -> still a valid open overnight shift
+//
+// Therefore the attendance only becomes MISSED_CHECKOUT
+// after it has remained open for more than 24 hours.
+//
+// This protects legitimate overnight attendance.
 // =========================================================
 
 const markMissedCheckout = async (
-  employeeId,
-  currentDay
+  employeeId
 ) => {
   try {
+    const now = new Date();
+
+    // Maximum allowed open attendance window.
+    //
+    // 24 hours allows:
+    //
+    // Oct 6 7 PM
+    //        ↓
+    // Oct 7 3 AM
+    //
+    // without incorrectly marking it as missed.
+    const staleCutoff =
+      new Date(
+        now.getTime() -
+          24 *
+            60 *
+            60 *
+            1000
+      );
+
     await Attendance.updateMany(
       {
         employeeId,
-        date: {
-          $lt: currentDay,
-        },
+
         "checkIn.time": {
           $exists: true,
+          $lt: staleCutoff,
         },
+
         "checkOut.time": {
           $exists: false,
         },
+
         status: "PRESENT",
       },
       {
@@ -436,24 +472,96 @@ export const checkIn = async (
       );
 
     // -----------------------------------------------------
-    // Mark previous incomplete attendance
+    // Mark ONLY genuinely stale open attendance
+    //
+    // IMPORTANT:
+    // We no longer use:
+    //
+    // attendance.date < today
+    //
+    // because that breaks night shifts.
+    //
+    // Only attendance open for more than 24 hours
+    // becomes MISSED_CHECKOUT.
     // -----------------------------------------------------
 
     await markMissedCheckout(
-      employee._id,
-      startOfDay
+      employee._id
     );
 
     // -----------------------------------------------------
-    // Check duplicate attendance
+    // Check whether employee currently has an OPEN
+    // attendance.
+    //
+    // This is the important protection against:
+    //
+    // Oct 6 7 PM -> Check-in
+    // Oct 7 7 PM -> another Check-in
+    //
+    // if the first attendance is still open.
+    // -----------------------------------------------------
+
+    const openAttendance =
+      await Attendance.findOne({
+        employeeId:
+          employee._id,
+
+        "checkIn.time": {
+          $exists: true,
+        },
+
+        "checkOut.time": {
+          $exists: false,
+        },
+
+        status: "PRESENT",
+      })
+        .sort({
+          "checkIn.time": -1,
+        });
+
+    if (openAttendance) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You already have an open attendance. Please check out from your previous shift before checking in again.",
+        attendance: {
+          id:
+            openAttendance._id,
+
+          date:
+            openAttendance.date,
+
+          checkIn:
+            openAttendance.checkIn,
+
+          status:
+            openAttendance.status,
+        },
+      });
+    }
+
+    // -----------------------------------------------------
+    // Check duplicate attendance for TODAY
+    //
+    // A CLOSED attendance from yesterday does NOT block
+    // today's check-in.
+    //
+    // A closed attendance from today DOES block another
+    // check-in today.
     // -----------------------------------------------------
 
     const existingAttendance =
       await Attendance.findOne({
-        employeeId: employee._id,
+        employeeId:
+          employee._id,
+
         date: {
-          $gte: startOfDay,
-          $lte: endOfDay,
+          $gte:
+            startOfDay,
+
+          $lte:
+            endOfDay,
         },
       });
 
@@ -592,6 +700,18 @@ export const checkIn = async (
 
     // -----------------------------------------------------
     // Create attendance
+    //
+    // IMPORTANT:
+    //
+    // date = shift START date.
+    //
+    // This does NOT change for overnight attendance.
+    //
+    // Example:
+    //
+    // Oct 6 7 PM -> Oct 7 3 AM
+    //
+    // date = Oct 6
     // -----------------------------------------------------
 
     const attendance =
@@ -736,17 +856,111 @@ export const checkOut = async (
     }
 
     // -----------------------------------------------------
-    // Get today's company calendar range
+    // Current timestamp
     // -----------------------------------------------------
 
     const now =
       new Date();
 
-    const startOfDay =
-      getCurrentCompanyDayStart();
+    // -----------------------------------------------------
+    // IMPORTANT NIGHT-SHIFT LOGIC
+    //
+    // Do NOT search only today's attendance.
+    //
+    // Search for the latest OPEN attendance whose
+    // check-in occurred within the last 24 hours.
+    //
+    // This supports:
+    //
+    // Same-day:
+    // 9 AM -> 6 PM
+    //
+    // Overnight:
+    // Oct 6 7 PM -> Oct 7 3 AM
+    //
+    // while preventing very old forgotten attendance
+    // from being checked out indefinitely.
+    // -----------------------------------------------------
 
-    const endOfDay =
-      getCompanyDayEndFromDate(now);
+    const openAttendanceCutoff =
+      new Date(
+        now.getTime() -
+          24 *
+            60 *
+            60 *
+            1000
+      );
+
+    const attendance =
+      await Attendance.findOne({
+        employeeId:
+          employee._id,
+
+        "checkIn.time": {
+          $exists: true,
+          $gte:
+            openAttendanceCutoff,
+        },
+
+        "checkOut.time": {
+          $exists: false,
+        },
+
+        status: "PRESENT",
+      })
+        .sort({
+          "checkIn.time": -1,
+        });
+
+    // -----------------------------------------------------
+    // Employee must have an open attendance
+    // -----------------------------------------------------
+
+    if (!attendance) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You do not have an active attendance to check out. Your previous attendance may have been marked as missed checkout.",
+      });
+    }
+
+    // -----------------------------------------------------
+    // Prevent duplicate check-out
+    //
+    // Normally the query above only returns open records,
+    // but this protection remains for safety.
+    // -----------------------------------------------------
+
+    if (
+      attendance.checkOut?.time
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You have already checked out",
+      });
+    }
+
+    // -----------------------------------------------------
+    // IMPORTANT:
+    //
+    // For checkout restrictions, use the ATTENDANCE DATE.
+    //
+    // NOT the current checkout date.
+    //
+    // Example:
+    //
+    // Oct 6 7 PM -> check-in
+    // Oct 7 3 AM -> check-out
+    //
+    // Shift date = Oct 6
+    //
+    // Therefore leave / holiday / Sunday rules are
+    // evaluated for Oct 6.
+    // -----------------------------------------------------
+
+    const shiftDate =
+      attendance.date;
 
     // -----------------------------------------------------
     // APPROVED LEAVE CHECK
@@ -754,14 +968,13 @@ export const checkOut = async (
     // IMPORTANT:
     // APPROVED LEAVE has higher priority than overtime.
     //
-    // Even if the employee has approved overtime,
-    // approved leave must block checkout.
+    // Check against the shift-start date.
     // -----------------------------------------------------
 
     const approvedLeave =
       await getApprovedLeave(
         employee._id,
-        now
+        shiftDate
       );
 
     if (approvedLeave) {
@@ -783,57 +996,13 @@ export const checkOut = async (
     }
 
     // -----------------------------------------------------
-    // Check today's holiday
+    // Check holiday using SHIFT DATE
     // -----------------------------------------------------
 
     const holiday =
-      await isHoliday(now);
-
-    // -----------------------------------------------------
-    // Find today's attendance
-    //
-    // This is important because approved overtime
-    // attendance must be allowed to check out.
-    // -----------------------------------------------------
-
-    const attendance =
-      await Attendance.findOne({
-        employeeId:
-          employee._id,
-
-        date: {
-          $gte:
-            startOfDay,
-          $lte:
-            endOfDay,
-        },
-      });
-
-    // -----------------------------------------------------
-    // Employee must check in first
-    // -----------------------------------------------------
-
-    if (!attendance) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "You have not checked in today",
-      });
-    }
-
-    // -----------------------------------------------------
-    // Prevent duplicate check-out
-    // -----------------------------------------------------
-
-    if (
-      attendance.checkOut?.time
-    ) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "You have already checked out today",
-      });
-    }
+      await isHoliday(
+        shiftDate
+      );
 
     // -----------------------------------------------------
     // Holiday check-out restriction
@@ -865,23 +1034,34 @@ export const checkOut = async (
 
     // -----------------------------------------------------
     // Sunday check-out restriction
+    //
+    // IMPORTANT:
+    // Use the SHIFT DATE, not today's date.
+    //
+    // This prevents:
+    //
+    // Saturday 7 PM -> Sunday 3 AM
+    //
+    // from incorrectly becoming a Sunday attendance.
     // -----------------------------------------------------
 
-    const currentDateParts =
-      getCompanyDateParts(now);
-
-    const dayOfWeek =
-      getCompanyDayOfWeek(
-        currentDateParts.year,
-        currentDateParts.month,
-        currentDateParts.day
+    const shiftDateParts =
+      getCompanyDateParts(
+        shiftDate
       );
 
-    const isSunday =
-      dayOfWeek === 0;
+    const shiftDayOfWeek =
+      getCompanyDayOfWeek(
+        shiftDateParts.year,
+        shiftDateParts.month,
+        shiftDateParts.day
+      );
+
+    const isShiftSunday =
+      shiftDayOfWeek === 0;
 
     if (
-      isSunday &&
+      isShiftSunday &&
       !attendance.isOvertime
     ) {
       return res.status(403).json({
@@ -988,15 +1168,30 @@ export const checkOut = async (
           settings.officeLocation.latitude,
           settings.officeLocation.longitude
         );
-        console.log("CHECK-OUT GPS CHECK:", {
-  userLatitude: latitude,
-  userLongitude: longitude,
-  accuracy,
-  officeLatitude: settings.officeLocation.latitude,
-  officeLongitude: settings.officeLocation.longitude,
-  officeRadius: settings.officeLocation.radius,
-  distance,
-});
+
+      console.log(
+        "CHECK-OUT GPS CHECK:",
+        {
+          userLatitude:
+            latitude,
+
+          userLongitude:
+            longitude,
+
+          accuracy,
+
+          officeLatitude:
+            settings.officeLocation.latitude,
+
+          officeLongitude:
+            settings.officeLocation.longitude,
+
+          officeRadius:
+            settings.officeLocation.radius,
+
+          distance,
+        }
+      );
 
       if (
         distance >
@@ -1043,6 +1238,19 @@ export const checkOut = async (
 
     // -----------------------------------------------------
     // Calculate working time
+    //
+    // IMPORTANT:
+    //
+    // Use actual timestamps.
+    //
+    // This automatically handles midnight.
+    //
+    // Example:
+    //
+    // Oct 6 7 PM
+    // Oct 7 3 AM
+    //
+    // = 480 minutes
     // -----------------------------------------------------
 
     const checkInTime =
@@ -1079,6 +1287,16 @@ export const checkOut = async (
 
     // -----------------------------------------------------
     // Update attendance
+    //
+    // IMPORTANT:
+    //
+    // attendance.date is NOT changed.
+    //
+    // For overnight:
+    //
+    // date     = Oct 6
+    // checkIn  = Oct 6 7 PM
+    // checkOut = Oct 7 3 AM
     // -----------------------------------------------------
 
     attendance.checkOut = {
@@ -1665,12 +1883,10 @@ export const getMyAttendanceSummary =
         let status;
 
         // -------------------------------------------------
-        // IMPORTANT:
-        //
         // Actual attendance gets priority.
         //
-        // This prevents an overtime attendance on Sunday
-        // from incorrectly showing only as WEEKEND.
+        // This preserves overtime attendance on Sunday/
+        // holiday as actual attendance.
         // -------------------------------------------------
 
         if (
@@ -2201,4 +2417,4 @@ export const adminUpdateCheckout =
         message: "Server error",
       });
     }
-  };  
+  };

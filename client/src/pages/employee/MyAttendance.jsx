@@ -2,13 +2,646 @@ import { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 import "./MyAttendance.css";
 
+/* =========================================================
+   MY ATTENDANCE
+   CloudMatrix Attendance System
+
+   IMPORTANT:
+   - Existing UI structure preserved
+   - Existing Work Report logic preserved
+   - Existing API endpoints preserved
+   - Laptop GPS continues to work
+   - Mobile GPS gets better fallback handling
+   ========================================================= */
+
+/* =========================================================
+   DATE HELPERS
+   ========================================================= */
+
+const getDateKey = (dateValue) => {
+  if (!dateValue) return "";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getDate()).padStart(2, "0")}`;
+};
+
+const formatDate = (dateValue) => {
+  if (!dateValue) return "-";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatDay = (dateValue) => {
+  if (!dateValue) return "-";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("en-IN", {
+    weekday: "long",
+  });
+};
+
+const formatShortDay = (dateValue) => {
+  if (!dateValue) return "-";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("en-IN", {
+    weekday: "short",
+  });
+};
+
+const formatTime = (dateValue) => {
+  if (!dateValue) return "--:--";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "--:--";
+
+  return date.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const formatLongDate = (dateValue) => {
+  if (!dateValue) return "-";
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+/* =========================================================
+   STATUS HELPERS
+   ========================================================= */
+
+const formatStatus = (status) => {
+  if (!status) return "Unknown";
+
+  const normalized = String(status).toUpperCase();
+
+  const statusMap = {
+    PRESENT: "Present",
+    ABSENT: "Absent",
+    LEAVE: "On Leave",
+    ON_LEAVE: "On Leave",
+    HOLIDAY: "Holiday",
+    WEEKEND: "Weekend",
+    MISSED_CHECKOUT: "Missed Checkout",
+    HALF_DAY: "Half Day",
+    OVERTIME: "Overtime",
+  };
+
+  return statusMap[normalized] || status.replaceAll("_", " ");
+};
+
+const getStatusClass = (status) => {
+  if (!status) return "unknown";
+
+  const normalized = String(status).toLowerCase();
+
+  if (normalized.includes("present")) return "present";
+  if (normalized.includes("absent")) return "absent";
+  if (normalized.includes("leave")) return "leave";
+  if (normalized.includes("holiday")) return "holiday";
+  if (normalized.includes("weekend")) return "weekend";
+  if (normalized.includes("missed")) return "missed";
+  if (normalized.includes("half")) return "half-day";
+  if (normalized.includes("overtime")) return "overtime";
+
+  return "unknown";
+};
+
+/* =========================================================
+   ATTENDANCE METHOD HELPERS
+   ========================================================= */
+
+const getAttendanceMethod = (record) => {
+  if (!record) return null;
+
+  return (
+    record.method ||
+    record.attendanceMethod ||
+    record.checkIn?.method ||
+    record.checkOut?.method ||
+    null
+  );
+};
+
+const formatMethod = (method) => {
+  if (!method) return "-";
+
+  const normalized = String(method).toUpperCase();
+
+  const methodMap = {
+    OFFICE: "Office",
+    REMOTE: "Remote",
+    FIELD: "Field",
+  };
+
+  return methodMap[normalized] || method.replaceAll("_", " ");
+};
+
+const getMethodIcon = (method) => {
+  if (!method) return "•";
+
+  const normalized = String(method).toUpperCase();
+
+  if (normalized === "OFFICE") return "⌂";
+  if (normalized === "REMOTE") return "⌁";
+  if (normalized === "FIELD") return "◉";
+
+  return "•";
+};
+
+/* =========================================================
+   WORKING TIME
+   ========================================================= */
+
+const formatMinutes = (minutes) => {
+  if (minutes === null || minutes === undefined) return "0 min";
+
+  const totalMinutes = Math.max(0, Number(minutes) || 0);
+
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+
+  if (hours === 0) return `${mins} min`;
+
+  if (mins === 0) {
+    return `${hours} hr`;
+  }
+
+  return `${hours} hr ${mins} min`;
+};
+
+/* =========================================================
+   GPS ERROR MESSAGE
+   ========================================================= */
+
+const getGpsErrorMessage = (error) => {
+  if (!error) {
+    return "Unable to get your location. Please try again.";
+  }
+
+  if (error.code === "GPS_ACCURACY_LOW") {
+    return (
+      error.message ||
+      "Your GPS accuracy is too low. Please move outside or near a window and try again."
+    );
+  }
+
+  if (error.code === 1) {
+    return "Location permission was denied. Please allow location access for this website and try again.";
+  }
+
+  if (error.code === 2) {
+    return "Your device could not determine your location. Turn ON GPS/Location and try again.";
+  }
+
+  if (error.code === 3) {
+    return "Location request timed out. Please turn ON GPS/Location and try again.";
+  }
+
+  if (error.code === "NOT_SECURE") {
+    return error.message;
+  }
+
+  if (error.message) {
+    return error.message;
+  }
+
+  return "Unable to get your location. Please try again.";
+};
+
+/* =========================================================
+   GPS HELPER
+   MOBILE GPS FIX ONLY
+   ========================================================= */
+
+const getBestLocation = () => {
+  return new Promise((resolve, reject) => {
+    if (
+      typeof navigator === "undefined" ||
+      !navigator.geolocation
+    ) {
+      reject({
+        code: "GEOLOCATION_NOT_SUPPORTED",
+        message:
+          "Geolocation is not supported by this browser.",
+      });
+      return;
+    }
+
+    /*
+     * Browser security check.
+     *
+     * Do not silently continue when the browser itself blocks
+     * geolocation because the page is not secure.
+     *
+     * localhost is allowed by browsers, but a phone opening
+     * the PC using an IP address such as:
+     *
+     * http://192.168.x.x:5173
+     *
+     * is normally not considered a secure context.
+     */
+    if (
+      typeof window !== "undefined" &&
+      window.isSecureContext === false
+    ) {
+      reject({
+        code: "NOT_SECURE",
+        message:
+          "Location access requires HTTPS on your phone. Open this application using HTTPS and allow location access.",
+      });
+      return;
+    }
+
+    let finished = false;
+    let watchId = null;
+    let timeoutId = null;
+    let firstRequestFinished = false;
+
+    const positions = [];
+
+    /* -------------------------------------------------------
+       CLEANUP
+       ------------------------------------------------------- */
+
+    const cleanup = () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
+
+    /* -------------------------------------------------------
+       SUCCESS
+       ------------------------------------------------------- */
+
+    const finishSuccess = (position) => {
+      if (finished) return;
+
+      if (!position?.coords) {
+        return;
+      }
+
+      const latitude = Number(position.coords.latitude);
+      const longitude = Number(position.coords.longitude);
+      const accuracy = Number(position.coords.accuracy);
+
+      if (
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(longitude) ||
+        !Number.isFinite(accuracy)
+      ) {
+        return;
+      }
+
+      /*
+       * Keep backend's 50m requirement.
+       */
+      if (accuracy > 50) {
+        return;
+      }
+
+      finished = true;
+      cleanup();
+
+      resolve({
+        latitude,
+        longitude,
+        accuracy,
+      });
+    };
+
+    /* -------------------------------------------------------
+       ERROR
+       ------------------------------------------------------- */
+
+    const finishError = (error) => {
+      if (finished) return;
+
+      finished = true;
+      cleanup();
+
+      reject(error);
+    };
+
+    /* -------------------------------------------------------
+       BEST POSITION
+       ------------------------------------------------------- */
+
+    const selectBestPosition = () => {
+      if (!positions.length) {
+        finishError({
+          code: 3,
+          message:
+            "Unable to get your location. Please turn ON GPS/Location and try again.",
+        });
+
+        return;
+      }
+
+      const validPositions = positions.filter((position) => {
+        if (!position?.coords) return false;
+
+        const latitude = Number(position.coords.latitude);
+        const longitude = Number(position.coords.longitude);
+        const accuracy = Number(position.coords.accuracy);
+
+        return (
+          Number.isFinite(latitude) &&
+          Number.isFinite(longitude) &&
+          Number.isFinite(accuracy)
+        );
+      });
+
+      if (!validPositions.length) {
+        finishError({
+          code: "GPS_ACCURACY_LOW",
+          message:
+            "Unable to determine a valid GPS location. Please try again.",
+        });
+
+        return;
+      }
+
+      const bestPosition = validPositions.reduce(
+        (best, current) => {
+          if (!best) return current;
+
+          return Number(current.coords.accuracy) <
+            Number(best.coords.accuracy)
+            ? current
+            : best;
+        },
+        null
+      );
+
+      const accuracy = Number(
+        bestPosition.coords.accuracy
+      );
+
+      /*
+       * Backend requires maximum accuracy of 50m.
+       */
+      if (accuracy > 50) {
+        finishError({
+          code: "GPS_ACCURACY_LOW",
+          accuracy,
+          message: `GPS accuracy is about ${Math.round(
+            accuracy
+          )}m. Please move outside or near a window, keep Location/GPS ON, and try again.`,
+        });
+
+        return;
+      }
+
+      finishSuccess(bestPosition);
+    };
+
+    /* =======================================================
+       MOBILE FIX
+       First request current location.
+       ======================================================= */
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (finished) return;
+
+        firstRequestFinished = true;
+
+        positions.push(position);
+
+        const accuracy = Number(
+          position?.coords?.accuracy
+        );
+
+        console.log("GPS current position:", {
+          latitude: position?.coords?.latitude,
+          longitude: position?.coords?.longitude,
+          accuracy,
+        });
+
+        /*
+         * If mobile immediately gives a good GPS reading,
+         * use it immediately.
+         */
+        if (
+          Number.isFinite(accuracy) &&
+          accuracy <= 50
+        ) {
+          finishSuccess(position);
+        }
+      },
+      (error) => {
+        if (finished) return;
+
+        firstRequestFinished = true;
+
+        console.error(
+          "GPS current position error:",
+          error
+        );
+
+        /*
+         * Permission denied cannot be fixed by watchPosition.
+         */
+        if (error?.code === 1) {
+          finishError(error);
+        }
+
+        /*
+         * For timeout / unavailable location, continue with
+         * watchPosition because mobile GPS may still recover.
+         */
+      },
+      {
+        enableHighAccuracy: true,
+
+        /*
+         * Do not use an old cached position.
+         */
+        maximumAge: 0,
+
+        /*
+         * Mobile devices sometimes need longer to wake GPS.
+         */
+        timeout: 20000,
+      }
+    );
+
+    /* =======================================================
+       MOBILE FIX
+       Watch position continuously.
+
+       This gives Android/iPhone GPS time to improve from:
+       100m -> 70m -> 45m
+
+       We only accept <= 50m.
+       ======================================================= */
+
+    watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        if (finished) return;
+
+        positions.push(position);
+
+        /*
+         * Keep memory small.
+         */
+        if (positions.length > 10) {
+          positions.shift();
+        }
+
+        const latitude = Number(
+          position?.coords?.latitude
+        );
+
+        const longitude = Number(
+          position?.coords?.longitude
+        );
+
+        const accuracy = Number(
+          position?.coords?.accuracy
+        );
+
+        console.log("GPS watch reading:", {
+          latitude,
+          longitude,
+          accuracy,
+          readingNumber: positions.length,
+        });
+
+        if (
+          !Number.isFinite(latitude) ||
+          !Number.isFinite(longitude) ||
+          !Number.isFinite(accuracy)
+        ) {
+          return;
+        }
+
+        /*
+         * The moment a valid <=50m reading is received,
+         * finish immediately.
+         */
+        if (accuracy <= 50) {
+          finishSuccess(position);
+          return;
+        }
+
+        /*
+         * Do not fail after 5 readings.
+         *
+         * Mobile GPS may initially return:
+         * 100m
+         * 90m
+         * 75m
+         * 62m
+         * 55m
+         *
+         * It may become <=50m after additional readings.
+         */
+      },
+      (error) => {
+        if (finished) return;
+
+        console.error("GPS watch error:", error);
+
+        /*
+         * Permission denied is final.
+         */
+        if (error?.code === 1) {
+          finishError(error);
+        }
+
+        /*
+         * Error 2 / 3:
+         *
+         * Do not immediately reject.
+         * The currentPosition request or another GPS
+         * reading may still succeed.
+         */
+      },
+      {
+        enableHighAccuracy: true,
+
+        /*
+         * Force fresh GPS/network reading.
+         */
+        maximumAge: 0,
+
+        /*
+         * Give each mobile GPS reading enough time.
+         */
+        timeout: 20000,
+      }
+    );
+
+    /* =======================================================
+       FINAL TIMEOUT
+       ======================================================= */
+
+    timeoutId = setTimeout(() => {
+      if (finished) return;
+
+      /*
+       * At this point choose the best reading we received.
+       *
+       * If it is <=50m -> success.
+       *
+       * If it is >50m -> GPS_ACCURACY_LOW.
+       */
+      selectBestPosition();
+    }, 45000);
+  });
+};
+
+/* =========================================================
+   COMPONENT
+   ========================================================= */
+
 const MyAttendance = () => {
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [methodFilter, setMethodFilter] = useState("ALL");
@@ -23,219 +656,19 @@ const MyAttendance = () => {
 
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // --------------------------------------------------
-  // DATE HELPERS
-  // --------------------------------------------------
+  /* =========================================================
+     TODAY
+     ========================================================= */
 
-  const getDateKey = (dateValue) => {
-    if (!dateValue) return "";
+  const todayKey = getDateKey(new Date());
 
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) return "";
-
-    return `${date.getFullYear()}-${String(
-      date.getMonth() + 1
-    ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  };
-
-  const formatDate = (dateValue) => {
-    if (!dateValue) return "—";
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) return "—";
-
-    return date.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const formatDay = (dateValue) => {
-    if (!dateValue) return "—";
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) return "—";
-
-    return date.toLocaleDateString("en-IN", {
-      weekday: "long",
-    });
-  };
-
-  const formatShortDay = (dateValue) => {
-    if (!dateValue) return "—";
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) return "—";
-
-    return date.toLocaleDateString("en-IN", {
-      weekday: "short",
-    });
-  };
-
-  const formatTime = (dateValue) => {
-    if (!dateValue) return "—";
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) return "—";
-
-    return date.toLocaleTimeString("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const formatLongDate = (dateValue) => {
-    if (!dateValue) return "";
-
-    const date = new Date(dateValue);
-
-    if (Number.isNaN(date.getTime())) return "";
-
-    return date.toLocaleDateString("en-IN", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
-  // --------------------------------------------------
-  // STATUS HELPERS
-  // --------------------------------------------------
-
-  const formatStatus = (status) => {
-    if (!status) return "Unknown";
-
-    const statusMap = {
-      PRESENT: "Present",
-      ABSENT: "Absent",
-      ON_LEAVE: "On Leave",
-      HOLIDAY: "Holiday",
-      WEEKEND: "Weekend",
-      MISSED_CHECKOUT: "Missed Checkout",
-      HALF_DAY: "Half Day",
-      UPCOMING: "Upcoming",
-    };
-
-    return (
-      statusMap[status] ||
-      status
-        .toLowerCase()
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, (char) => char.toUpperCase())
-    );
-  };
-
-  const getStatusClass = (status) => {
-    if (!status) return "unknown";
-
-    return status.toLowerCase().replaceAll("_", "-");
-  };
-
-  // --------------------------------------------------
-  // ATTENDANCE METHOD
-  // --------------------------------------------------
-
-  const getAttendanceMethod = (record) => {
-    return (
-      record?.checkIn?.method ||
-      record?.checkOut?.method ||
-      record?.method ||
-      record?.attendanceMethod ||
-      ""
-    );
-  };
-
-  const formatMethod = (method) => {
-    if (!method) return "—";
-
-    const methodMap = {
-      OFFICE: "Office",
-      REMOTE: "Remote",
-      FIELD: "Field",
-    };
-
-    return (
-      methodMap[method] ||
-      method
-        .toLowerCase()
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, (char) => char.toUpperCase())
-    );
-  };
-
-  const getMethodIcon = (method) => {
-    switch (method) {
-      case "REMOTE":
-        return "⌂";
-
-      case "FIELD":
-        return "⌖";
-
-      case "OFFICE":
-        return "⌂";
-
-      default:
-        return "•";
-    }
-  };
-
-  // --------------------------------------------------
-  // WORKING TIME
-  // --------------------------------------------------
-
-  const formatMinutes = (minutes) => {
-    const totalMinutes = Number(minutes || 0);
-
-    if (totalMinutes <= 0) return "0m";
-
-    const hours = Math.floor(totalMinutes / 60);
-    const remainingMinutes = totalMinutes % 60;
-
-    if (hours > 0 && remainingMinutes > 0) {
-      return `${hours}h ${remainingMinutes}m`;
-    }
-
-    if (hours > 0) {
-      return `${hours}h`;
-    }
-
-    return `${remainingMinutes}m`;
-  };
-
-  // --------------------------------------------------
-  // TODAY ATTENDANCE
-  // --------------------------------------------------
-
-  const todayAttendance = useMemo(() => {
-    const todayKey = getDateKey(new Date());
-
-    return (
-      attendance.find(
-        (record) => getDateKey(record.date) === todayKey
-      ) || null
-    );
-  }, [attendance]);
+  const todayAttendance =
+    attendance.find((record) => getDateKey(record.date) === todayKey) || null;
 
   /*
-   * IMPORTANT FIX
-   *
-   * Do NOT use:
-   *
-   * !todayAttendance
-   *
-   * because backend can return a record for today
-   * even before the employee checks in.
-   *
-   * Instead, check whether an actual check-in time exists.
+   * Backend can create today's attendance record before actual
+   * check-in. Therefore checkIn.time is the actual indicator.
    */
-
   const hasCheckedIn = !!todayAttendance?.checkIn?.time;
 
   const hasCheckedOut = !!todayAttendance?.checkOut?.time;
@@ -244,36 +677,31 @@ const MyAttendance = () => {
 
   const isCheckedOut = hasCheckedIn && hasCheckedOut;
 
-  // --------------------------------------------------
-  // LIVE WORKING TIME
-  // --------------------------------------------------
+  /* =========================================================
+     LIVE WORKING TIME
+     ========================================================= */
 
   const liveWorkingMinutes = useMemo(() => {
     if (!todayAttendance?.checkIn?.time) {
-      return Number(todayAttendance?.workingMinutes || 0);
+      return todayAttendance?.workingMinutes || 0;
     }
 
     if (todayAttendance?.checkOut?.time) {
-      return Number(todayAttendance?.workingMinutes || 0);
+      return todayAttendance?.workingMinutes || 0;
     }
 
-    const checkInTime = new Date(
-      todayAttendance.checkIn.time
-    ).getTime();
-
-    const now = currentTime.getTime();
+    const checkInTime = new Date(todayAttendance.checkIn.time).getTime();
 
     if (Number.isNaN(checkInTime)) return 0;
 
-    return Math.max(
-      0,
-      Math.floor((now - checkInTime) / 60000)
-    );
+    const now = currentTime.getTime();
+
+    return Math.max(0, Math.floor((now - checkInTime) / 60000));
   }, [todayAttendance, currentTime]);
 
-  // --------------------------------------------------
-  // MESSAGE
-  // --------------------------------------------------
+  /* =========================================================
+     MESSAGE
+     ========================================================= */
 
   const showMessage = (text, type = "success") => {
     setMessage(text);
@@ -281,13 +709,12 @@ const MyAttendance = () => {
 
     setTimeout(() => {
       setMessage("");
-      setMessageType("");
     }, 4000);
   };
 
-  // --------------------------------------------------
-  // FETCH ATTENDANCE
-  // --------------------------------------------------
+  /* =========================================================
+     FETCH ATTENDANCE
+     ========================================================= */
 
   const fetchAttendance = async () => {
     try {
@@ -295,25 +722,21 @@ const MyAttendance = () => {
 
       const response = await api.get("/attendance/my");
 
-      if (response.data.success) {
-        setAttendance(response.data.attendance || []);
+      if (response?.data?.attendance) {
+        setAttendance(response.data.attendance);
+      } else if (response?.data?.records) {
+        setAttendance(response.data.records);
+      } else if (Array.isArray(response?.data)) {
+        setAttendance(response.data);
       } else {
         setAttendance([]);
-
-        showMessage(
-          response.data.message ||
-            "Failed to load attendance",
-          "error"
-        );
       }
     } catch (error) {
       console.error("Fetch attendance error:", error);
 
-      setAttendance([]);
-
       showMessage(
-        error.response?.data?.message ||
-          "Unable to load attendance",
+        error?.response?.data?.message ||
+          "Unable to load attendance records.",
         "error"
       );
     } finally {
@@ -321,53 +744,58 @@ const MyAttendance = () => {
     }
   };
 
-  // --------------------------------------------------
-  // FETCH TODAY WORK REPORT
-  // --------------------------------------------------
+  /* =========================================================
+     FETCH TODAY WORK REPORT
+     ========================================================= */
 
   const fetchTodayWorkReport = async () => {
     try {
       const response = await api.get("/work-reports/my");
 
-      if (response.data.success) {
-        const reports = response.data.workReports || [];
+      const report =
+        response?.data?.workReport ||
+        response?.data?.report ||
+        response?.data?.data ||
+        null;
 
-        const todayReport = reports.find(
-          (report) =>
-            getDateKey(report.date) ===
-            getDateKey(new Date())
-        );
-
-        if (todayReport) {
-          setWorkReportExists(true);
-          setWorkDescription(
-            todayReport.description || ""
-          );
-        } else {
-          setWorkReportExists(false);
-          setWorkDescription("");
-        }
+      if (report) {
+        setWorkReportExists(true);
+        setWorkDescription(report.description || "");
+        return report;
       }
+
+      setWorkReportExists(false);
+      setWorkDescription("");
+
+      return null;
     } catch (error) {
-      console.error(
-        "Fetch today's work report error:",
-        error
-      );
+      /*
+       * 404 means employee has not created today's report.
+       */
+      if (error?.response?.status === 404) {
+        setWorkReportExists(false);
+        setWorkDescription("");
+        return null;
+      }
+
+      console.error("Fetch work report error:", error);
+
+      return null;
     }
   };
 
-  // --------------------------------------------------
-  // INITIAL LOAD
-  // --------------------------------------------------
+  /* =========================================================
+     INITIAL LOAD
+     ========================================================= */
 
   useEffect(() => {
     fetchAttendance();
     fetchTodayWorkReport();
   }, []);
 
-  // --------------------------------------------------
-  // LIVE CLOCK
-  // --------------------------------------------------
+  /* =========================================================
+     LIVE CLOCK
+     ========================================================= */
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -377,119 +805,129 @@ const MyAttendance = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // --------------------------------------------------
-  // CHECK IN
-  // --------------------------------------------------
+  /* =========================================================
+     CHECK-IN
+     ========================================================= */
 
-  const handleCheckIn = () => {
+  const handleCheckIn = async () => {
+    if (actionLoading) return;
+
     if (!navigator.geolocation) {
       showMessage(
-        "Geolocation is not supported by your browser.",
+        "Your browser does not support location services.",
         "error"
       );
       return;
     }
 
-    setActionLoading(true);
-    setMessage("");
+    try {
+      setActionLoading(true);
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude, accuracy } =
-            position.coords;
+      showMessage(
+        "Getting your accurate location... Please wait.",
+        "info"
+      );
 
-          const response = await api.post(
-            "/attendance/check-in",
-            {
-              latitude,
-              longitude,
-              accuracy,
-            }
-          );
+      const position = await getBestLocation();
 
-          if (response.data.success) {
-            showMessage(
-              response.data.message ||
-                "Check-in successful",
-              "success"
-            );
+      const { latitude, longitude, accuracy } = position;
 
-            await fetchAttendance();
-          } else {
-            showMessage(
-              response.data.message ||
-                "Check-in failed",
-              "error"
-            );
-          }
-        } catch (error) {
-          console.error("Check-in error:", error);
+      console.log("Check-in GPS:", {
+        latitude,
+        longitude,
+        accuracy,
+      });
 
-          showMessage(
-            error.response?.data?.message ||
-              "Unable to check in",
-            "error"
-          );
-        } finally {
-          setActionLoading(false);
-        }
-      },
-      (error) => {
-        setActionLoading(false);
+      const response = await api.post("/attendance/check-in", {
+        latitude,
+        longitude,
+        accuracy,
+      });
 
-        let errorMessage =
-          "Unable to get your location.";
+      showMessage(
+        response?.data?.message || "Check-in successful",
+        "success"
+      );
 
-        if (error.code === 1) {
-          errorMessage =
-            "Location permission was denied. Please allow location access.";
-        } else if (error.code === 2) {
-          errorMessage =
-            "Your location could not be determined.";
-        } else if (error.code === 3) {
-          errorMessage =
-            "Location request timed out. Please try again.";
-        }
+      await fetchAttendance();
+    } catch (error) {
+      console.error("Check-in error:", error);
 
-        showMessage(errorMessage, "error");
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
+      const gpsError = error;
+
+      if (
+        gpsError?.code === "GPS_ACCURACY_LOW" ||
+        gpsError?.code === "NOT_SECURE" ||
+        gpsError?.code === 1 ||
+        gpsError?.code === 2 ||
+        gpsError?.code === 3
+      ) {
+        showMessage(getGpsErrorMessage(gpsError), "error");
+      } else {
+        showMessage(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Check-in failed. Please try again.",
+          "error"
+        );
       }
-    );
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  // --------------------------------------------------
-  // CHECK OUT BUTTON
-  // --------------------------------------------------
+  /* =========================================================
+     CHECK-OUT CLICK
+     ========================================================= */
 
   const handleCheckOutClick = async () => {
-    await fetchTodayWorkReport();
+    if (actionLoading) return;
 
-    setShowWorkReport(true);
+    if (!isCheckedIn || isCheckedOut) {
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+
+      const report = await fetchTodayWorkReport();
+
+      if (report) {
+        setWorkReportExists(true);
+        setWorkDescription(report.description || "");
+      } else {
+        setWorkReportExists(false);
+        setWorkDescription("");
+      }
+
+      setShowWorkReport(true);
+    } catch (error) {
+      console.error("Checkout preparation error:", error);
+
+      showMessage(
+        "Unable to prepare checkout. Please try again.",
+        "error"
+      );
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  // --------------------------------------------------
-  // WORK REPORT + CHECK OUT
-  // --------------------------------------------------
+  /* =========================================================
+     WORK REPORT + CHECK-OUT
+     ========================================================= */
 
   const handleWorkReportAndCheckOut = async () => {
     const description = workDescription.trim();
 
     if (!description) {
-      showMessage(
-        "Please enter today's work description.",
-        "error"
-      );
+      showMessage("Please enter your work report.", "error");
       return;
     }
 
     if (description.length < 10) {
       showMessage(
-        "Work description must contain at least 10 characters.",
+        "Work report should contain at least 10 characters.",
         "error"
       );
       return;
@@ -497,20 +935,18 @@ const MyAttendance = () => {
 
     if (!navigator.geolocation) {
       showMessage(
-        "Geolocation is not supported by your browser.",
+        "Your browser does not support location services.",
         "error"
       );
       return;
     }
 
-    setWorkReportLoading(true);
-    setMessage("");
-
     try {
-      // ----------------------------------------------
-      // SAVE / UPDATE WORK REPORT
-      // ----------------------------------------------
+      setWorkReportLoading(true);
 
+      /*
+       * Save/update work report FIRST.
+       */
       if (workReportExists) {
         await api.put("/work-reports/my", {
           description,
@@ -521,172 +957,119 @@ const MyAttendance = () => {
         });
       }
 
-      // ----------------------------------------------
-      // GET LOCATION
-      // ----------------------------------------------
-
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const {
-              latitude,
-              longitude,
-              accuracy,
-            } = position.coords;
-
-            const response = await api.post(
-              "/attendance/check-out",
-              {
-                latitude,
-                longitude,
-                accuracy,
-              }
-            );
-
-            if (response.data.success) {
-              setShowWorkReport(false);
-              setWorkDescription("");
-              setWorkReportExists(true);
-
-              showMessage(
-                response.data.message ||
-                  "Check-out successful",
-                "success"
-              );
-
-              await fetchAttendance();
-              await fetchTodayWorkReport();
-            } else {
-              showMessage(
-                response.data.message ||
-                  "Check-out failed",
-                "error"
-              );
-            }
-          } catch (error) {
-            console.error("Check-out error:", error);
-
-            showMessage(
-              error.response?.data?.message ||
-                "Unable to check out",
-              "error"
-            );
-          } finally {
-            setWorkReportLoading(false);
-          }
-        },
-        (error) => {
-          setWorkReportLoading(false);
-
-          let errorMessage =
-            "Unable to get your location.";
-
-          if (error.code === 1) {
-            errorMessage =
-              "Location permission was denied. Please allow location access.";
-          } else if (error.code === 2) {
-            errorMessage =
-              "Your location could not be determined.";
-          } else if (error.code === 3) {
-            errorMessage =
-              "Location request timed out. Please try again.";
-          }
-
-          showMessage(errorMessage, "error");
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0,
-        }
-      );
-    } catch (error) {
-      console.error("Work report error:", error);
-
-      setWorkReportLoading(false);
+      setWorkReportExists(true);
 
       showMessage(
-        error.response?.data?.message ||
-          "Unable to save work report",
-        "error"
+        "Work report saved. Getting your location...",
+        "info"
       );
+
+      /*
+       * Get GPS AFTER work report is saved.
+       */
+      const position = await getBestLocation();
+
+      const { latitude, longitude, accuracy } = position;
+
+      console.log("Check-out GPS:", {
+        latitude,
+        longitude,
+        accuracy,
+      });
+
+      /*
+       * Existing backend endpoint preserved.
+       */
+      const response = await api.post("/attendance/check-out", {
+        latitude,
+        longitude,
+        accuracy,
+      });
+
+      showMessage(
+        response?.data?.message || "Check-out successful",
+        "success"
+      );
+
+      setShowWorkReport(false);
+      setWorkDescription("");
+
+      await fetchAttendance();
+      await fetchTodayWorkReport();
+    } catch (error) {
+      console.error("Check-out error:", error);
+
+      const gpsError = error;
+
+      if (
+        gpsError?.code === "GPS_ACCURACY_LOW" ||
+        gpsError?.code === "NOT_SECURE" ||
+        gpsError?.code === 1 ||
+        gpsError?.code === 2 ||
+        gpsError?.code === 3
+      ) {
+        showMessage(getGpsErrorMessage(gpsError), "error");
+      } else {
+        showMessage(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Check-out failed. Please try again.",
+          "error"
+        );
+      }
+    } finally {
+      setWorkReportLoading(false);
     }
   };
 
-  // --------------------------------------------------
-  // FILTER
-  // --------------------------------------------------
+  /* =========================================================
+     FILTERING
+     ========================================================= */
 
   const filteredAttendance = useMemo(() => {
     return attendance.filter((record) => {
-      const method = getAttendanceMethod(record);
+      const status = String(record?.status || "").toUpperCase();
+      const method = String(
+        getAttendanceMethod(record) || ""
+      ).toUpperCase();
 
       const statusMatches =
-        statusFilter === "ALL" ||
-        record.status === statusFilter;
+        statusFilter === "ALL" || status === statusFilter;
 
       const methodMatches =
-        methodFilter === "ALL" ||
-        method === methodFilter;
+        methodFilter === "ALL" || method === methodFilter;
 
       return statusMatches && methodMatches;
     });
-  }, [
-    attendance,
-    statusFilter,
-    methodFilter,
-  ]);
+  }, [attendance, statusFilter, methodFilter]);
 
-  // --------------------------------------------------
-  // PAGINATION
-  // --------------------------------------------------
+  /* =========================================================
+     PAGINATION
+     ========================================================= */
 
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredAttendance.length / recordsPerPage
-    )
+    Math.ceil(filteredAttendance.length / recordsPerPage)
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages
-  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
-  const startIndex =
-    (safeCurrentPage - 1) * recordsPerPage;
+  const paginatedAttendance = useMemo(() => {
+    const startIndex = (safeCurrentPage - 1) * recordsPerPage;
 
-  const paginatedAttendance =
-    filteredAttendance.slice(
+    return filteredAttendance.slice(
       startIndex,
       startIndex + recordsPerPage
     );
+  }, [filteredAttendance, safeCurrentPage]);
 
-  // --------------------------------------------------
-  // SUMMARY
-  // --------------------------------------------------
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, methodFilter]);
 
-  const presentCount = attendance.filter(
-    (record) => record.status === "PRESENT"
-  ).length;
-
-  const absentCount = attendance.filter(
-    (record) => record.status === "ABSENT"
-  ).length;
-
-  const leaveCount = attendance.filter(
-    (record) => record.status === "ON_LEAVE"
-  ).length;
-
-  const overtimeMinutes = attendance.reduce(
-    (total, record) =>
-      total + Number(record.overtimeMinutes || 0),
-    0
-  );
-
-  // --------------------------------------------------
-  // CLEAR FILTERS
-  // --------------------------------------------------
+  /* =========================================================
+     CLEAR FILTERS
+     ========================================================= */
 
   const clearFilters = () => {
     setStatusFilter("ALL");
@@ -694,696 +1077,482 @@ const MyAttendance = () => {
     setCurrentPage(1);
   };
 
-  // --------------------------------------------------
-  // LOADING
-  // --------------------------------------------------
+  /* =========================================================
+     CLOSE WORK REPORT MODAL
+     ========================================================= */
 
-  if (loading) {
-    return (
-      <div className="attendance-page">
-        <div className="page-loading">
-          <div className="loading-spinner"></div>
-          <p>Loading your attendance...</p>
-        </div>
-      </div>
-    );
-  }
+  const closeWorkReportModal = () => {
+    if (workReportLoading) return;
 
-  // --------------------------------------------------
-  // PAGE
-  // --------------------------------------------------
+    setShowWorkReport(false);
+  };
+
+  /* =========================================================
+     RENDER
+     ========================================================= */
 
   return (
-    <div className="attendance-page">
-
-      {/* -------------------------------------------- */}
-      {/* PAGE HEADER */}
-      {/* -------------------------------------------- */}
+    <div className="my-attendance-page">
+      {/* =====================================================
+          PAGE HEADER
+          ===================================================== */}
 
       <div className="attendance-page-header">
         <div>
-          <p className="dashboard-eyebrow">
-            EMPLOYEE PORTAL
-          </p>
+          <div className="attendance-eyebrow">ATTENDANCE</div>
 
           <h1>My Attendance</h1>
 
           <p>
-            Track your daily attendance, working hours
-            and attendance history.
+            Track your daily attendance, working hours and
+            attendance history.
           </p>
+        </div>
+
+        <div className="attendance-current-date">
+          <span className="current-date-label">TODAY</span>
+
+          <strong>{formatLongDate(currentTime)}</strong>
+
+          <span>
+            {currentTime.toLocaleTimeString("en-IN", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true,
+            })}
+          </span>
         </div>
       </div>
 
-      {/* -------------------------------------------- */}
-      {/* MESSAGE */}
-      {/* -------------------------------------------- */}
+      {/* =====================================================
+          MESSAGE
+          ===================================================== */}
 
       {message && (
-        <div
-          className={`attendance-message ${messageType}`}
-        >
-          <span>
-            {messageType === "success" ? "✓" : "!"}
+        <div className={`attendance-message ${messageType}`}>
+          <span className="message-icon">
+            {messageType === "error"
+              ? "!"
+              : messageType === "info"
+              ? "i"
+              : "✓"}
           </span>
 
-          <p>{message}</p>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMessage("");
-              setMessageType("");
-            }}
-          >
-            ×
-          </button>
+          <span>{message}</span>
         </div>
       )}
 
-      {/* -------------------------------------------- */}
-      {/* TODAY SECTION */}
-      {/* -------------------------------------------- */}
+      {/* =====================================================
+          TODAY ATTENDANCE
+          ===================================================== */}
 
-      <section className="today-section">
+      <section className="today-attendance-card">
+        <div className="today-attendance-header">
+          <div>
+            <span className="today-section-label">
+              TODAY'S ATTENDANCE
+            </span>
 
-        <div className="today-main-card">
-
-          <div className="today-card-header">
-
-            <div>
-              <p className="dashboard-eyebrow">
-                TODAY
-              </p>
-
-              <h2>
-                {formatLongDate(new Date())}
-              </h2>
-            </div>
-
-            <div
-              className={`today-status ${
-                isCheckedOut
-                  ? "completed"
-                  : isCheckedIn
-                  ? "working"
-                  : "not-started"
-              }`}
-            >
-              <span className="status-dot"></span>
-
-              {isCheckedOut
-                ? "Completed"
-                : isCheckedIn
-                ? "Working"
-                : "Not Checked In"}
-            </div>
-
+            <h2>{formatDate(currentTime)}</h2>
           </div>
 
-          {/* ---------------------------------------- */}
-          {/* TIME */}
-          {/* ---------------------------------------- */}
+          <div
+            className={`today-status-badge ${
+              todayAttendance
+                ? getStatusClass(todayAttendance.status)
+                : "pending"
+            }`}
+          >
+            <span className="status-dot"></span>
 
-          <div className="today-time-area">
-
-            <div className="clock-display">
-              {currentTime.toLocaleTimeString(
-                "en-IN",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  second: "2-digit",
-                }
-              )}
-            </div>
-
-            <p>Current time</p>
-
+            {todayAttendance?.status
+              ? formatStatus(todayAttendance.status)
+              : "Not Checked In"}
           </div>
+        </div>
 
-          {/* ---------------------------------------- */}
-          {/* TODAY DETAILS */}
-          {/* ---------------------------------------- */}
-
-          <div className="today-details">
-
-            <div className="today-detail-item">
-              <span className="detail-label">
-                Check In
-              </span>
+        <div className="today-attendance-body">
+          <div className="today-time-grid">
+            <div className="today-time-item">
+              <span className="today-time-label">CHECK IN</span>
 
               <strong>
-                {formatTime(
-                  todayAttendance?.checkIn?.time
-                )}
+                {todayAttendance?.checkIn?.time
+                  ? formatTime(todayAttendance.checkIn.time)
+                  : "--:--"}
               </strong>
             </div>
 
-            <div className="today-detail-item">
-              <span className="detail-label">
-                Check Out
-              </span>
+            <div className="today-time-item">
+              <span className="today-time-label">CHECK OUT</span>
 
               <strong>
-                {formatTime(
-                  todayAttendance?.checkOut?.time
-                )}
+                {todayAttendance?.checkOut?.time
+                  ? formatTime(todayAttendance.checkOut.time)
+                  : "--:--"}
               </strong>
             </div>
 
-            <div className="today-detail-item">
-              <span className="detail-label">
-                Working Time
-              </span>
+            <div className="today-time-item">
+              <span className="today-time-label">WORKING TIME</span>
 
               <strong>
-                {formatMinutes(
-                  liveWorkingMinutes
-                )}
+                {formatMinutes(liveWorkingMinutes)}
               </strong>
             </div>
 
-            <div className="today-detail-item">
-              <span className="detail-label">
-                Method
-              </span>
+            <div className="today-time-item">
+              <span className="today-time-label">METHOD</span>
 
-              <strong>
+              <strong className="method-value">
+                {getMethodIcon(
+                  getAttendanceMethod(todayAttendance)
+                )}
+
                 {formatMethod(
-                  getAttendanceMethod(
-                    todayAttendance
-                  )
+                  getAttendanceMethod(todayAttendance)
                 )}
               </strong>
             </div>
-
           </div>
 
-          {/* ---------------------------------------- */}
-          {/* ACTION BUTTONS */}
-          {/* ---------------------------------------- */}
-
-          <div className="today-action-area">
-
-            {/* FIXED CHECK-IN CONDITION */}
+          <div className="today-attendance-actions">
             {!hasCheckedIn && (
               <button
                 type="button"
-                className="primary-attendance-button"
+                className="check-in-button"
                 onClick={handleCheckIn}
                 disabled={actionLoading}
               >
-                <span className="button-icon">
-                  ✓
-                </span>
-
-                {actionLoading
-                  ? "Checking location..."
-                  : "Check In"}
+                {actionLoading ? (
+                  <>
+                    <span className="button-spinner"></span>
+                    Getting Location...
+                  </>
+                ) : (
+                  <>
+                    <span>✓</span>
+                    Check In
+                  </>
+                )}
               </button>
             )}
 
             {isCheckedIn && (
               <button
                 type="button"
-                className="checkout-attendance-button"
+                className="check-out-button"
                 onClick={handleCheckOutClick}
                 disabled={actionLoading}
               >
-                <span className="button-icon">
-                  ↗
-                </span>
-
-                Check Out
+                {actionLoading ? (
+                  <>
+                    <span className="button-spinner"></span>
+                    Please Wait...
+                  </>
+                ) : (
+                  <>
+                    <span>↗</span>
+                    Check Out
+                  </>
+                )}
               </button>
             )}
 
             {isCheckedOut && (
-              <div className="completed-message">
+              <div className="checked-out-message">
                 <span>✓</span>
-
-                <div>
-                  <strong>
-                    Attendance completed
-                  </strong>
-
-                  <p>
-                    Your attendance has been
-                    completed for today.
-                  </p>
-                </div>
+                Attendance completed for today
               </div>
             )}
-
           </div>
-
-          {/* ---------------------------------------- */}
-          {/* FOOTER */}
-          {/* ---------------------------------------- */}
-
-          <div className="today-footer">
-
-            {isCheckedIn && (
-              <span>
-                ● You are currently working
-              </span>
-            )}
-
-            {isCheckedOut && (
-              <span>
-                ✓ Today's attendance is complete
-              </span>
-            )}
-
-            {!hasCheckedIn && (
-              <span>
-                Check in when you arrive at work.
-              </span>
-            )}
-
-          </div>
-
         </div>
-
       </section>
 
-      {/* -------------------------------------------- */}
-      {/* MONTH OVERVIEW */}
-      {/* -------------------------------------------- */}
+      {/* =====================================================
+          FILTERS
+          ===================================================== */}
 
-      <section className="month-overview">
-
-        <div className="section-title-row">
-
+      <section className="attendance-filters-card">
+        <div className="attendance-filters-header">
           <div>
-            <p className="dashboard-eyebrow">
-              OVERVIEW
-            </p>
+            <span className="attendance-section-label">
+              ATTENDANCE HISTORY
+            </span>
 
-            <h2>Attendance Summary</h2>
-
-            <p>
-              Based on your available attendance
-              records.
-            </p>
+            <h2>Attendance Records</h2>
           </div>
 
+          <span className="attendance-count">
+            {filteredAttendance.length} record
+            {filteredAttendance.length !== 1 ? "s" : ""}
+          </span>
         </div>
-
-        <div className="month-summary-grid">
-
-          <div className="month-summary-card">
-            <span>Present</span>
-            <strong>{presentCount}</strong>
-          </div>
-
-          <div className="month-summary-card">
-            <span>Absent</span>
-            <strong>{absentCount}</strong>
-          </div>
-
-          <div className="month-summary-card">
-            <span>On Leave</span>
-            <strong>{leaveCount}</strong>
-          </div>
-
-          <div className="month-summary-card">
-            <span>Overtime</span>
-            <strong>
-              {formatMinutes(overtimeMinutes)}
-            </strong>
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* -------------------------------------------- */}
-      {/* ATTENDANCE HISTORY */}
-      {/* -------------------------------------------- */}
-
-      <section className="attendance-history-section">
-
-        <div className="section-title-row">
-
-          <div>
-            <p className="dashboard-eyebrow">
-              RECORDS
-            </p>
-
-            <h2>Attendance History</h2>
-
-            <p>
-              View your previous attendance records.
-            </p>
-          </div>
-
-        </div>
-
-        {/* ------------------------------------------ */}
-        {/* FILTERS */}
-        {/* ------------------------------------------ */}
 
         <div className="attendance-filters">
-
           <div className="filter-group">
-
-            <span>Status</span>
+            <label htmlFor="status-filter">Status</label>
 
             <select
+              id="status-filter"
               value={statusFilter}
-              onChange={(event) => {
-                setStatusFilter(
-                  event.target.value
-                );
-                setCurrentPage(1);
-              }}
+              onChange={(event) =>
+                setStatusFilter(event.target.value)
+              }
             >
-              <option value="ALL">
-                All Status
-              </option>
-
-              <option value="PRESENT">
-                Present
-              </option>
-
-              <option value="ABSENT">
-                Absent
-              </option>
-
-              <option value="ON_LEAVE">
-                On Leave
-              </option>
-
-              <option value="HALF_DAY">
-                Half Day
-              </option>
-
+              <option value="ALL">All Status</option>
+              <option value="PRESENT">Present</option>
+              <option value="ABSENT">Absent</option>
+              <option value="LEAVE">Leave</option>
+              <option value="ON_LEAVE">On Leave</option>
+              <option value="HOLIDAY">Holiday</option>
+              <option value="WEEKEND">Weekend</option>
               <option value="MISSED_CHECKOUT">
                 Missed Checkout
               </option>
-
-              <option value="HOLIDAY">
-                Holiday
-              </option>
-
-              <option value="WEEKEND">
-                Weekend
-              </option>
+              <option value="HALF_DAY">Half Day</option>
+              <option value="OVERTIME">Overtime</option>
             </select>
-
           </div>
 
           <div className="filter-group">
-
-            <span>Method</span>
+            <label htmlFor="method-filter">Method</label>
 
             <select
+              id="method-filter"
               value={methodFilter}
-              onChange={(event) => {
-                setMethodFilter(
-                  event.target.value
-                );
-                setCurrentPage(1);
-              }}
+              onChange={(event) =>
+                setMethodFilter(event.target.value)
+              }
             >
-              <option value="ALL">
-                All Methods
-              </option>
-
-              <option value="OFFICE">
-                Office
-              </option>
-
-              <option value="REMOTE">
-                Remote
-              </option>
-
-              <option value="FIELD">
-                Field
-              </option>
+              <option value="ALL">All Methods</option>
+              <option value="OFFICE">Office</option>
+              <option value="REMOTE">Remote</option>
+              <option value="FIELD">Field</option>
             </select>
-
           </div>
 
-          {(statusFilter !== "ALL" ||
-            methodFilter !== "ALL") && (
+          <button
+            type="button"
+            className="clear-filters-button"
+            onClick={clearFilters}
+          >
+            Clear Filters
+          </button>
+        </div>
+      </section>
+
+      {/* =====================================================
+          LOADING
+          ===================================================== */}
+
+      {loading && (
+        <div className="attendance-loading">
+          <span className="loading-spinner"></span>
+          <span>Loading attendance...</span>
+        </div>
+      )}
+
+      {/* =====================================================
+          EMPTY
+          ===================================================== */}
+
+      {!loading && filteredAttendance.length === 0 && (
+        <div className="empty-attendance">
+          <div className="empty-attendance-icon">◎</div>
+
+          <h3>No attendance records found</h3>
+
+          <p>
+            There are no attendance records matching the
+            selected filters.
+          </p>
+
+          {(statusFilter !== "ALL" || methodFilter !== "ALL") && (
             <button
               type="button"
-              className="clear-filters-button"
               onClick={clearFilters}
             >
               Clear Filters
             </button>
           )}
-
         </div>
+      )}
 
-        {/* ------------------------------------------ */}
-        {/* RECORD LIST */}
-        {/* ------------------------------------------ */}
+      {/* =====================================================
+          RECORD LIST
+          ===================================================== */}
 
-        {paginatedAttendance.length === 0 ? (
-          <div className="empty-attendance">
-            <div className="empty-icon">
-              ◷
-            </div>
+      {!loading && paginatedAttendance.length > 0 && (
+        <div className="attendance-record-list">
+          {paginatedAttendance.map((record, index) => {
+            const recordStatus = record?.status || "UNKNOWN";
+            const recordMethod = getAttendanceMethod(record);
 
-            <h3>No attendance records</h3>
+            return (
+              <article
+                className="attendance-record"
+                key={record?._id || record?.id || index}
+              >
+                <div className="record-date">
+                  <strong>
+                    {formatDate(record.date)}
+                  </strong>
 
-            <p>
-              No records match the selected filters.
-            </p>
+                  <span>
+                    {formatShortDay(record.date)}
+                  </span>
+                </div>
 
-            {(statusFilter !== "ALL" ||
-              methodFilter !== "ALL") && (
+                <div className="record-status">
+                  <span
+                    className={`record-status-badge ${getStatusClass(
+                      recordStatus
+                    )}`}
+                  >
+                    {formatStatus(recordStatus)}
+                  </span>
+                </div>
+
+                <div className="record-time">
+                  <div>
+                    <span>IN</span>
+
+                    <strong>
+                      {record?.checkIn?.time
+                        ? formatTime(record.checkIn.time)
+                        : "--:--"}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>OUT</span>
+
+                    <strong>
+                      {record?.checkOut?.time
+                        ? formatTime(record.checkOut.time)
+                        : "--:--"}
+                    </strong>
+                  </div>
+                </div>
+
+                <div className="record-duration">
+                  <span>WORKING</span>
+
+                  <strong>
+                    {formatMinutes(
+                      record?.workingMinutes || 0
+                    )}
+                  </strong>
+                </div>
+
+                <div className="record-method">
+                  <span>
+                    {getMethodIcon(recordMethod)}
+                  </span>
+
+                  <strong>
+                    {formatMethod(recordMethod)}
+                  </strong>
+
+                  {record?.isOvertime && (
+                    <small>Overtime</small>
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      {/* =====================================================
+          PAGINATION
+          ===================================================== */}
+
+      {!loading && filteredAttendance.length > recordsPerPage && (
+        <div className="attendance-pagination">
+          <button
+            type="button"
+            onClick={() =>
+              setCurrentPage((page) => Math.max(1, page - 1))
+            }
+            disabled={safeCurrentPage === 1}
+          >
+            ← Previous
+          </button>
+
+          <div className="pagination-pages">
+            {Array.from(
+              { length: totalPages },
+              (_, index) => index + 1
+            ).map((page) => (
               <button
                 type="button"
-                onClick={clearFilters}
+                key={page}
+                className={
+                  page === safeCurrentPage ? "active" : ""
+                }
+                onClick={() => setCurrentPage(page)}
               >
-                Clear Filters
+                {page}
               </button>
-            )}
+            ))}
           </div>
-        ) : (
-          <div className="attendance-record-list">
 
-            {paginatedAttendance.map(
-              (record) => {
-                const method =
-                  getAttendanceMethod(record);
+          <button
+            type="button"
+            onClick={() =>
+              setCurrentPage((page) =>
+                Math.min(totalPages, page + 1)
+              )
+            }
+            disabled={safeCurrentPage === totalPages}
+          >
+            Next →
+          </button>
+        </div>
+      )}
 
-                return (
-                  <div
-                    key={
-                      record._id ||
-                      record.id ||
-                      record.date
-                    }
-                    className="attendance-record"
-                  >
-
-                    {/* DATE */}
-                    <div className="record-date">
-
-                      <strong>
-                        {formatShortDay(
-                          record.date
-                        )}
-                      </strong>
-
-                      <span>
-                        {formatDate(
-                          record.date
-                        )}
-                      </span>
-
-                    </div>
-
-                    {/* STATUS */}
-                    <div className="record-status">
-
-                      <span
-                        className={`status-badge ${getStatusClass(
-                          record.status
-                        )}`}
-                      >
-                        {formatStatus(
-                          record.status
-                        )}
-                      </span>
-
-                    </div>
-
-                    {/* CHECK IN */}
-                    <div className="record-time">
-
-                      <span>
-                        Check In
-                      </span>
-
-                      <strong>
-                        {formatTime(
-                          record?.checkIn?.time
-                        )}
-                      </strong>
-
-                    </div>
-
-                    {/* CHECK OUT */}
-                    <div className="record-time">
-
-                      <span>
-                        Check Out
-                      </span>
-
-                      <strong>
-                        {formatTime(
-                          record?.checkOut?.time
-                        )}
-                      </strong>
-
-                    </div>
-
-                    {/* WORKING TIME */}
-                    <div className="record-duration">
-
-                      <span>
-                        Working
-                      </span>
-
-                      <strong>
-                        {formatMinutes(
-                          record.workingMinutes
-                        )}
-                      </strong>
-
-                    </div>
-
-                    {/* METHOD */}
-                    <div className="record-method">
-
-                      <span className="method-icon">
-                        {getMethodIcon(method)}
-                      </span>
-
-                      <span>
-                        {formatMethod(method)}
-                      </span>
-
-                    </div>
-
-                  </div>
-                );
-              }
-            )}
-
-          </div>
-        )}
-
-        {/* ------------------------------------------ */}
-        {/* PAGINATION */}
-        {/* ------------------------------------------ */}
-
-        {filteredAttendance.length >
-          recordsPerPage && (
-          <div className="attendance-pagination">
-
-            <button
-              type="button"
-              disabled={safeCurrentPage === 1}
-              onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.max(1, page - 1)
-                )
-              }
-            >
-              ← Previous
-            </button>
-
-            <span>
-              Page {safeCurrentPage} of{" "}
-              {totalPages}
-            </span>
-
-            <button
-              type="button"
-              disabled={
-                safeCurrentPage === totalPages
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.min(
-                      totalPages,
-                      page + 1
-                    )
-                )
-              }
-            >
-              Next →
-            </button>
-
-          </div>
-        )}
-
-      </section>
-
-      {/* -------------------------------------------- */}
-      {/* WORK REPORT MODAL */}
-      {/* -------------------------------------------- */}
+      {/* =====================================================
+          WORK REPORT MODAL
+          ===================================================== */}
 
       {showWorkReport && (
         <div
           className="work-report-modal-overlay"
-          onClick={() => {
-            if (!workReportLoading) {
-              setShowWorkReport(false);
-            }
-          }}
+          onClick={closeWorkReportModal}
         >
-
           <div
             className="work-report-modal"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
-
             <div className="modal-header">
-
               <div>
-                <p className="dashboard-eyebrow">
-                  WORK REPORT
-                </p>
+                <span className="modal-eyebrow">
+                  CHECK OUT
+                </span>
 
-                <h2>
-                  Complete Today's Work
-                </h2>
+                <h2>Today's Work Report</h2>
 
                 <p>
-                  Please describe the work you
-                  completed before checking out.
+                  Please describe the work you completed today
+                  before checking out.
                 </p>
               </div>
 
               <button
                 type="button"
                 className="modal-close-button"
-                onClick={() =>
-                  setShowWorkReport(false)
-                }
+                onClick={closeWorkReportModal}
                 disabled={workReportLoading}
+                aria-label="Close"
               >
                 ×
               </button>
-
             </div>
 
             <div className="modal-body">
-
               <label htmlFor="work-description">
                 Work Description
               </label>
@@ -1392,35 +1561,27 @@ const MyAttendance = () => {
                 id="work-description"
                 value={workDescription}
                 onChange={(event) =>
-                  setWorkDescription(
-                    event.target.value
-                  )
+                  setWorkDescription(event.target.value)
                 }
-                placeholder="Example: Completed employee attendance API integration, fixed validation issues and tested the check-in/check-out flow..."
-                rows={6}
+                placeholder="Example: Completed attendance frontend, fixed mobile GPS issue and tested check-in/check-out..."
+                rows={7}
                 disabled={workReportLoading}
               />
 
-              <div className="character-info">
-                <span>
-                  Minimum 10 characters
-                </span>
+              <div className="work-report-helper">
+                <span>Minimum 10 characters</span>
 
                 <span>
-                  {workDescription.length} characters
+                  {workDescription.trim().length} characters
                 </span>
               </div>
-
             </div>
 
             <div className="modal-footer">
-
               <button
                 type="button"
                 className="modal-cancel-button"
-                onClick={() =>
-                  setShowWorkReport(false)
-                }
+                onClick={closeWorkReportModal}
                 disabled={workReportLoading}
               >
                 Cancel
@@ -1428,24 +1589,26 @@ const MyAttendance = () => {
 
               <button
                 type="button"
-                className="modal-submit-button"
-                onClick={
-                  handleWorkReportAndCheckOut
-                }
+                className="modal-checkout-button"
+                onClick={handleWorkReportAndCheckOut}
                 disabled={workReportLoading}
               >
-                {workReportLoading
-                  ? "Processing..."
-                  : "Save & Check Out"}
+                {workReportLoading ? (
+                  <>
+                    <span className="button-spinner"></span>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    Save Report & Check Out
+                    <span>→</span>
+                  </>
+                )}
               </button>
-
             </div>
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 };

@@ -1,7 +1,10 @@
 /* =========================================================
    MY ATTENDANCE
-   Clean employee attendance UI
-   Responsive: Desktop / Laptop / Tablet / Mobile / Small
+   CloudMatrix Attendance System
+
+   Matches current MyAttendance.jsx exactly
+   Responsive:
+   Desktop / Laptop / Tablet / Mobile / Small Mobile
    ========================================================= */
 
 *,
@@ -10,7 +13,11 @@
   box-sizing: border-box;
 }
 
-.attendance-page {
+/* =========================================================
+   MAIN PAGE
+   ========================================================= */
+
+.my-attendance-page {
   width: 100%;
   max-width: 1500px;
   min-width: 0;
@@ -27,11 +34,19 @@
    ========================================================= */
 
 .attendance-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 25px;
   width: 100%;
   margin-bottom: 24px;
 }
 
-.attendance-page-header .dashboard-eyebrow {
+.attendance-page-header > div:first-child {
+  min-width: 0;
+}
+
+.attendance-eyebrow {
   margin: 0 0 6px;
   color: #1479d1;
   font-size: 11px;
@@ -49,12 +64,49 @@
   overflow-wrap: anywhere;
 }
 
-.attendance-page-header > div > p:last-child {
+.attendance-page-header > div:first-child > p {
   margin: 7px 0 0;
   color: #667085;
   font-size: 13px;
   line-height: 1.5;
   overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   CURRENT DATE / CLOCK
+   ========================================================= */
+
+.attendance-current-date {
+  display: flex;
+  min-width: 190px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  padding: 12px 15px;
+  border: 1px solid #e2eaf3;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 5px 20px rgba(16, 24, 40, 0.035);
+}
+
+.current-date-label {
+  color: #1479d1;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.3px;
+}
+
+.attendance-current-date strong {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 750;
+  text-align: right;
+}
+
+.attendance-current-date > span:last-child {
+  color: #98a2b3;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* =========================================================
@@ -85,7 +137,13 @@
   color: #c92a2a;
 }
 
-.attendance-message > span:first-child {
+.attendance-message.info {
+  border-color: #c9e2f7;
+  background: #f0f8ff;
+  color: #1479d1;
+}
+
+.message-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -94,29 +152,18 @@
   flex-shrink: 0;
   border-radius: 50%;
   background: currentColor;
-  color: #fff;
-  font-size: 13px;
+  color: #ffffff;
+  font-size: 12px;
   font-weight: 800;
 }
 
-.attendance-message p {
+.attendance-message > span:last-child {
   min-width: 0;
   flex: 1;
-  margin: 0;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.5;
   overflow-wrap: anywhere;
-}
-
-.attendance-message button {
-  flex-shrink: 0;
-  border: 0;
-  background: transparent;
-  color: currentColor;
-  cursor: pointer;
-  font-size: 20px;
-  line-height: 1;
 }
 
 @keyframes messageSlide {
@@ -132,27 +179,22 @@
 }
 
 /* =========================================================
-   TODAY
+   TODAY ATTENDANCE CARD
    ========================================================= */
 
-.today-section {
-  width: 100%;
-  margin-bottom: 26px;
-}
-
-.today-main-card {
+.today-attendance-card {
   position: relative;
   width: 100%;
   min-width: 0;
+  margin-bottom: 25px;
   overflow: hidden;
-  padding: 28px 30px 20px;
   border: 1px solid #e3eaf3;
   border-radius: 22px;
   background: #ffffff;
   box-shadow: 0 8px 30px rgba(16, 24, 40, 0.05);
 }
 
-.today-main-card::before {
+.today-attendance-card::before {
   position: absolute;
   top: -110px;
   right: -80px;
@@ -168,21 +210,23 @@
    TODAY HEADER
    ========================================================= */
 
-.today-card-header {
+.today-attendance-header {
   position: relative;
   z-index: 1;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
+  padding: 28px 30px 0;
+}
+
+.today-attendance-header > div:first-child {
   min-width: 0;
 }
 
-.today-card-header > div:first-child {
-  min-width: 0;
-}
-
-.today-card-header .dashboard-eyebrow {
+.today-section-label,
+.attendance-section-label {
+  display: block;
   margin: 0 0 6px;
   color: #1479d1;
   font-size: 10px;
@@ -190,7 +234,7 @@
   letter-spacing: 1.4px;
 }
 
-.today-card-header h2 {
+.today-attendance-header h2 {
   margin: 0;
   color: #101828;
   font-size: 21px;
@@ -204,8 +248,8 @@
    TODAY STATUS
    ========================================================= */
 
-.today-status {
-  display: flex;
+.today-status-badge {
+  display: inline-flex;
   align-items: center;
   gap: 7px;
   flex-shrink: 0;
@@ -216,76 +260,139 @@
   white-space: nowrap;
 }
 
-.today-status .status-dot {
+.today-status-badge .status-dot {
   width: 7px;
   height: 7px;
   flex-shrink: 0;
   border-radius: 50%;
 }
 
-.today-status.not-started {
-  background: #f2f4f7;
-  color: #667085;
-}
+/* Present */
 
-.today-status.not-started .status-dot {
-  background: #98a2b3;
-}
-
-.today-status.working {
+.today-status-badge.present {
   background: #eaf9f0;
   color: #16844b;
 }
 
-.today-status.working .status-dot {
+.today-status-badge.present .status-dot {
   background: #20a55a;
   box-shadow: 0 0 0 4px rgba(32, 165, 90, 0.1);
 }
 
-.today-status.completed {
-  background: #eaf4ff;
-  color: #1479d1;
+/* Working / unknown style */
+
+.today-status-badge.pending {
+  background: #f2f4f7;
+  color: #667085;
 }
 
-.today-status.completed .status-dot {
-  background: #1479d1;
+.today-status-badge.pending .status-dot {
+  background: #98a2b3;
+}
+
+/* Absent */
+
+.today-status-badge.absent {
+  background: #fff0f0;
+  color: #d63d3d;
+}
+
+.today-status-badge.absent .status-dot {
+  background: #d63d3d;
+}
+
+/* Leave */
+
+.today-status-badge.leave {
+  background: #fff8e8;
+  color: #b57d12;
+}
+
+.today-status-badge.leave .status-dot {
+  background: #d99a20;
+}
+
+/* Holiday */
+
+.today-status-badge.holiday {
+  background: #eef5ff;
+  color: #3976c9;
+}
+
+.today-status-badge.holiday .status-dot {
+  background: #3976c9;
+}
+
+/* Weekend */
+
+.today-status-badge.weekend {
+  background: #f3f4f6;
+  color: #667085;
+}
+
+.today-status-badge.weekend .status-dot {
+  background: #98a2b3;
+}
+
+/* Missed checkout */
+
+.today-status-badge.missed {
+  background: #fff0f0;
+  color: #c43c3c;
+}
+
+.today-status-badge.missed .status-dot {
+  background: #c43c3c;
+}
+
+/* Half day */
+
+.today-status-badge.half-day {
+  background: #fff4e9;
+  color: #bd6818;
+}
+
+.today-status-badge.half-day .status-dot {
+  background: #bd6818;
+}
+
+/* Overtime */
+
+.today-status-badge.overtime {
+  background: #f0ebff;
+  color: #7354c7;
+}
+
+.today-status-badge.overtime .status-dot {
+  background: #7354c7;
+}
+
+/* Unknown */
+
+.today-status-badge.unknown {
+  background: #f2f4f7;
+  color: #667085;
+}
+
+.today-status-badge.unknown .status-dot {
+  background: #98a2b3;
 }
 
 /* =========================================================
-   CLOCK
+   TODAY BODY
    ========================================================= */
 
-.today-time-area {
+.today-attendance-body {
   position: relative;
   z-index: 1;
-  padding: 30px 0 27px;
-  text-align: center;
-}
-
-.clock-display {
-  color: #101828;
-  font-size: 50px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.today-time-area p {
-  margin: 9px 0 0;
-  color: #98a2b3;
-  font-size: 11px;
-  line-height: 1.4;
+  padding: 28px 30px 0;
 }
 
 /* =========================================================
-   TODAY DETAILS
+   TODAY TIME GRID
    ========================================================= */
 
-.today-details {
-  position: relative;
-  z-index: 1;
+.today-time-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   width: 100%;
@@ -293,49 +400,61 @@
   border-bottom: 1px solid #edf0f5;
 }
 
-.today-detail-item {
+.today-time-item {
   display: flex;
   min-width: 0;
+  min-height: 82px;
   flex-direction: column;
-  gap: 6px;
+  justify-content: center;
+  gap: 7px;
   padding: 16px 18px;
 }
 
-.today-detail-item + .today-detail-item {
+.today-time-item + .today-time-item {
   border-left: 1px solid #edf0f5;
 }
 
-.today-detail-item .detail-label {
+.today-time-label {
   color: #98a2b3;
-  font-size: 10px;
-  font-weight: 650;
-  overflow-wrap: anywhere;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-.today-detail-item strong {
+.today-time-item strong {
+  min-width: 0;
   color: #273142;
   font-size: 14px;
   font-weight: 750;
+  line-height: 1.3;
   overflow-wrap: anywhere;
 }
 
+.method-value {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
 /* =========================================================
-   ACTION AREA
+   TODAY ACTIONS
    ========================================================= */
 
-.today-action-area {
-  position: relative;
-  z-index: 1;
+.today-attendance-actions {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 76px;
-  padding: 10px 0 6px;
+  min-height: 85px;
+  padding: 11px 0 9px;
 }
 
-.primary-attendance-button,
-.checkout-attendance-button {
-  display: flex;
+/* =========================================================
+   CHECK IN BUTTON
+   ========================================================= */
+
+.check-in-button,
+.check-out-button {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
@@ -353,67 +472,71 @@
     opacity 0.2s ease;
 }
 
-.primary-attendance-button {
+.check-in-button {
   background: #1479d1;
   color: #ffffff;
   box-shadow: 0 8px 20px rgba(20, 121, 209, 0.2);
 }
 
-.primary-attendance-button:hover {
+.check-in-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 12px 26px rgba(20, 121, 209, 0.26);
 }
 
-.checkout-attendance-button {
+.check-out-button {
   background: #172033;
   color: #ffffff;
   box-shadow: 0 8px 20px rgba(23, 32, 51, 0.18);
 }
 
-.checkout-attendance-button:hover {
+.check-out-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 12px 26px rgba(23, 32, 51, 0.24);
 }
 
-.primary-attendance-button:disabled,
-.checkout-attendance-button:disabled {
+.check-in-button:disabled,
+.check-out-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
   transform: none;
 }
 
-.button-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
+/* =========================================================
+   BUTTON SPINNER
+   ========================================================= */
+
+.button-spinner {
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  font-size: 12px;
+  animation: spin 0.8s linear infinite;
 }
 
 /* =========================================================
-   COMPLETED
+   CHECKED OUT
    ========================================================= */
 
-.completed-message {
+.checked-out-message {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   max-width: 100%;
   color: #16844b;
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 700;
+  text-align: center;
 }
 
-.completed-message > span {
+.checked-out-message > span {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 25px;
-  height: 25px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   border-radius: 50%;
   background: #eaf9f0;
@@ -421,56 +544,14 @@
   font-weight: 800;
 }
 
-.completed-message > div {
-  min-width: 0;
-}
-
-.completed-message strong {
-  display: block;
-  color: #16844b;
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-
-.completed-message p {
-  margin: 2px 0 0;
-  color: #7a8495;
-  font-size: 10px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-
 /* =========================================================
-   TODAY FOOTER
+   ATTENDANCE FILTER CARD
    ========================================================= */
 
-.today-footer {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 24px;
-  color: #98a2b3;
-  font-size: 10px;
-}
-
-.today-footer span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}
-
-/* =========================================================
-   MONTH OVERVIEW
-   ========================================================= */
-
-.month-overview {
+.attendance-filters-card {
   width: 100%;
   min-width: 0;
-  margin-bottom: 26px;
+  margin-bottom: 16px;
   padding: 25px;
   border: 1px solid #e3eaf3;
   border-radius: 22px;
@@ -478,19 +559,24 @@
   box-shadow: 0 8px 30px rgba(16, 24, 40, 0.045);
 }
 
-.month-overview .section-title-row {
-  margin-bottom: 18px;
+/* =========================================================
+   FILTER HEADER
+   ========================================================= */
+
+.attendance-filters-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  min-width: 0;
+  margin-bottom: 19px;
 }
 
-.section-title-row .dashboard-eyebrow {
-  margin: 0 0 5px;
-  color: #1479d1;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1.4px;
+.attendance-filters-header > div {
+  min-width: 0;
 }
 
-.section-title-row h2 {
+.attendance-filters-header h2 {
   margin: 0;
   color: #172033;
   font-size: 19px;
@@ -499,67 +585,15 @@
   line-height: 1.3;
 }
 
-.section-title-row > div > p:last-child {
-  margin: 5px 0 0;
-  color: #98a2b3;
-  font-size: 11px;
-  line-height: 1.5;
-}
-
-/* =========================================================
-   MONTH SUMMARY
-   ========================================================= */
-
-.month-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.month-summary-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-width: 0;
-  min-height: 68px;
-  gap: 10px;
-  padding: 14px 16px;
-  border: 1px solid #edf0f5;
-  border-radius: 13px;
-  background: #fafbfd;
-}
-
-.month-summary-card span {
-  min-width: 0;
-  color: #667085;
-  font-size: 11px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.month-summary-card strong {
+.attendance-count {
   flex-shrink: 0;
-  color: #172033;
-  font-size: 22px;
-  font-weight: 800;
-}
-
-/* =========================================================
-   HISTORY
-   ========================================================= */
-
-.attendance-history-section {
-  width: 100%;
-  min-width: 0;
-  padding: 25px;
-  border: 1px solid #e3eaf3;
-  border-radius: 22px;
-  background: #ffffff;
-  box-shadow: 0 8px 30px rgba(16, 24, 40, 0.045);
-}
-
-.attendance-history-section .section-title-row {
-  margin-bottom: 19px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #eef6ff;
+  color: #1479d1;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 /* =========================================================
@@ -569,21 +603,20 @@
 .attendance-filters {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  margin-bottom: 18px;
-  padding-bottom: 17px;
-  border-bottom: 1px solid #edf0f5;
+  padding-top: 16px;
+  border-top: 1px solid #edf0f5;
 }
 
 .filter-group {
   display: flex;
   align-items: center;
   min-width: 0;
-  gap: 7px;
+  gap: 8px;
 }
 
-.filter-group > span {
+.filter-group label {
   flex-shrink: 0;
   color: #98a2b3;
   font-size: 10px;
@@ -591,16 +624,21 @@
 }
 
 .filter-group select {
-  min-width: 125px;
+  min-width: 135px;
   max-width: 100%;
-  padding: 8px 11px;
+  padding: 9px 11px;
   border: 1px solid #e0e5ed;
   border-radius: 9px;
   outline: none;
   background: #ffffff;
   color: #667085;
   cursor: pointer;
+  font-family: inherit;
   font-size: 11px;
+}
+
+.filter-group select:hover {
+  border-color: #ccd7e4;
 }
 
 .filter-group select:focus {
@@ -611,227 +649,65 @@
 .clear-filters-button {
   flex-shrink: 0;
   margin-left: auto;
-  padding: 8px 12px;
+  padding: 9px 13px;
   border: 0;
   border-radius: 9px;
   background: #fff1f1;
   color: #d63d3d;
   cursor: pointer;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 700;
-}
-
-/* =========================================================
-   RECORD LIST
-   ========================================================= */
-
-.attendance-record-list {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.attendance-record {
-  display: grid;
-  grid-template-columns:
-    75px
-    125px
-    minmax(100px, 1fr)
-    minmax(100px, 1fr)
-    100px
-    110px;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-width: 0;
-  padding: 12px 14px;
-  border: 1px solid #edf0f5;
-  border-radius: 13px;
-  background: #ffffff;
   transition:
-    border-color 0.2s ease,
     background 0.2s ease,
     transform 0.2s ease;
 }
 
-.attendance-record:hover {
-  border-color: #d9e6f3;
-  background: #fbfdff;
+.clear-filters-button:hover {
+  background: #ffe6e6;
   transform: translateY(-1px);
 }
 
-.attendance-record > * {
-  min-width: 0;
-}
-
 /* =========================================================
-   RECORD DATE
+   LOADING
    ========================================================= */
 
-.record-date {
+.attendance-loading {
   display: flex;
+  min-height: 220px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 11px;
-  background: #f3f7fc;
-}
-
-.record-date strong {
-  color: #172033;
-  font-size: 15px;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.record-date span {
-  margin-top: 4px;
-  color: #8a94a6;
-  font-size: 8px;
-  text-transform: uppercase;
-}
-
-/* =========================================================
-   RECORD STATUS
-   ========================================================= */
-
-.record-status {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-  padding: 6px 9px;
+  gap: 13px;
+  width: 100%;
+  padding: 25px;
+  border: 1px solid #e3eaf3;
   border-radius: 20px;
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
+  background: #ffffff;
 }
 
-.status-badge.present {
-  background: #eaf9f0;
-  color: #16844b;
-}
-
-.status-badge.absent {
-  background: #fff0f0;
-  color: #d63d3d;
-}
-
-.status-badge.on-leave {
-  background: #fff8e8;
-  color: #b57d12;
-}
-
-.status-badge.holiday {
-  background: #eef5ff;
-  color: #3976c9;
-}
-
-.status-badge.weekend {
-  background: #f3f4f6;
-  color: #667085;
-}
-
-.status-badge.half-day {
-  background: #fff4e9;
-  color: #bd6818;
-}
-
-.status-badge.missed-checkout {
-  background: #fff0f0;
-  color: #c43c3c;
-}
-
-.status-badge.upcoming {
-  background: #f3f4f6;
-  color: #667085;
-}
-
-/* =========================================================
-   RECORD TIME
-   ========================================================= */
-
-.record-time {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  gap: 10px;
-}
-
-.record-time > span {
-  display: none;
-  flex-shrink: 0;
-}
-
-.record-time strong {
-  color: #344054;
-  font-size: 12px;
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-
-/* =========================================================
-   WORKING
-   ========================================================= */
-
-.record-duration {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.record-duration > span {
+.attendance-loading > span:last-child {
   color: #98a2b3;
-  font-size: 9px;
+  font-size: 11px;
 }
 
-.record-duration strong {
-  color: #172033;
-  font-size: 12px;
-  font-weight: 750;
-  overflow-wrap: anywhere;
+.loading-spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid #e3edf8;
+  border-top-color: #1479d1;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
 }
 
-/* =========================================================
-   METHOD
-   ========================================================= */
-
-.record-method {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  gap: 8px;
-  color: #667085;
-  font-size: 10px;
-  font-weight: 650;
-  overflow-wrap: anywhere;
-}
-
-.method-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 29px;
-  height: 29px;
-  flex-shrink: 0;
-  border-radius: 9px;
-  background: #f3f7fc;
-  color: #1479d1;
-  font-size: 14px;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* =========================================================
-   EMPTY
+   EMPTY ATTENDANCE
    ========================================================= */
 
 .empty-attendance {
@@ -840,11 +716,15 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  width: 100%;
+  padding: 25px;
+  border: 1px solid #e3eaf3;
+  border-radius: 20px;
+  background: #ffffff;
   text-align: center;
 }
 
-.empty-icon {
+.empty-attendance-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -861,6 +741,7 @@
   margin: 0;
   color: #344054;
   font-size: 15px;
+  font-weight: 750;
 }
 
 .empty-attendance p {
@@ -878,8 +759,291 @@
   background: #eaf4ff;
   color: #1479d1;
   cursor: pointer;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 700;
+}
+
+/* =========================================================
+   RECORD LIST
+   ========================================================= */
+
+.attendance-record-list {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =========================================================
+   ATTENDANCE RECORD
+   =========================================================
+
+   IMPORTANT:
+   Current JSX has EXACTLY 5 direct children:
+
+   1. record-date
+   2. record-status
+   3. record-time
+   4. record-duration
+   5. record-method
+
+   Therefore this uses 5 columns.
+   ========================================================= */
+
+.attendance-record {
+  display: grid;
+  grid-template-columns:
+    100px
+    125px
+    minmax(175px, 1.25fr)
+    minmax(110px, 0.85fr)
+    minmax(130px, 0.9fr);
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+  padding: 13px 15px;
+  border: 1px solid #edf0f5;
+  border-radius: 13px;
+  background: #ffffff;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.attendance-record:hover {
+  border-color: #d9e6f3;
+  background: #fbfdff;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(16, 24, 40, 0.035);
+}
+
+.attendance-record > * {
+  min-width: 0;
+}
+
+/* =========================================================
+   RECORD DATE
+   ========================================================= */
+
+.record-date {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+}
+
+.record-date strong {
+  color: #172033;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.record-date span {
+  color: #8a94a6;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* =========================================================
+   RECORD STATUS
+   ========================================================= */
+
+.record-status {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.record-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 6px 9px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Present */
+
+.record-status-badge.present {
+  background: #eaf9f0;
+  color: #16844b;
+}
+
+/* Absent */
+
+.record-status-badge.absent {
+  background: #fff0f0;
+  color: #d63d3d;
+}
+
+/* Leave */
+
+.record-status-badge.leave {
+  background: #fff8e8;
+  color: #b57d12;
+}
+
+/* Holiday */
+
+.record-status-badge.holiday {
+  background: #eef5ff;
+  color: #3976c9;
+}
+
+/* Weekend */
+
+.record-status-badge.weekend {
+  background: #f3f4f6;
+  color: #667085;
+}
+
+/* Missed checkout */
+
+.record-status-badge.missed {
+  background: #fff0f0;
+  color: #c43c3c;
+}
+
+/* Half day */
+
+.record-status-badge.half-day {
+  background: #fff4e9;
+  color: #bd6818;
+}
+
+/* Overtime */
+
+.record-status-badge.overtime {
+  background: #f0ebff;
+  color: #7354c7;
+}
+
+/* Unknown */
+
+.record-status-badge.unknown {
+  background: #f3f4f6;
+  color: #667085;
+}
+
+/* =========================================================
+   RECORD TIME
+   ========================================================= */
+
+.record-time {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  min-width: 0;
+  gap: 12px;
+}
+
+.record-time > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.record-time > div > span {
+  color: #98a2b3;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.record-time strong {
+  color: #344054;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   RECORD DURATION
+   ========================================================= */
+
+.record-duration {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.record-duration > span {
+  color: #98a2b3;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.record-duration strong {
+  color: #172033;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   RECORD METHOD
+   ========================================================= */
+
+.record-method {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 7px;
+  color: #667085;
+}
+
+.record-method > span:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: #f3f7fc;
+  color: #1479d1;
+  font-size: 14px;
+}
+
+.record-method strong {
+  min-width: 0;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.record-method small {
+  flex-shrink: 0;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: #f0ebff;
+  color: #7354c7;
+  font-size: 7px;
+  font-weight: 750;
+  text-transform: uppercase;
 }
 
 /* =========================================================
@@ -891,42 +1055,78 @@
   align-items: center;
   justify-content: space-between;
   gap: 15px;
+  width: 100%;
   margin-top: 17px;
   padding-top: 16px;
   border-top: 1px solid #edf0f5;
 }
 
-.attendance-pagination > span {
-  min-width: 0;
-  color: #98a2b3;
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-.attendance-pagination button {
-  min-width: 85px;
+.attendance-pagination > button {
+  min-width: 90px;
   padding: 8px 11px;
   border: 1px solid #e4e8ef;
   border-radius: 8px;
   background: #ffffff;
   color: #667085;
   cursor: pointer;
+  font-family: inherit;
   font-size: 10px;
   font-weight: 650;
 }
 
-.attendance-pagination button:hover:not(:disabled) {
+.attendance-pagination > button:hover:not(:disabled) {
   border-color: #c9dff5;
   color: #1479d1;
+  background: #fbfdff;
 }
 
-.attendance-pagination button:disabled {
+.attendance-pagination > button:disabled {
   cursor: not-allowed;
   opacity: 0.4;
 }
 
 /* =========================================================
-   WORK REPORT MODAL
+   PAGINATION PAGES
+   ========================================================= */
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pagination-pages button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #e4e8ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #667085;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.pagination-pages button:hover {
+  border-color: #c9dff5;
+  color: #1479d1;
+}
+
+.pagination-pages button.active {
+  border-color: #1479d1;
+  background: #1479d1;
+  color: #ffffff;
+}
+
+/* =========================================================
+   WORK REPORT MODAL OVERLAY
    ========================================================= */
 
 .work-report-modal-overlay {
@@ -940,6 +1140,10 @@
   background: rgba(15, 23, 42, 0.52);
   backdrop-filter: blur(5px);
 }
+
+/* =========================================================
+   WORK REPORT MODAL
+   ========================================================= */
 
 .work-report-modal {
   position: relative;
@@ -967,12 +1171,24 @@
   }
 }
 
+/* =========================================================
+   MODAL HEADER
+   ========================================================= */
+
 .modal-header {
   position: relative;
+  display: flex;
+  justify-content: space-between;
+  min-width: 0;
   padding-right: 40px;
 }
 
-.modal-header .dashboard-eyebrow {
+.modal-header > div {
+  min-width: 0;
+}
+
+.modal-eyebrow {
+  display: block;
   margin: 0 0 6px;
   color: #1479d1;
   font-size: 10px;
@@ -986,6 +1202,7 @@
   font-size: 22px;
   font-weight: 800;
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .modal-header p {
@@ -994,6 +1211,10 @@
   font-size: 11px;
   line-height: 1.6;
 }
+
+/* =========================================================
+   MODAL CLOSE
+   ========================================================= */
 
 .modal-close-button {
   position: absolute;
@@ -1009,11 +1230,26 @@
   background: #f4f6f8;
   color: #667085;
   cursor: pointer;
+  font-family: inherit;
   font-size: 19px;
+  line-height: 1;
 }
 
-.modal-close-button:hover {
+.modal-close-button:hover:not(:disabled) {
   background: #eaedf1;
+}
+
+.modal-close-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* =========================================================
+   MODAL BODY
+   ========================================================= */
+
+.modal-body {
+  width: 100%;
 }
 
 .modal-body label {
@@ -1028,7 +1264,6 @@
   display: block;
   width: 100%;
   min-height: 150px;
-  box-sizing: border-box;
   padding: 14px;
   border: 1px solid #dfe5ed;
   border-radius: 12px;
@@ -1053,14 +1288,29 @@
   color: #a7afbb;
 }
 
-.character-info {
+.modal-body textarea:disabled {
+  cursor: not-allowed;
+  background: #f8fafc;
+  opacity: 0.75;
+}
+
+/* =========================================================
+   WORK REPORT HELPER
+   ========================================================= */
+
+.work-report-helper {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
   margin-top: 7px;
   color: #98a2b3;
   font-size: 9px;
 }
+
+/* =========================================================
+   MODAL FOOTER
+   ========================================================= */
 
 .modal-footer {
   display: flex;
@@ -1070,10 +1320,16 @@
 }
 
 .modal-cancel-button,
-.modal-submit-button {
-  padding: 11px 16px;
+.modal-checkout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 10px 16px;
   border-radius: 10px;
   cursor: pointer;
+  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
 }
@@ -1084,60 +1340,25 @@
   color: #667085;
 }
 
-.modal-submit-button {
+.modal-checkout-button {
   border: 0;
   background: #1479d1;
   color: #ffffff;
   box-shadow: 0 7px 17px rgba(20, 121, 209, 0.18);
 }
 
-.modal-cancel-button:hover {
+.modal-cancel-button:hover:not(:disabled) {
   background: #f8f9fb;
 }
 
-.modal-submit-button:hover {
+.modal-checkout-button:hover:not(:disabled) {
   background: #106dbf;
 }
 
 .modal-cancel-button:disabled,
-.modal-submit-button:disabled,
-.modal-close-button:disabled {
+.modal-checkout-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
-}
-
-/* =========================================================
-   LOADING
-   ========================================================= */
-
-.page-loading {
-  display: flex;
-  min-height: 65vh;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading-spinner {
-  width: 42px;
-  height: 42px;
-  margin-bottom: 15px;
-  border: 3px solid #e3edf8;
-  border-top-color: #1479d1;
-  border-radius: 50%;
-  animation: spin 0.9s linear infinite;
-}
-
-.page-loading p {
-  margin: 0;
-  color: #98a2b3;
-  font-size: 11px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* =========================================================
@@ -1146,17 +1367,31 @@
    ========================================================= */
 
 @media (min-width: 1400px) {
-  .attendance-page {
+  .my-attendance-page {
     padding: 36px 40px 55px;
   }
 
-  .today-main-card {
-    padding: 30px 32px 21px;
+  .today-attendance-header {
+    padding-left: 32px;
+    padding-right: 32px;
   }
 
-  .month-overview,
-  .attendance-history-section {
+  .today-attendance-body {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .attendance-filters-card {
     padding: 28px;
+  }
+
+  .attendance-record {
+    grid-template-columns:
+      105px
+      135px
+      minmax(190px, 1.3fr)
+      minmax(120px, 0.85fr)
+      minmax(145px, 0.9fr);
   }
 }
 
@@ -1166,23 +1401,30 @@
    ========================================================= */
 
 @media (max-width: 1399px) {
-  .attendance-page {
+  .my-attendance-page {
     padding: 30px 30px 48px;
   }
 
   .attendance-record {
     grid-template-columns:
-      65px
+      92px
       115px
-      minmax(90px, 1fr)
-      minmax(90px, 1fr)
-      90px
-      95px;
-    gap: 9px;
+      minmax(150px, 1.2fr)
+      minmax(105px, 0.8fr)
+      minmax(120px, 0.85fr);
+    gap: 10px;
   }
 
-  .attendance-record .record-method {
+  .record-method {
+    gap: 6px;
+  }
+
+  .record-method strong {
     font-size: 9px;
+  }
+
+  .record-method small {
+    font-size: 6px;
   }
 }
 
@@ -1192,50 +1434,69 @@
    ========================================================= */
 
 @media (max-width: 1100px) {
-  .attendance-page {
+  .my-attendance-page {
     padding: 27px 24px 45px;
   }
 
-  .today-main-card {
-    padding: 25px 25px 19px;
+  .attendance-page-header {
+    gap: 15px;
   }
 
-  .today-details {
+  .today-attendance-header {
+    padding: 25px 25px 0;
+  }
+
+  .today-attendance-body {
+    padding: 25px 25px 0;
+  }
+
+  .today-time-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .today-detail-item:nth-child(3) {
+  .today-time-item:nth-child(3) {
     border-top: 1px solid #edf0f5;
     border-left: 0;
   }
 
-  .today-detail-item:nth-child(4) {
+  .today-time-item:nth-child(4) {
     border-top: 1px solid #edf0f5;
   }
 
-  .month-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  /* -----------------------------------------
+     HISTORY RECORD
+     3-column compact layout
+     ----------------------------------------- */
 
   .attendance-record {
-    grid-template-columns: 58px 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: 90px minmax(130px, 1fr) minmax(140px, 1fr);
+    gap: 10px 12px;
+    padding: 13px;
+  }
+
+  .record-date {
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
 
   .record-status {
     grid-column: 2;
+    grid-row: 1;
   }
 
   .record-time {
     grid-column: 3;
+    grid-row: 1;
   }
 
   .record-duration {
     grid-column: 2;
+    grid-row: 2;
   }
 
   .record-method {
     grid-column: 3;
+    grid-row: 2;
   }
 }
 
@@ -1245,24 +1506,37 @@
    ========================================================= */
 
 @media (max-width: 900px) {
-  .attendance-page {
+  .my-attendance-page {
     padding: 25px 22px 42px;
+  }
+
+  .attendance-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .attendance-current-date {
+    align-items: flex-start;
+    width: fit-content;
+  }
+
+  .attendance-current-date strong {
+    text-align: left;
   }
 
   .attendance-page-header h1 {
     font-size: 28px;
   }
 
-  .today-card-header {
+  .today-attendance-header {
     gap: 15px;
   }
 
-  .clock-display {
-    font-size: 46px;
+  .today-time-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .month-overview,
-  .attendance-history-section {
+  .attendance-filters-card {
     padding: 22px;
     border-radius: 19px;
   }
@@ -1284,10 +1558,10 @@
     margin-left: 0;
   }
 
-  /*
-    Tablet attendance record becomes a clean 2-column card.
-    This prevents the desktop 6-column layout from becoming cramped.
-  */
+  /* -----------------------------------------
+     HISTORY
+     Clean 2-column card
+     ----------------------------------------- */
 
   .attendance-record {
     grid-template-columns: 58px minmax(0, 1fr);
@@ -1312,6 +1586,7 @@
 
   .record-duration {
     grid-column: 1 / -1;
+    grid-row: auto;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -1321,15 +1596,9 @@
 
   .record-method {
     grid-column: 1 / -1;
+    grid-row: auto;
     padding-top: 9px;
     border-top: 1px solid #edf0f5;
-  }
-
-  .record-time > span {
-    display: block;
-    color: #98a2b3;
-    font-size: 9px;
-    font-weight: 650;
   }
 
   .attendance-pagination {
@@ -1343,15 +1612,19 @@
    ========================================================= */
 
 @media (max-width: 650px) {
-  .attendance-page {
+  .my-attendance-page {
     padding: 20px 15px 35px;
   }
+
+  /* -----------------------------------------
+     HEADER
+     ----------------------------------------- */
 
   .attendance-page-header {
     margin-bottom: 20px;
   }
 
-  .attendance-page-header .dashboard-eyebrow {
+  .attendance-eyebrow {
     font-size: 10px;
   }
 
@@ -1360,14 +1633,25 @@
     letter-spacing: -0.5px;
   }
 
-  .attendance-page-header > div > p:last-child {
-    max-width: 100%;
+  .attendance-page-header > div:first-child > p {
     margin-top: 6px;
     font-size: 12px;
     line-height: 1.5;
   }
 
-  /* MESSAGE */
+  .attendance-current-date {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 13px;
+  }
+
+  .attendance-current-date strong {
+    font-size: 11px;
+  }
+
+  /* -----------------------------------------
+     MESSAGE
+     ----------------------------------------- */
 
   .attendance-message {
     align-items: flex-start;
@@ -1375,139 +1659,131 @@
     padding: 11px 12px;
   }
 
-  .attendance-message > span:first-child {
+  .message-icon {
     width: 24px;
     height: 24px;
   }
 
-  .attendance-message p {
+  .attendance-message > span:last-child {
     font-size: 11px;
   }
 
-  /* CARDS */
+  /* -----------------------------------------
+     TODAY CARD
+     ----------------------------------------- */
 
-  .today-main-card,
-  .month-overview,
-  .attendance-history-section {
-    padding: 18px;
+  .today-attendance-card {
     border-radius: 17px;
   }
 
-  /* TODAY */
-
-  .today-card-header {
+  .today-attendance-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 11px;
+    padding: 19px 18px 0;
   }
 
-  .today-card-header h2 {
+  .today-attendance-header h2 {
     font-size: 18px;
   }
 
-  .today-status {
+  .today-status-badge {
     align-self: flex-start;
   }
 
-  .today-time-area {
-    padding: 26px 0 23px;
+  .today-attendance-body {
+    padding: 23px 18px 0;
   }
 
-  .clock-display {
-    font-size: 40px;
-    letter-spacing: -1.5px;
-  }
+  /* -----------------------------------------
+     TODAY TIME
+     ----------------------------------------- */
 
-  .today-time-area p {
-    font-size: 10px;
-  }
-
-  /* DETAILS */
-
-  .today-details {
+  .today-time-grid {
     grid-template-columns: 1fr;
   }
 
-  .today-detail-item,
-  .today-detail-item:nth-child(3),
-  .today-detail-item:nth-child(4) {
-    border-top: 0;
-    border-left: 0;
-  }
-
-  .today-detail-item + .today-detail-item {
-    border-top: 1px solid #edf0f5;
-  }
-
-  .today-detail-item {
+  .today-time-item {
+    min-height: 65px;
     padding: 12px 8px;
   }
 
-  .today-detail-item strong {
+  .today-time-item + .today-time-item {
+    border-top: 1px solid #edf0f5;
+    border-left: 0;
+  }
+
+  .today-time-label {
+    font-size: 8px;
+  }
+
+  .today-time-item strong {
     font-size: 13px;
   }
 
-  /* ACTION */
+  /* -----------------------------------------
+     ACTIONS
+     ----------------------------------------- */
 
-  .today-action-area {
+  .today-attendance-actions {
     min-height: 70px;
     padding: 10px 0 5px;
   }
 
-  .primary-attendance-button,
-  .checkout-attendance-button {
+  .check-in-button,
+  .check-out-button {
     width: 100%;
     min-width: 0;
     padding: 12px 15px;
   }
 
-  .today-footer {
-    justify-content: flex-start;
+  .checked-out-message {
+    font-size: 11px;
   }
 
-  .today-footer span {
-    font-size: 9px;
+  /* -----------------------------------------
+     FILTER CARD
+     ----------------------------------------- */
+
+  .attendance-filters-card {
+    margin-bottom: 14px;
+    padding: 18px;
+    border-radius: 17px;
   }
 
-  /* MONTH */
+  .attendance-filters-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
 
-  .section-title-row h2 {
+  .attendance-filters-header h2 {
     font-size: 17px;
   }
 
-  .section-title-row > div > p:last-child {
-    font-size: 10px;
+  .attendance-count {
+    align-self: flex-start;
   }
 
-  .month-summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
-  }
-
-  .month-summary-card {
-    min-height: 62px;
-    padding: 11px 12px;
-  }
-
-  .month-summary-card span {
-    font-size: 10px;
-  }
-
-  .month-summary-card strong {
-    font-size: 19px;
-  }
-
-  /* FILTERS */
+  /* -----------------------------------------
+     FILTERS
+     ----------------------------------------- */
 
   .attendance-filters {
     align-items: stretch;
     flex-direction: column;
     gap: 9px;
+    padding-top: 14px;
   }
 
   .filter-group {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .filter-group label {
+    font-size: 10px;
   }
 
   .filter-group select {
@@ -1521,7 +1797,9 @@
     align-self: flex-start;
   }
 
-  /* RECORD */
+  /* -----------------------------------------
+     HISTORY RECORD
+     ----------------------------------------- */
 
   .attendance-record {
     grid-template-columns: 50px minmax(0, 1fr);
@@ -1531,70 +1809,129 @@
   }
 
   .record-date {
-    width: 46px;
-    height: 46px;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-items: center;
+    justify-content: center;
   }
 
   .record-date strong {
-    font-size: 14px;
+    font-size: 10px;
+    text-align: center;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .record-date span {
+    font-size: 8px;
   }
 
   .record-status {
     grid-column: 2;
+    grid-row: 1;
   }
 
-  .status-badge {
-    font-size: 9px;
+  .record-status-badge {
     padding: 5px 8px;
+    font-size: 9px;
   }
+
+  /* -----------------------------------------
+     IN / OUT
+     ----------------------------------------- */
 
   .record-time {
     grid-column: 1 / -1;
-    justify-content: space-between;
+    grid-row: 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
     padding-top: 10px;
     border-top: 1px solid #edf0f5;
   }
 
-  .record-time > span {
-    display: block;
-    color: #98a2b3;
-    font-size: 9px;
-    font-weight: 650;
+  .record-time > div {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .record-time > div > span {
+    font-size: 8px;
   }
 
   .record-time strong {
     font-size: 11px;
   }
 
+  /* -----------------------------------------
+     WORKING
+     ----------------------------------------- */
+
   .record-duration {
     grid-column: 1 / -1;
+    grid-row: 4;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid #edf0f5;
   }
 
   .record-duration > span {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .record-duration strong {
     font-size: 11px;
   }
 
+  /* -----------------------------------------
+     METHOD
+     ----------------------------------------- */
+
   .record-method {
     grid-column: 1 / -1;
+    grid-row: 5;
     padding-top: 8px;
     border-top: 1px solid #edf0f5;
     font-size: 9px;
   }
 
-  .method-icon {
+  .record-method > span:first-child {
     width: 27px;
     height: 27px;
     font-size: 13px;
   }
 
-  /* PAGINATION */
+  .record-method strong {
+    font-size: 9px;
+  }
+
+  .record-method small {
+    margin-left: auto;
+  }
+
+  /* -----------------------------------------
+     LOADING
+     ----------------------------------------- */
+
+  .attendance-loading {
+    min-height: 190px;
+  }
+
+  /* -----------------------------------------
+     EMPTY
+     ----------------------------------------- */
+
+  .empty-attendance {
+    min-height: 190px;
+    padding: 15px;
+  }
+
+  /* -----------------------------------------
+     PAGINATION
+     ----------------------------------------- */
 
   .attendance-pagination {
     align-items: stretch;
@@ -1602,23 +1939,29 @@
     gap: 9px;
   }
 
-  .attendance-pagination > span {
-    order: 1;
-    text-align: center;
+  .pagination-pages {
+    order: 2;
   }
 
-  .attendance-pagination button {
+  .attendance-pagination > button {
     width: 100%;
   }
 
-  /* EMPTY */
-
-  .empty-attendance {
-    min-height: 190px;
-    padding: 15px;
+  .attendance-pagination > button:first-child {
+    order: 1;
   }
 
-  /* MODAL */
+  .pagination-pages {
+    order: 2;
+  }
+
+  .attendance-pagination > button:last-child {
+    order: 3;
+  }
+
+  /* -----------------------------------------
+     MODAL
+     ----------------------------------------- */
 
   .work-report-modal-overlay {
     align-items: center;
@@ -1650,7 +1993,7 @@
   }
 
   .modal-cancel-button,
-  .modal-submit-button {
+  .modal-checkout-button {
     width: 100%;
   }
 }
@@ -1661,7 +2004,7 @@
    ========================================================= */
 
 @media (max-width: 480px) {
-  .attendance-page {
+  .my-attendance-page {
     padding: 17px 12px 30px;
   }
 
@@ -1669,42 +2012,15 @@
     font-size: 23px;
   }
 
-  .today-main-card,
-  .month-overview,
-  .attendance-history-section {
+  .today-attendance-header,
+  .today-attendance-body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .attendance-filters-card {
     padding: 16px;
     border-radius: 15px;
-  }
-
-  .clock-display {
-    font-size: 36px;
-  }
-
-  .today-status {
-    padding: 6px 10px;
-    font-size: 10px;
-  }
-
-  .today-detail-item {
-    padding: 11px 6px;
-  }
-
-  .month-summary-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .month-summary-card {
-    min-height: 58px;
-    padding: 10px;
-  }
-
-  .month-summary-card span {
-    font-size: 9px;
-  }
-
-  .month-summary-card strong {
-    font-size: 17px;
   }
 
   .attendance-record {
@@ -1712,13 +2028,8 @@
     padding: 11px;
   }
 
-  .record-date {
-    width: 43px;
-    height: 43px;
-  }
-
   .record-date strong {
-    font-size: 13px;
+    font-size: 9px;
   }
 
   .record-date span {
@@ -1734,10 +2045,27 @@
     font-size: 8px;
   }
 
-  .method-icon {
+  .record-method > span:first-child {
     width: 25px;
     height: 25px;
     font-size: 12px;
+  }
+
+  .record-method strong {
+    font-size: 8px;
+  }
+
+  .record-method small {
+    font-size: 6px;
+  }
+
+  .pagination-pages {
+    gap: 4px;
+  }
+
+  .pagination-pages button {
+    width: 28px;
+    height: 28px;
   }
 
   .work-report-modal-overlay {
@@ -1775,7 +2103,7 @@
    ========================================================= */
 
 @media (max-width: 360px) {
-  .attendance-page {
+  .my-attendance-page {
     padding: 14px 9px 25px;
   }
 
@@ -1783,34 +2111,22 @@
     font-size: 21px;
   }
 
-  .attendance-page-header > div > p:last-child {
+  .attendance-page-header > div:first-child > p {
     font-size: 11px;
   }
 
-  .today-main-card,
-  .month-overview,
-  .attendance-history-section {
-    padding: 13px;
+  .today-attendance-header,
+  .today-attendance-body {
+    padding-left: 13px;
+    padding-right: 13px;
   }
 
-  .today-card-header h2 {
+  .today-attendance-header h2 {
     font-size: 17px;
   }
 
-  .clock-display {
-    font-size: 32px;
-  }
-
-  .today-detail-item {
-    padding: 10px 4px;
-  }
-
-  .month-summary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .month-summary-card {
-    min-height: 54px;
+  .attendance-filters-card {
+    padding: 13px;
   }
 
   .attendance-record {
@@ -1819,18 +2135,21 @@
     padding: 10px;
   }
 
-  .record-date {
-    width: 40px;
-    height: 40px;
-  }
-
   .record-date strong {
-    font-size: 12px;
+    font-size: 8px;
   }
 
-  .status-badge {
+  .record-date span {
+    font-size: 7px;
+  }
+
+  .record-status-badge {
     font-size: 8px;
     padding: 4px 7px;
+  }
+
+  .record-time > div > span {
+    font-size: 7px;
   }
 
   .record-time strong,
@@ -1838,23 +2157,68 @@
     font-size: 9px;
   }
 
+  .record-duration > span {
+    font-size: 7px;
+  }
+
   .record-method {
     font-size: 8px;
   }
 
-  .method-icon {
+  .record-method strong {
+    font-size: 8px;
+  }
+
+  .record-method > span:first-child {
     width: 23px;
     height: 23px;
     font-size: 11px;
   }
 
-  .primary-attendance-button,
-  .checkout-attendance-button {
+  .check-in-button,
+  .check-out-button {
     font-size: 11px;
     padding: 11px 12px;
   }
 
+  .pagination-pages button {
+    width: 26px;
+    height: 26px;
+    font-size: 9px;
+  }
+
   .work-report-modal {
     padding: 14px;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY / FOCUS
+   ========================================================= */
+
+button:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #72b5ea;
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   REDUCE MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-message,
+  .work-report-modal,
+  .loading-spinner,
+  .button-spinner {
+    animation: none;
+  }
+
+  .attendance-record,
+  .check-in-button,
+  .check-out-button,
+  .clear-filters-button {
+    transition: none;
   }
 }
