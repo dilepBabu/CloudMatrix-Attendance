@@ -593,10 +593,6 @@ const getBestLocation = (onGpsUpdate = null) => {
    ========================================================= */
 
 const MyAttendance = () => {
-  /* =======================================================
-     ATTENDANCE STATE
-     ======================================================= */
-
   const [
     attendance,
     setAttendance,
@@ -794,11 +790,18 @@ const MyAttendance = () => {
 
   /* =======================================================
      FETCH WORK REPORT
+     
+     IMPORTANT:
+     Can receive attendanceId.
+     Exact attendance report is preferred.
+     This fixes overnight shifts.
      ======================================================= */
 
   const fetchTodayWorkReport =
     useCallback(
-      async () => {
+      async (
+        attendanceId = null
+      ) => {
         try {
           const response =
             await api.get(
@@ -850,15 +853,71 @@ const MyAttendance = () => {
             return null;
           }
 
+          /*
+           * FIRST:
+           * Match the exact attendance ID.
+           */
+
+          if (attendanceId) {
+            const exactReport =
+              reports.find(
+                (report) => {
+                  const reportAttendanceId =
+                    report
+                      ?.attendanceId
+                      ?._id ||
+                    report?.attendanceId;
+
+                  return (
+                    String(
+                      reportAttendanceId ||
+                        ""
+                    ) ===
+                    String(
+                      attendanceId
+                    )
+                  );
+                }
+              );
+
+            if (exactReport) {
+              setWorkReportExists(
+                true
+              );
+
+              setWorkReportDescription(
+                exactReport.description ||
+                  ""
+              );
+
+              return exactReport;
+            }
+
+            /*
+             * Exact attendance has no report.
+             */
+
+            setWorkReportExists(
+              false
+            );
+
+            setWorkReportDescription(
+              ""
+            );
+
+            return null;
+          }
+
+          /*
+           * No attendance ID supplied.
+           *
+           * Preserve normal current behavior.
+           */
+
           const todayKey =
             getDateKey(
               new Date()
             );
-
-          /*
-           * Prefer report for today's
-           * attendance date.
-           */
 
           const todayReport =
             reports.find(
@@ -918,13 +977,6 @@ const MyAttendance = () => {
             "FETCH WORK REPORT ERROR:",
             error
           );
-
-          /*
-           * Important:
-           *
-           * Do not erase the user's
-           * textarea if this request fails.
-           */
 
           return null;
         }
@@ -1515,22 +1567,30 @@ const MyAttendance = () => {
         setMessageType("");
 
         /*
-         * Store EXACT attendance ID.
+         * Store the EXACT attendance ID.
          */
 
-        setCheckoutAttendanceId(
+        const exactAttendanceId =
           String(
             attendanceId
-          )
+          );
+
+        setCheckoutAttendanceId(
+          exactAttendanceId
         );
 
         /*
-         * Load existing report.
+         * IMPORTANT:
          *
-         * This does NOT perform checkout.
+         * Fetch report for this exact
+         * attendance record.
+         *
+         * This fixes overnight shifts.
          */
 
-        await fetchTodayWorkReport();
+        await fetchTodayWorkReport(
+          exactAttendanceId
+        );
 
         setShowWorkReportModal(
           true
@@ -1569,13 +1629,6 @@ const MyAttendance = () => {
       ) {
         return;
       }
-
-      /*
-       * IMPORTANT:
-       *
-       * Use the attendance ID captured
-       * when the checkout button was clicked.
-       */
 
       const currentAttendanceId =
         checkoutAttendanceId;
@@ -1712,7 +1765,7 @@ const MyAttendance = () => {
 
         /* =================================================
            STEP 1
-           SAVE WORK REPORT
+           SAVE WORK REPORT FOR EXACT ATTENDANCE
            ================================================= */
 
         let reportResponse;
@@ -1729,6 +1782,15 @@ const MyAttendance = () => {
               "/work-reports/my",
               {
                 description,
+
+                /*
+                 * VERY IMPORTANT
+                 *
+                 * Send exact attendance ID.
+                 */
+
+                attendanceId:
+                  currentAttendanceId,
               }
             );
         } else {
@@ -1741,6 +1803,16 @@ const MyAttendance = () => {
               "/work-reports",
               {
                 description,
+
+                /*
+                 * VERY IMPORTANT
+                 *
+                 * Link report to exact
+                 * attendance record.
+                 */
+
+                attendanceId:
+                  currentAttendanceId,
               }
             );
         }
@@ -1806,11 +1878,6 @@ const MyAttendance = () => {
         let checkoutPayload =
           {};
 
-        /*
-         * OFFICE:
-         * GPS required.
-         */
-
         if (
           attendanceMethod ===
           "OFFICE"
@@ -1840,14 +1907,7 @@ const MyAttendance = () => {
             accuracy:
               gps.accuracy,
           };
-        }
-
-        /*
-         * REMOTE:
-         * No GPS.
-         */
-
-        else if (
+        } else if (
           attendanceMethod ===
           "REMOTE"
         ) {
@@ -1855,14 +1915,7 @@ const MyAttendance = () => {
             source:
               "REMOTE ATTENDANCE - GPS NOT REQUIRED FOR CHECKOUT",
           });
-        }
-
-        /*
-         * FIELD:
-         * No GPS.
-         */
-
-        else if (
+        } else if (
           attendanceMethod ===
           "FIELD"
         ) {
@@ -1870,15 +1923,7 @@ const MyAttendance = () => {
             source:
               "FIELD ATTENDANCE - GPS NOT REQUIRED FOR CHECKOUT",
           });
-        }
-
-        /*
-         * Unknown method:
-         *
-         * Let backend decide.
-         */
-
-        else {
+        } else {
           setGpsDebug({
             source:
               "ATTENDANCE METHOD NOT FOUND - SENDING CHECKOUT REQUEST",
@@ -1941,14 +1986,10 @@ const MyAttendance = () => {
           null
         );
 
-        /*
-         * Refresh attendance.
-         */
-
         await fetchAttendance();
 
         /*
-         * Refresh work report.
+         * Refresh report list.
          */
 
         await fetchTodayWorkReport();
@@ -1959,14 +2000,11 @@ const MyAttendance = () => {
         );
 
         /*
-         * IMPORTANT:
+         * DO NOT CLEAR WORK REPORT.
          *
-         * If work report was already saved
-         * and GPS/checkout failed, DO NOT
-         * delete/clear the report.
-         *
-         * User can simply press
-         * Submit & Check Out again.
+         * If report was saved but GPS or
+         * checkout failed, the report stays
+         * saved. User can retry checkout.
          */
 
         const errorMessage =
@@ -2047,10 +2085,6 @@ const MyAttendance = () => {
   return (
     <div className="my-attendance-page">
 
-      {/* =================================================
-          PAGE HEADER
-          ================================================= */}
-
       <div className="attendance-page-header">
 
         <div>
@@ -2090,10 +2124,6 @@ const MyAttendance = () => {
 
       </div>
 
-      {/* =================================================
-          MESSAGE
-          ================================================= */}
-
       {message && (
         <div
           className={`attendance-message ${messageType}`}
@@ -2113,10 +2143,6 @@ const MyAttendance = () => {
           </span>
         </div>
       )}
-
-      {/* =================================================
-          GPS DEBUG
-          ================================================= */}
 
       {gpsDebug && (
         <div
@@ -2260,10 +2286,6 @@ const MyAttendance = () => {
           )}
         </div>
       )}
-
-      {/* =================================================
-          TODAY ATTENDANCE CARD
-          ================================================= */}
 
       <div className="today-attendance-card">
 
@@ -2454,10 +2476,6 @@ const MyAttendance = () => {
 
       </div>
 
-      {/* =================================================
-          FILTER CARD
-          ================================================= */}
-
       <div className="attendance-filters-card">
 
         <div className="attendance-filters-header">
@@ -2647,10 +2665,6 @@ const MyAttendance = () => {
         </div>
 
       </div>
-
-      {/* =================================================
-          ATTENDANCE CONTENT
-          ================================================= */}
 
       {loading ? (
 
@@ -2844,10 +2858,6 @@ const MyAttendance = () => {
 
       )}
 
-      {/* =================================================
-          PAGINATION
-          ================================================= */}
-
       {filteredAttendance.length >
         recordsPerPage && (
 
@@ -2930,10 +2940,6 @@ const MyAttendance = () => {
         </div>
 
       )}
-
-      {/* =================================================
-          WORK REPORT MODAL
-          ================================================= */}
 
       {showWorkReportModal && (
 
