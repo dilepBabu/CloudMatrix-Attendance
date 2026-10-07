@@ -825,7 +825,26 @@ export const checkIn =
               .longitude
           );
 
+console.log("========== MOBILE GPS CHECK ==========");
 
+console.log({
+  userLatitude: gps.latitude,
+  userLongitude: gps.longitude,
+  gpsAccuracy: gps.accuracy,
+
+  officeLatitude:
+    settings.officeLocation.latitude,
+
+  officeLongitude:
+    settings.officeLocation.longitude,
+
+  officeRadius:
+    settings.officeLocation.radius,
+
+  calculatedDistance: distance,
+});
+
+console.log("======================================");
         console.log(
           "CHECK-IN GPS CHECK:",
           {
