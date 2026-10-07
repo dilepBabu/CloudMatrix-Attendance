@@ -8,7 +8,7 @@ import "./MyAttendance.css";
    MY ATTENDANCE
    CloudMatrix Attendance System
 
-   GPS FIX:
+   GPS DEBUG VERSION:
    - High accuracy location first
    - Multiple GPS readings
    - Keeps the most accurate reading
@@ -16,6 +16,8 @@ import "./MyAttendance.css";
    - Uses watchPosition() to improve mobile accuracy
    - Frontend GPS accuracy limit = 300m
    - Backend performs actual office-radius validation
+   - Shows GPS information directly on screen
+   - Shows backend distance/radius when available
 
    EXISTING LOGIC PRESERVED:
    - Existing UI
@@ -295,17 +297,6 @@ const getGpsErrorMessage = (error) => {
    GPS CONFIGURATION
    ========================================================= */
 
-/*
- * IMPORTANT:
- *
- * Backend maximum GPS accuracy = 300m.
- *
- * Accuracy means how confident the browser is
- * about the supplied GPS position.
- *
- * Office radius is a separate backend calculation.
- */
-
 const MAX_GPS_ACCURACY = 300;
 
 
@@ -325,14 +316,12 @@ const MAX_GPS_ACCURACY = 300;
       is <= 300m.
    7. Otherwise return GPS_ACCURACY_LOW.
 
-   IMPORTANT:
-   - Does NOT change backend office radius.
-   - Does NOT change check-in API.
-   - Does NOT change check-out API.
-   - Works for laptop and mobile.
+   DEBUG:
+   - onGpsUpdate callback sends every useful reading
+     to the React component.
    ========================================================= */
 
-const getBestLocation = () => {
+const getBestLocation = (onGpsUpdate) => {
   return new Promise((resolve, reject) => {
     if (
       typeof navigator === "undefined" ||
@@ -467,6 +456,15 @@ const getBestLocation = () => {
         }
       );
 
+      if (onGpsUpdate) {
+        onGpsUpdate({
+          latitude,
+          longitude,
+          accuracy,
+          source: "FINAL",
+        });
+      }
+
       resolve({
         latitude,
         longitude,
@@ -573,6 +571,23 @@ const getBestLocation = () => {
 
 
       /* ===================================================
+         SHOW GPS READING ON SCREEN
+         =================================================== */
+
+      if (onGpsUpdate) {
+        onGpsUpdate({
+          latitude,
+          longitude,
+          accuracy,
+          source:
+            accuracy <= 50
+              ? "HIGH ACCURACY"
+              : "GPS READING",
+        });
+      }
+
+
+      /* ===================================================
          KEEP MOST ACCURATE READING
          =================================================== */
 
@@ -595,6 +610,16 @@ const getBestLocation = () => {
             accuracy,
           }
         );
+
+        if (onGpsUpdate) {
+          onGpsUpdate({
+            latitude,
+            longitude,
+            accuracy,
+            source:
+              "BEST READING",
+          });
+        }
       }
 
 
@@ -614,14 +639,6 @@ const getBestLocation = () => {
 
     /* =====================================================
        NORMAL GPS FALLBACK
-       =====================================================
-
-       IMPORTANT:
-       This function is declared BEFORE the high accuracy
-       watcher starts.
-
-       This avoids calling a const function before it has
-       been initialized.
        ===================================================== */
 
     const startFallback = () => {
@@ -636,6 +653,14 @@ const getBestLocation = () => {
       console.log(
         "STARTING NORMAL MOBILE GPS FALLBACK..."
       );
+
+      if (onGpsUpdate) {
+        onGpsUpdate((previous) => ({
+          ...previous,
+          source:
+            "NORMAL GPS FALLBACK",
+        }));
+      }
 
       fallbackWatchId =
         navigator.geolocation.watchPosition(
@@ -674,6 +699,13 @@ const getBestLocation = () => {
       "STARTING HIGH ACCURACY MOBILE GPS..."
     );
 
+    if (onGpsUpdate) {
+      onGpsUpdate({
+        source:
+          "STARTING HIGH ACCURACY GPS",
+      });
+    }
+
     highAccuracyWatchId =
       navigator.geolocation.watchPosition(
         (position) => {
@@ -688,11 +720,15 @@ const getBestLocation = () => {
             error
           );
 
-          /*
-           * Do not immediately fail.
-           *
-           * Start normal browser location fallback.
-           */
+          if (onGpsUpdate) {
+            onGpsUpdate({
+              source:
+                "HIGH ACCURACY GPS ERROR",
+              gpsError:
+                error?.message ||
+                "Unable to get high accuracy GPS",
+            });
+          }
 
           startFallback();
         },
@@ -777,6 +813,14 @@ const MyAttendance = () => {
 
   const [currentTime, setCurrentTime] =
     useState(new Date());
+
+
+  /* =========================================================
+     GPS DEBUG STATE
+     ========================================================= */
+
+  const [gpsDebug, setGpsDebug] =
+    useState(null);
 
 
   /* =========================================================
@@ -1065,6 +1109,11 @@ const MyAttendance = () => {
 
         setMessage("");
 
+        setGpsDebug({
+          source:
+            "REQUESTING MOBILE/LAPTOP GPS...",
+        });
+
         showMessage(
           "Getting your location... Please allow location access if your browser asks.",
           "info"
@@ -1075,7 +1124,22 @@ const MyAttendance = () => {
         );
 
         const position =
-          await getBestLocation();
+          await getBestLocation(
+            (gps) => {
+              if (
+                typeof gps ===
+                "function"
+              ) {
+                setGpsDebug(
+                  gps
+                );
+              } else {
+                setGpsDebug(
+                  gps
+                );
+              }
+            }
+          );
 
         const latitude =
           Number(
@@ -1099,6 +1163,19 @@ const MyAttendance = () => {
             longitude,
             accuracy,
           }
+        );
+
+        setGpsDebug(
+          (previous) => ({
+            ...(previous || {}),
+            latitude,
+            longitude,
+            accuracy,
+            source:
+              "LOCATION READY - SENDING TO BACKEND",
+            result:
+              "WAITING FOR BACKEND",
+          })
         );
 
         if (
@@ -1154,6 +1231,25 @@ const MyAttendance = () => {
           response?.data
         );
 
+        setGpsDebug(
+          (previous) => ({
+            ...(previous || {}),
+            latitude,
+            longitude,
+            accuracy,
+            result:
+              "INSIDE OFFICE / CHECK-IN ACCEPTED",
+            backendDistance:
+              response?.data
+                ?.distance ??
+              previous?.backendDistance,
+            officeRadius:
+              response?.data
+                ?.allowedRadius ??
+              previous?.officeRadius,
+          })
+        );
+
         showMessage(
           response?.data
             ?.message ||
@@ -1184,6 +1280,18 @@ const MyAttendance = () => {
             "error"
           );
 
+          setGpsDebug(
+            (previous) => ({
+              ...(previous || {}),
+              result:
+                "GPS ERROR",
+              gpsError:
+                getGpsErrorMessage(
+                  error
+                ),
+            })
+          );
+
           return;
         }
 
@@ -1192,6 +1300,25 @@ const MyAttendance = () => {
             ?.data?.message;
 
         if (backendMessage) {
+          const backendData =
+            error?.response
+              ?.data;
+
+          setGpsDebug(
+            (previous) => ({
+              ...(previous || {}),
+              result:
+                "BACKEND REJECTED LOCATION",
+              backendMessage,
+              backendDistance:
+                backendData?.distance ??
+                previous?.backendDistance,
+              officeRadius:
+                backendData?.allowedRadius ??
+                previous?.officeRadius,
+            })
+          );
+
           showMessage(
             backendMessage,
             "error"
@@ -1199,6 +1326,17 @@ const MyAttendance = () => {
 
           return;
         }
+
+        setGpsDebug(
+          (previous) => ({
+            ...(previous || {}),
+            result:
+              "CHECK-IN FAILED",
+            backendMessage:
+              error?.message ||
+              "Unknown error",
+          })
+        );
 
         showMessage(
           error?.message ||
@@ -1351,11 +1489,36 @@ const MyAttendance = () => {
 
 
         /* ===================================================
+           RESET GPS DEBUG
+           =================================================== */
+
+        setGpsDebug({
+          source:
+            "REQUESTING GPS FOR CHECK-OUT...",
+        });
+
+
+        /* ===================================================
            GET GPS
            =================================================== */
 
         const position =
-          await getBestLocation();
+          await getBestLocation(
+            (gps) => {
+              if (
+                typeof gps ===
+                "function"
+              ) {
+                setGpsDebug(
+                  gps
+                );
+              } else {
+                setGpsDebug(
+                  gps
+                );
+              }
+            }
+          );
 
         const latitude =
           Number(
@@ -1379,6 +1542,19 @@ const MyAttendance = () => {
             longitude,
             accuracy,
           }
+        );
+
+        setGpsDebug(
+          (previous) => ({
+            ...(previous || {}),
+            latitude,
+            longitude,
+            accuracy,
+            source:
+              "LOCATION READY - SENDING TO BACKEND",
+            result:
+              "WAITING FOR BACKEND",
+          })
         );
 
         if (
@@ -1439,6 +1615,25 @@ const MyAttendance = () => {
           response?.data
         );
 
+        setGpsDebug(
+          (previous) => ({
+            ...(previous || {}),
+            latitude,
+            longitude,
+            accuracy,
+            result:
+              "INSIDE OFFICE / CHECK-OUT ACCEPTED",
+            backendDistance:
+              response?.data
+                ?.distance ??
+              previous?.backendDistance,
+            officeRadius:
+              response?.data
+                ?.allowedRadius ??
+              previous?.officeRadius,
+          })
+        );
+
         showMessage(
           response?.data
             ?.message ||
@@ -1477,6 +1672,18 @@ const MyAttendance = () => {
             "error"
           );
 
+          setGpsDebug(
+            (previous) => ({
+              ...(previous || {}),
+              result:
+                "GPS ERROR",
+              gpsError:
+                getGpsErrorMessage(
+                  error
+                ),
+            })
+          );
+
           return;
         }
 
@@ -1485,6 +1692,25 @@ const MyAttendance = () => {
             ?.data?.message;
 
         if (backendMessage) {
+          const backendData =
+            error?.response
+              ?.data;
+
+          setGpsDebug(
+            (previous) => ({
+              ...(previous || {}),
+              result:
+                "BACKEND REJECTED LOCATION",
+              backendMessage,
+              backendDistance:
+                backendData?.distance ??
+                previous?.backendDistance,
+              officeRadius:
+                backendData?.allowedRadius ??
+                previous?.officeRadius,
+            })
+          );
+
           showMessage(
             backendMessage,
             "error"
@@ -1492,6 +1718,17 @@ const MyAttendance = () => {
 
           return;
         }
+
+        setGpsDebug(
+          (previous) => ({
+            ...(previous || {}),
+            result:
+              "CHECK-OUT FAILED",
+            backendMessage:
+              error?.message ||
+              "Unknown error",
+          })
+        );
 
         showMessage(
           error?.message ||
@@ -1709,6 +1946,252 @@ const MyAttendance = () => {
           <span>
             {message}
           </span>
+
+        </div>
+      )}
+
+
+      {/* =====================================================
+          GPS DEBUG PANEL
+          
+          IMPORTANT:
+          This uses inline styles only.
+          Your existing CSS is NOT changed.
+          ===================================================== */}
+
+      {gpsDebug && (
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "18px",
+            background: "#f5f9ff",
+            border: "1px solid #cfe3ff",
+            borderRadius: "12px",
+            fontFamily:
+              "Arial, sans-serif",
+            fontSize: "14px",
+            lineHeight: "1.8",
+            color: "#17324d",
+            boxSizing: "border-box",
+            width: "100%",
+          }}
+        >
+
+          <div
+            style={{
+              fontWeight: "700",
+              fontSize: "15px",
+              marginBottom: "10px",
+              color: "#0066b3",
+            }}
+          >
+            📍 GPS LOCATION DEBUG
+          </div>
+
+
+          {/* SOURCE */}
+
+          {gpsDebug.source && (
+            <div>
+              <strong>
+                Source:
+              </strong>{" "}
+              {gpsDebug.source}
+            </div>
+          )}
+
+
+          {/* LATITUDE */}
+
+          {Number.isFinite(
+            Number(
+              gpsDebug.latitude
+            )
+          ) && (
+            <div>
+              <strong>
+                Latitude:
+              </strong>{" "}
+              {Number(
+                gpsDebug.latitude
+              ).toFixed(8)}
+            </div>
+          )}
+
+
+          {/* LONGITUDE */}
+
+          {Number.isFinite(
+            Number(
+              gpsDebug.longitude
+            )
+          ) && (
+            <div>
+              <strong>
+                Longitude:
+              </strong>{" "}
+              {Number(
+                gpsDebug.longitude
+              ).toFixed(8)}
+            </div>
+          )}
+
+
+          {/* ACCURACY */}
+
+          {Number.isFinite(
+            Number(
+              gpsDebug.accuracy
+            )
+          ) && (
+            <div>
+              <strong>
+                GPS Accuracy:
+              </strong>{" "}
+              {Math.round(
+                Number(
+                  gpsDebug.accuracy
+                )
+              )}{" "}
+              m
+            </div>
+          )}
+
+
+          {/* BACKEND DISTANCE */}
+
+          {Number.isFinite(
+            Number(
+              gpsDebug.backendDistance
+            )
+          ) && (
+            <div>
+              <strong>
+                Distance From Office:
+              </strong>{" "}
+              {Math.round(
+                Number(
+                  gpsDebug.backendDistance
+                )
+              )}{" "}
+              m
+            </div>
+          )}
+
+
+          {/* OFFICE RADIUS */}
+
+          {Number.isFinite(
+            Number(
+              gpsDebug.officeRadius
+            )
+          ) && (
+            <div>
+              <strong>
+                Allowed Office Radius:
+              </strong>{" "}
+              {Math.round(
+                Number(
+                  gpsDebug.officeRadius
+                )
+              )}{" "}
+              m
+            </div>
+          )}
+
+
+          {/* RESULT */}
+
+          {gpsDebug.result && (
+            <div
+              style={{
+                marginTop: "8px",
+                fontWeight: "700",
+              }}
+            >
+              <strong>
+                Result:
+              </strong>{" "}
+              {gpsDebug.result}
+            </div>
+          )}
+
+
+          {/* BACKEND MESSAGE */}
+
+          {gpsDebug.backendMessage && (
+            <div
+              style={{
+                marginTop: "5px",
+                fontWeight: "600",
+              }}
+            >
+              <strong>
+                Backend:
+              </strong>{" "}
+              {gpsDebug.backendMessage}
+            </div>
+          )}
+
+
+          {/* GPS ERROR */}
+
+          {gpsDebug.gpsError && (
+            <div
+              style={{
+                marginTop: "5px",
+                fontWeight: "600",
+              }}
+            >
+              <strong>
+                GPS Error:
+              </strong>{" "}
+              {gpsDebug.gpsError}
+            </div>
+          )}
+
+
+          {/* IMPORTANT EXPLANATION */}
+
+          {Number.isFinite(
+            Number(
+              gpsDebug.backendDistance
+            )
+          ) &&
+            Number.isFinite(
+              Number(
+                gpsDebug.officeRadius
+              )
+            ) && (
+              <div
+                style={{
+                  marginTop: "10px",
+                  paddingTop: "10px",
+                  borderTop:
+                    "1px solid #d9e8f8",
+                  fontSize: "13px",
+                  color: "#4b6175",
+                }}
+              >
+                Backend comparison:{" "}
+                <strong>
+                  {Math.round(
+                    Number(
+                      gpsDebug.backendDistance
+                    )
+                  )}m
+                </strong>{" "}
+                from office vs{" "}
+                <strong>
+                  {Math.round(
+                    Number(
+                      gpsDebug.officeRadius
+                    )
+                  )}m
+                </strong>{" "}
+                allowed.
+              </div>
+            )}
 
         </div>
       )}
