@@ -8,14 +8,25 @@ import "./MyAttendance.css";
    MY ATTENDANCE
    CloudMatrix Attendance System
 
-   IMPORTANT:
-   - Existing UI structure preserved
-   - Existing Work Report logic preserved
-   - Existing API endpoints preserved
-   - Laptop GPS continues to work
-   - Mobile GPS gets better fallback handling
-   - Frontend GPS accuracy aligned with backend: 300m
+   GPS FIX:
+   - High accuracy location first
+   - Normal browser location fallback
+   - No watchPosition()
+   - No manual secure-context rejection
+   - Frontend GPS accuracy limit = 300m
+   - Backend performs actual office-radius validation
+
+   EXISTING LOGIC PRESERVED:
+   - Existing UI
+   - Work report
+   - Check-in API
+   - Check-out API
+   - Attendance history
+   - Pagination
+   - Filters
+   - Night-shift backend compatibility
    ========================================================= */
+
 
 /* =========================================================
    DATE HELPERS
@@ -28,10 +39,11 @@ const getDateKey = (dateValue) => {
 
   if (Number.isNaN(date.getTime())) return "";
 
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0"
-  )}-${String(date.getDate()).padStart(2, "0")}`;
+  return `${date.getFullYear()}-${String(
+    date.getMonth() + 1
+  ).padStart(2, "0")}-${String(
+    date.getDate()
+  ).padStart(2, "0")}`;
 };
 
 const formatDate = (dateValue) => {
@@ -101,6 +113,7 @@ const formatLongDate = (dateValue) => {
   });
 };
 
+
 /* =========================================================
    STATUS HELPERS
    ========================================================= */
@@ -120,9 +133,13 @@ const formatStatus = (status) => {
     MISSED_CHECKOUT: "Missed Checkout",
     HALF_DAY: "Half Day",
     OVERTIME: "Overtime",
+    UPCOMING: "Upcoming",
   };
 
-  return statusMap[normalized] || status.replaceAll("_", " ");
+  return (
+    statusMap[normalized] ||
+    String(status).replaceAll("_", " ")
+  );
 };
 
 const getStatusClass = (status) => {
@@ -138,9 +155,11 @@ const getStatusClass = (status) => {
   if (normalized.includes("missed")) return "missed";
   if (normalized.includes("half")) return "half-day";
   if (normalized.includes("overtime")) return "overtime";
+  if (normalized.includes("upcoming")) return "upcoming";
 
   return "unknown";
 };
+
 
 /* =========================================================
    ATTENDANCE METHOD HELPERS
@@ -169,7 +188,10 @@ const formatMethod = (method) => {
     FIELD: "Field",
   };
 
-  return methodMap[normalized] || method.replaceAll("_", " ");
+  return (
+    methodMap[normalized] ||
+    String(method).replaceAll("_", " ")
+  );
 };
 
 const getMethodIcon = (method) => {
@@ -184,19 +206,33 @@ const getMethodIcon = (method) => {
   return "•";
 };
 
+
 /* =========================================================
    WORKING TIME
    ========================================================= */
 
 const formatMinutes = (minutes) => {
-  if (minutes === null || minutes === undefined) return "0 min";
+  if (
+    minutes === null ||
+    minutes === undefined
+  ) {
+    return "0 min";
+  }
 
-  const totalMinutes = Math.max(0, Number(minutes) || 0);
+  const totalMinutes = Math.max(
+    0,
+    Number(minutes) || 0
+  );
 
-  const hours = Math.floor(totalMinutes / 60);
+  const hours = Math.floor(
+    totalMinutes / 60
+  );
+
   const mins = totalMinutes % 60;
 
-  if (hours === 0) return `${mins} min`;
+  if (hours === 0) {
+    return `${mins} min`;
+  }
 
   if (mins === 0) {
     return `${hours} hr`;
@@ -204,6 +240,7 @@ const formatMinutes = (minutes) => {
 
   return `${hours} hr ${mins} min`;
 };
+
 
 /* =========================================================
    GPS ERROR MESSAGE
@@ -217,24 +254,32 @@ const getGpsErrorMessage = (error) => {
   if (error.code === "GPS_ACCURACY_LOW") {
     return (
       error.message ||
-      "Your GPS accuracy is too low. Please move outside or near a window and try again."
+      "GPS accuracy is too low. Please move outside or near a window and try again."
+    );
+  }
+
+  if (error.code === "GEOLOCATION_NOT_SUPPORTED") {
+    return (
+      "Location services are not supported by this browser."
     );
   }
 
   if (error.code === 1) {
-    return "Location permission was denied. Please allow location access for this website and try again.";
+    return (
+      "Location permission was denied. Please allow location access for this website and try again."
+    );
   }
 
   if (error.code === 2) {
-    return "Your device could not determine your location. Turn ON GPS/Location and try again.";
+    return (
+      "Your device could not determine your location. Turn ON GPS/Location and try again."
+    );
   }
 
   if (error.code === 3) {
-    return "Location request timed out. Please turn ON GPS/Location and try again.";
-  }
-
-  if (error.code === "NOT_SECURE") {
-    return error.message;
+    return (
+      "Location request timed out. Please turn ON GPS/Location and try again."
+    );
   }
 
   if (error.message) {
@@ -244,28 +289,45 @@ const getGpsErrorMessage = (error) => {
   return "Unable to get your location. Please try again.";
 };
 
+
 /* =========================================================
-   GPS HELPER
-   MOBILE GPS FIX
+   GPS CONFIGURATION
    ========================================================= */
 
 /*
  * IMPORTANT:
  *
- * Backend currently allows maximum GPS accuracy of 300m.
+ * Backend maximum GPS accuracy = 300m.
  *
- * Therefore frontend must NOT reject locations at 50m.
+ * Accuracy means how confident the browser is
+ * about the supplied GPS position.
  *
- * GPS accuracy and office radius are different:
- *
- * accuracy = how confident the device is about its GPS position
- *
- * radius = how far the employee is allowed to be from office
- *
- * Backend still performs the actual office-distance validation.
+ * Office radius is a separate backend calculation.
  */
 
 const MAX_GPS_ACCURACY = 300;
+
+
+/* =========================================================
+   GPS HELPER
+   =========================================================
+
+   FIXED PROBLEMS:
+
+   OLD:
+   - getCurrentPosition()
+   - watchPosition()
+   - 45 second wait
+   - manual secure-context rejection
+
+   NEW:
+   - high accuracy first
+   - normal location fallback
+   - no watchPosition
+   - faster failure
+   - better laptop support
+   - better mobile support
+   ========================================================= */
 
 const getBestLocation = () => {
   return new Promise((resolve, reject) => {
@@ -276,66 +338,13 @@ const getBestLocation = () => {
       reject({
         code: "GEOLOCATION_NOT_SUPPORTED",
         message:
-          "Geolocation is not supported by this browser.",
-      });
-
-      return;
-    }
-
-    /* =======================================================
-       SECURE CONTEXT CHECK
-       ======================================================= */
-
-    /*
-     * localhost normally works with HTTP.
-     *
-     * A phone accessing the PC using:
-     *
-     * http://192.168.x.x:5173
-     *
-     * is normally NOT considered secure.
-     *
-     * Production should use HTTPS.
-     */
-
-    if (
-      typeof window !== "undefined" &&
-      window.isSecureContext === false
-    ) {
-      reject({
-        code: "NOT_SECURE",
-        message:
-          "Location access requires HTTPS on your phone. Open this application using HTTPS and allow location access.",
+          "Location services are not supported by this browser.",
       });
 
       return;
     }
 
     let finished = false;
-    let watchId = null;
-    let timeoutId = null;
-
-    const positions = [];
-
-    /* =======================================================
-       CLEANUP
-       ======================================================= */
-
-    const cleanup = () => {
-      if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-      }
-
-      if (timeoutId !== null) {
-        clearTimeout(timeoutId);
-        timeoutId = null;
-      }
-    };
-
-    /* =======================================================
-       SUCCESS
-       ======================================================= */
 
     const finishSuccess = (position) => {
       if (finished) return;
@@ -344,9 +353,17 @@ const getBestLocation = () => {
         return;
       }
 
-      const latitude = Number(position.coords.latitude);
-      const longitude = Number(position.coords.longitude);
-      const accuracy = Number(position.coords.accuracy);
+      const latitude = Number(
+        position.coords.latitude
+      );
+
+      const longitude = Number(
+        position.coords.longitude
+      );
+
+      const accuracy = Number(
+        position.coords.accuracy
+      );
 
       if (
         !Number.isFinite(latitude) ||
@@ -356,19 +373,27 @@ const getBestLocation = () => {
         return;
       }
 
+      console.log(
+        "GPS LOCATION FOUND:",
+        {
+          latitude,
+          longitude,
+          accuracy,
+        }
+      );
+
       /*
-       * IMPORTANT:
-       *
-       * Frontend and backend are both using 300m.
+       * Do not send an inaccurate position
+       * to the backend.
        */
 
-      if (accuracy > MAX_GPS_ACCURACY) {
+      if (
+        accuracy > MAX_GPS_ACCURACY
+      ) {
         return;
       }
 
       finished = true;
-
-      cleanup();
 
       resolve({
         latitude,
@@ -377,196 +402,127 @@ const getBestLocation = () => {
       });
     };
 
-    /* =======================================================
-       ERROR
-       ======================================================= */
-
     const finishError = (error) => {
       if (finished) return;
 
       finished = true;
 
-      cleanup();
-
       reject(error);
     };
 
-    /* =======================================================
-       SELECT BEST POSITION
-       ======================================================= */
 
-    const selectBestPosition = () => {
-      if (!positions.length) {
-        finishError({
-          code: 3,
-          message:
-            "Unable to get your location. Please turn ON GPS/Location and try again.",
-        });
+    /* =====================================================
+       NORMAL LOCATION FALLBACK
+       ===================================================== */
 
-        return;
-      }
+    const requestNormalLocation = () => {
+      if (finished) return;
 
-      const validPositions = positions.filter((position) => {
-        if (!position?.coords) return false;
+      console.log(
+        "Trying normal browser location..."
+      );
 
-        const latitude = Number(position.coords.latitude);
-        const longitude = Number(position.coords.longitude);
-        const accuracy = Number(position.coords.accuracy);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          if (finished) return;
 
-        return (
-          Number.isFinite(latitude) &&
-          Number.isFinite(longitude) &&
-          Number.isFinite(accuracy)
-        );
-      });
+          const latitude = Number(
+            position?.coords?.latitude
+          );
 
-      if (!validPositions.length) {
-        finishError({
-          code: "GPS_ACCURACY_LOW",
-          message:
-            "Unable to determine a valid GPS location. Please try again.",
-        });
+          const longitude = Number(
+            position?.coords?.longitude
+          );
 
-        return;
-      }
+          const accuracy = Number(
+            position?.coords?.accuracy
+          );
 
-      const bestPosition = validPositions.reduce(
-        (best, current) => {
-          if (!best) return current;
+          console.log(
+            "GPS NORMAL RESULT:",
+            {
+              latitude,
+              longitude,
+              accuracy,
+            }
+          );
 
-          return Number(current.coords.accuracy) <
-            Number(best.coords.accuracy)
-            ? current
-            : best;
+          if (
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude) ||
+            !Number.isFinite(accuracy)
+          ) {
+            finishError({
+              code: "GPS_ACCURACY_LOW",
+              message:
+                "The browser returned an invalid location. Please try again.",
+            });
+
+            return;
+          }
+
+          if (
+            accuracy <=
+            MAX_GPS_ACCURACY
+          ) {
+            finishSuccess(position);
+
+            return;
+          }
+
+          finishError({
+            code: "GPS_ACCURACY_LOW",
+            accuracy,
+            message:
+              `GPS accuracy is about ${Math.round(
+                accuracy
+              )}m. Please move outside or near a window, keep Location/GPS ON, and try again.`,
+          });
         },
-        null
+
+        (error) => {
+          if (finished) return;
+
+          console.error(
+            "NORMAL GPS ERROR:",
+            error
+          );
+
+          finishError(error);
+        },
+
+        {
+          /*
+           * Normal browser location is useful
+           * especially on laptops where there may
+           * be no actual GPS hardware.
+           */
+
+          enableHighAccuracy: false,
+
+          /*
+           * Allow a recent Wi-Fi/network location.
+           */
+
+          maximumAge: 30000,
+
+          timeout: 20000,
+        }
       );
-
-      const accuracy = Number(
-        bestPosition.coords.accuracy
-      );
-
-      /*
-       * Backend maximum GPS accuracy = 300m.
-       */
-
-      if (accuracy > MAX_GPS_ACCURACY) {
-        finishError({
-          code: "GPS_ACCURACY_LOW",
-          accuracy,
-          message: `GPS accuracy is about ${Math.round(
-            accuracy
-          )}m. Please move outside or near a window, keep Location/GPS ON, and try again.`,
-        });
-
-        return;
-      }
-
-      finishSuccess(bestPosition);
     };
 
-    /* =======================================================
-       FIRST GPS REQUEST
-       ======================================================= */
+
+    /* =====================================================
+       HIGH ACCURACY LOCATION
+       ===================================================== */
+
+    console.log(
+      "Starting high accuracy GPS..."
+    );
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         if (finished) return;
-
-        positions.push(position);
-
-        const accuracy = Number(
-          position?.coords?.accuracy
-        );
-
-        console.log("GPS current position:", {
-          latitude: position?.coords?.latitude,
-          longitude: position?.coords?.longitude,
-          accuracy,
-        });
-
-        /*
-         * If the first reading is already acceptable,
-         * finish immediately.
-         */
-
-        if (
-          Number.isFinite(accuracy) &&
-          accuracy <= MAX_GPS_ACCURACY
-        ) {
-          finishSuccess(position);
-        }
-      },
-
-      (error) => {
-        if (finished) return;
-
-        console.error(
-          "GPS current position error:",
-          error
-        );
-
-        /*
-         * Permission denied is final.
-         */
-
-        if (error?.code === 1) {
-          finishError(error);
-        }
-
-        /*
-         * For error 2 / 3, watchPosition below gets
-         * additional opportunities to obtain location.
-         */
-      },
-
-      {
-        enableHighAccuracy: true,
-
-        /*
-         * Always request a fresh position.
-         */
-
-        maximumAge: 0,
-
-        /*
-         * Give mobile GPS enough time.
-         */
-
-        timeout: 20000,
-      }
-    );
-
-    /* =======================================================
-       WATCH GPS
-       ======================================================= */
-
-    /*
-     * Mobile devices may initially provide:
-     *
-     * 250m
-     * 150m
-     * 100m
-     * 80m
-     * 60m
-     *
-     * Any reading <=300m is accepted because the backend
-     * already performs the actual office-distance check.
-     */
-
-    watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        if (finished) return;
-
-        positions.push(position);
-
-        /*
-         * Keep memory small.
-         */
-
-        if (positions.length > 10) {
-          positions.shift();
-        }
 
         const latitude = Number(
           position?.coords?.latitude
@@ -580,39 +536,48 @@ const getBestLocation = () => {
           position?.coords?.accuracy
         );
 
-        console.log("GPS watch reading:", {
-          latitude,
-          longitude,
-          accuracy,
-          readingNumber: positions.length,
-        });
+        console.log(
+          "GPS HIGH ACCURACY RESULT:",
+          {
+            latitude,
+            longitude,
+            accuracy,
+          }
+        );
+
+        /*
+         * Accept immediately if accurate enough.
+         */
 
         if (
-          !Number.isFinite(latitude) ||
-          !Number.isFinite(longitude) ||
-          !Number.isFinite(accuracy)
+          Number.isFinite(latitude) &&
+          Number.isFinite(longitude) &&
+          Number.isFinite(accuracy) &&
+          accuracy <=
+            MAX_GPS_ACCURACY
         ) {
-          return;
-        }
-
-        /*
-         * Accept any valid reading <=300m.
-         */
-
-        if (accuracy <= MAX_GPS_ACCURACY) {
           finishSuccess(position);
+
           return;
         }
 
         /*
-         * If accuracy is >300m, keep watching.
+         * High accuracy result exists,
+         * but it is not accurate enough.
+         *
+         * Try normal location.
          */
+
+        requestNormalLocation();
       },
 
       (error) => {
         if (finished) return;
 
-        console.error("GPS watch error:", error);
+        console.error(
+          "HIGH ACCURACY GPS ERROR:",
+          error
+        );
 
         /*
          * Permission denied is final.
@@ -620,51 +585,37 @@ const getBestLocation = () => {
 
         if (error?.code === 1) {
           finishError(error);
+
+          return;
         }
 
         /*
-         * Error 2 / 3:
-         *
-         * Do not immediately reject.
-         * Final timeout will decide.
+         * For timeout / unavailable,
+         * use normal browser location.
          */
+
+        requestNormalLocation();
       },
 
       {
         enableHighAccuracy: true,
 
         /*
-         * Request fresh GPS/network reading.
+         * Do not use stale GPS.
          */
 
         maximumAge: 0,
 
         /*
-         * Give GPS enough time.
+         * Laptop/mobile gets enough time.
          */
 
-        timeout: 20000,
+        timeout: 15000,
       }
     );
-
-    /* =======================================================
-       FINAL TIMEOUT
-       ======================================================= */
-
-    timeoutId = setTimeout(() => {
-      if (finished) return;
-
-      /*
-       * Choose the best reading received.
-       *
-       * <=300m = success
-       * >300m = GPS accuracy error
-       */
-
-      selectBestPosition();
-    }, 45000);
   });
 };
+
 
 /* =========================================================
    COMPONENT
@@ -672,83 +623,143 @@ const getBestLocation = () => {
 
 const MyAttendance = () => {
   const [attendance, setAttendance] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
 
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("success");
+  const [loading, setLoading] =
+    useState(true);
 
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [methodFilter, setMethodFilter] = useState("ALL");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [actionLoading, setActionLoading] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [messageType, setMessageType] =
+    useState("success");
+
+  const [statusFilter, setStatusFilter] =
+    useState("ALL");
+
+  const [methodFilter, setMethodFilter] =
+    useState("ALL");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
 
   const recordsPerPage = 8;
 
-  const [showWorkReport, setShowWorkReport] = useState(false);
-  const [workDescription, setWorkDescription] = useState("");
-  const [workReportLoading, setWorkReportLoading] = useState(false);
-  const [workReportExists, setWorkReportExists] = useState(false);
+  const [showWorkReport, setShowWorkReport] =
+    useState(false);
 
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [workDescription, setWorkDescription] =
+    useState("");
+
+  const [workReportLoading, setWorkReportLoading] =
+    useState(false);
+
+  const [workReportExists, setWorkReportExists] =
+    useState(false);
+
+  const [currentTime, setCurrentTime] =
+    useState(new Date());
+
 
   /* =========================================================
      TODAY
      ========================================================= */
 
-  const todayKey = getDateKey(new Date());
+  const todayKey =
+    getDateKey(new Date());
 
   const todayAttendance =
     attendance.find(
-      (record) => getDateKey(record.date) === todayKey
+      (record) =>
+        getDateKey(record.date) ===
+        todayKey
     ) || null;
 
+
   /*
-   * Backend can create today's attendance record before
-   * actual check-in.
+   * Backend can create today's attendance
+   * record before actual check-in.
    *
-   * Therefore checkIn.time is the actual indicator.
+   * Therefore checkIn.time is the actual
+   * indicator.
    */
 
-  const hasCheckedIn = !!todayAttendance?.checkIn?.time;
+  const hasCheckedIn =
+    !!todayAttendance?.checkIn?.time;
 
-  const hasCheckedOut = !!todayAttendance?.checkOut?.time;
+  const hasCheckedOut =
+    !!todayAttendance?.checkOut?.time;
 
-  const isCheckedIn = hasCheckedIn && !hasCheckedOut;
+  const isCheckedIn =
+    hasCheckedIn &&
+    !hasCheckedOut;
 
-  const isCheckedOut = hasCheckedIn && hasCheckedOut;
+  const isCheckedOut =
+    hasCheckedIn &&
+    hasCheckedOut;
+
 
   /* =========================================================
      LIVE WORKING TIME
      ========================================================= */
 
-  const liveWorkingMinutes = useMemo(() => {
-    if (!todayAttendance?.checkIn?.time) {
-      return todayAttendance?.workingMinutes || 0;
-    }
+  const liveWorkingMinutes =
+    useMemo(() => {
+      if (
+        !todayAttendance?.checkIn?.time
+      ) {
+        return (
+          todayAttendance?.workingMinutes ||
+          0
+        );
+      }
 
-    if (todayAttendance?.checkOut?.time) {
-      return todayAttendance?.workingMinutes || 0;
-    }
+      if (
+        todayAttendance?.checkOut?.time
+      ) {
+        return (
+          todayAttendance?.workingMinutes ||
+          0
+        );
+      }
 
-    const checkInTime = new Date(
-      todayAttendance.checkIn.time
-    ).getTime();
+      const checkInTime =
+        new Date(
+          todayAttendance.checkIn.time
+        ).getTime();
 
-    if (Number.isNaN(checkInTime)) return 0;
+      if (
+        Number.isNaN(checkInTime)
+      ) {
+        return 0;
+      }
 
-    const now = currentTime.getTime();
+      const now =
+        currentTime.getTime();
 
-    return Math.max(
-      0,
-      Math.floor((now - checkInTime) / 60000)
-    );
-  }, [todayAttendance, currentTime]);
+      return Math.max(
+        0,
+        Math.floor(
+          (now - checkInTime) /
+            60000
+        )
+      );
+    }, [
+      todayAttendance,
+      currentTime,
+    ]);
+
 
   /* =========================================================
      MESSAGE
      ========================================================= */
 
-  const showMessage = (text, type = "success") => {
+  const showMessage = (
+    text,
+    type = "success"
+  ) => {
     setMessage(text);
     setMessageType(type);
 
@@ -757,83 +768,129 @@ const MyAttendance = () => {
     }, 4000);
   };
 
+
   /* =========================================================
      FETCH ATTENDANCE
      ========================================================= */
 
-  const fetchAttendance = async () => {
-    try {
-      setLoading(true);
+  const fetchAttendance =
+    async () => {
+      try {
+        setLoading(true);
 
-      const response = await api.get("/attendance/my");
+        const response =
+          await api.get(
+            "/attendance/my"
+          );
 
-      if (response?.data?.attendance) {
-        setAttendance(response.data.attendance);
-      } else if (response?.data?.records) {
-        setAttendance(response.data.records);
-      } else if (Array.isArray(response?.data)) {
-        setAttendance(response.data);
-      } else {
-        setAttendance([]);
+        if (
+          response?.data?.attendance
+        ) {
+          setAttendance(
+            response.data.attendance
+          );
+        } else if (
+          response?.data?.records
+        ) {
+          setAttendance(
+            response.data.records
+          );
+        } else if (
+          Array.isArray(
+            response?.data
+          )
+        ) {
+          setAttendance(
+            response.data
+          );
+        } else {
+          setAttendance([]);
+        }
+      } catch (error) {
+        console.error(
+          "Fetch attendance error:",
+          error
+        );
+
+        showMessage(
+          error?.response?.data
+            ?.message ||
+            "Unable to load attendance records.",
+          "error"
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Fetch attendance error:", error);
+    };
 
-      showMessage(
-        error?.response?.data?.message ||
-          "Unable to load attendance records.",
-        "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /* =========================================================
      FETCH TODAY WORK REPORT
      ========================================================= */
 
-  const fetchTodayWorkReport = async () => {
-    try {
-      const response = await api.get("/work-reports/my");
+  const fetchTodayWorkReport =
+    async () => {
+      try {
+        const response =
+          await api.get(
+            "/work-reports/my"
+          );
 
-      const report =
-        response?.data?.workReport ||
-        response?.data?.report ||
-        response?.data?.data ||
-        null;
+        const report =
+          response?.data
+            ?.workReport ||
+          response?.data?.report ||
+          response?.data?.data ||
+          null;
 
-      if (report) {
-        setWorkReportExists(true);
-        setWorkDescription(report.description || "");
+        if (report) {
+          setWorkReportExists(
+            true
+          );
 
-        return report;
-      }
+          setWorkDescription(
+            report.description ||
+              ""
+          );
 
-      setWorkReportExists(false);
-      setWorkDescription("");
+          return report;
+        }
 
-      return null;
-    } catch (error) {
-      /*
-       * 404 means employee has not created today's report.
-       */
+        setWorkReportExists(
+          false
+        );
 
-      if (error?.response?.status === 404) {
-        setWorkReportExists(false);
         setWorkDescription("");
 
         return null;
+      } catch (error) {
+        /*
+         * 404 means no work report
+         * has been created today.
+         */
+
+        if (
+          error?.response
+            ?.status === 404
+        ) {
+          setWorkReportExists(
+            false
+          );
+
+          setWorkDescription("");
+
+          return null;
+        }
+
+        console.error(
+          "Fetch work report error:",
+          error
+        );
+
+        return null;
       }
+    };
 
-      console.error(
-        "Fetch work report error:",
-        error
-      );
-
-      return null;
-    }
-  };
 
   /* =========================================================
      INITIAL LOAD
@@ -844,345 +901,573 @@ const MyAttendance = () => {
     fetchTodayWorkReport();
   }, []);
 
+
   /* =========================================================
      LIVE CLOCK
      ========================================================= */
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const timer =
+      setInterval(() => {
+        setCurrentTime(
+          new Date()
+        );
+      }, 1000);
 
-    return () => clearInterval(timer);
+    return () =>
+      clearInterval(timer);
   }, []);
+
 
   /* =========================================================
      CHECK-IN
      ========================================================= */
 
-  const handleCheckIn = async () => {
-    if (actionLoading) return;
-
-    if (!navigator.geolocation) {
-      showMessage(
-        "Your browser does not support location services.",
-        "error"
-      );
-
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-
-      showMessage(
-        "Getting your accurate location... Please wait.",
-        "info"
-      );
-
-      /*
-       * GPS helper now accepts up to 300m,
-       * matching backend.
-       */
-
-      const position = await getBestLocation();
-
-      const {
-        latitude,
-        longitude,
-        accuracy,
-      } = position;
-
-      console.log("Check-in GPS:", {
-        latitude,
-        longitude,
-        accuracy,
-      });
-
-      const response = await api.post(
-        "/attendance/check-in",
-        {
-          latitude,
-          longitude,
-          accuracy,
-        }
-      );
-
-      showMessage(
-        response?.data?.message ||
-          "Check-in successful",
-        "success"
-      );
-
-      await fetchAttendance();
-    } catch (error) {
-      console.error("Check-in error:", error);
-
-      const gpsError = error;
+  const handleCheckIn =
+    async () => {
+      if (actionLoading) return;
 
       if (
-        gpsError?.code === "GPS_ACCURACY_LOW" ||
-        gpsError?.code === "NOT_SECURE" ||
-        gpsError?.code === 1 ||
-        gpsError?.code === 2 ||
-        gpsError?.code === 3
+        typeof navigator ===
+          "undefined" ||
+        !navigator.geolocation
       ) {
         showMessage(
-          getGpsErrorMessage(gpsError),
+          "Your browser does not support location services.",
           "error"
         );
-      } else {
+
+        return;
+      }
+
+      try {
+        setActionLoading(true);
+
+        setMessage("");
+
         showMessage(
-          error?.response?.data?.message ||
-            error?.message ||
+          "Getting your location... Please allow location access if your browser asks.",
+          "info"
+        );
+
+        console.log(
+          "Starting check-in GPS..."
+        );
+
+        const position =
+          await getBestLocation();
+
+        const latitude =
+          Number(
+            position.latitude
+          );
+
+        const longitude =
+          Number(
+            position.longitude
+          );
+
+        const accuracy =
+          Number(
+            position.accuracy
+          );
+
+        console.log(
+          "CHECK-IN LOCATION READY:",
+          {
+            latitude,
+            longitude,
+            accuracy,
+          }
+        );
+
+        if (
+          !Number.isFinite(
+            latitude
+          ) ||
+          !Number.isFinite(
+            longitude
+          ) ||
+          !Number.isFinite(
+            accuracy
+          )
+        ) {
+          throw new Error(
+            "Invalid location received from browser."
+          );
+        }
+
+        if (
+          accuracy >
+          MAX_GPS_ACCURACY
+        ) {
+          throw {
+            code:
+              "GPS_ACCURACY_LOW",
+            accuracy,
+            message:
+              `GPS accuracy is about ${Math.round(
+                accuracy
+              )}m. Please move near a window or outside and try again.`,
+          };
+        }
+
+        showMessage(
+          "Location found. Checking you in...",
+          "info"
+        );
+
+        const response =
+          await api.post(
+            "/attendance/check-in",
+            {
+              latitude,
+              longitude,
+              accuracy,
+            }
+          );
+
+        console.log(
+          "CHECK-IN RESPONSE:",
+          response?.data
+        );
+
+        showMessage(
+          response?.data
+            ?.message ||
+            "Check-in successful",
+          "success"
+        );
+
+        await fetchAttendance();
+      } catch (error) {
+        console.error(
+          "CHECK-IN ERROR:",
+          error
+        );
+
+        if (
+          error?.code ===
+            "GPS_ACCURACY_LOW" ||
+          error?.code === 1 ||
+          error?.code === 2 ||
+          error?.code === 3 ||
+          error?.code ===
+            "GEOLOCATION_NOT_SUPPORTED"
+        ) {
+          showMessage(
+            getGpsErrorMessage(
+              error
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+        const backendMessage =
+          error?.response
+            ?.data?.message;
+
+        if (backendMessage) {
+          showMessage(
+            backendMessage,
+            "error"
+          );
+
+          return;
+        }
+
+        showMessage(
+          error?.message ||
             "Check-in failed. Please try again.",
           "error"
         );
+      } finally {
+        setActionLoading(
+          false
+        );
       }
-    } finally {
-      setActionLoading(false);
-    }
-  };
+    };
+
 
   /* =========================================================
      CHECK-OUT CLICK
      ========================================================= */
 
-  const handleCheckOutClick = async () => {
-    if (actionLoading) return;
+  const handleCheckOutClick =
+    async () => {
+      if (actionLoading) return;
 
-    if (!isCheckedIn || isCheckedOut) {
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-
-      const report = await fetchTodayWorkReport();
-
-      if (report) {
-        setWorkReportExists(true);
-        setWorkDescription(
-          report.description || ""
-        );
-      } else {
-        setWorkReportExists(false);
-        setWorkDescription("");
+      if (
+        !isCheckedIn ||
+        isCheckedOut
+      ) {
+        return;
       }
 
-      setShowWorkReport(true);
-    } catch (error) {
-      console.error(
-        "Checkout preparation error:",
-        error
-      );
+      try {
+        setActionLoading(true);
 
-      showMessage(
-        "Unable to prepare checkout. Please try again.",
-        "error"
-      );
-    } finally {
-      setActionLoading(false);
-    }
-  };
+        const report =
+          await fetchTodayWorkReport();
+
+        if (report) {
+          setWorkReportExists(
+            true
+          );
+
+          setWorkDescription(
+            report.description ||
+              ""
+          );
+        } else {
+          setWorkReportExists(
+            false
+          );
+
+          setWorkDescription("");
+        }
+
+        setShowWorkReport(
+          true
+        );
+      } catch (error) {
+        console.error(
+          "Checkout preparation error:",
+          error
+        );
+
+        showMessage(
+          "Unable to prepare checkout. Please try again.",
+          "error"
+        );
+      } finally {
+        setActionLoading(
+          false
+        );
+      }
+    };
+
 
   /* =========================================================
      WORK REPORT + CHECK-OUT
      ========================================================= */
 
-  const handleWorkReportAndCheckOut = async () => {
-    const description =
-      workDescription.trim();
+  const handleWorkReportAndCheckOut =
+    async () => {
+      const description =
+        workDescription.trim();
 
-    if (!description) {
-      showMessage(
-        "Please enter your work report.",
-        "error"
-      );
-
-      return;
-    }
-
-    if (description.length < 10) {
-      showMessage(
-        "Work report should contain at least 10 characters.",
-        "error"
-      );
-
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      showMessage(
-        "Your browser does not support location services.",
-        "error"
-      );
-
-      return;
-    }
-
-    try {
-      setWorkReportLoading(true);
-
-      /*
-       * Save/update work report FIRST.
-       */
-
-      if (workReportExists) {
-        await api.put("/work-reports/my", {
-          description,
-        });
-      } else {
-        await api.post("/work-reports", {
-          description,
-        });
-      }
-
-      setWorkReportExists(true);
-
-      showMessage(
-        "Work report saved. Getting your location...",
-        "info"
-      );
-
-      /*
-       * Get GPS AFTER work report is saved.
-       */
-
-      const position = await getBestLocation();
-
-      const {
-        latitude,
-        longitude,
-        accuracy,
-      } = position;
-
-      console.log("Check-out GPS:", {
-        latitude,
-        longitude,
-        accuracy,
-      });
-
-      /*
-       * Existing backend endpoint preserved.
-       */
-
-      const response = await api.post(
-        "/attendance/check-out",
-        {
-          latitude,
-          longitude,
-          accuracy,
-        }
-      );
-
-      showMessage(
-        response?.data?.message ||
-          "Check-out successful",
-        "success"
-      );
-
-      setShowWorkReport(false);
-      setWorkDescription("");
-
-      await fetchAttendance();
-      await fetchTodayWorkReport();
-    } catch (error) {
-      console.error("Check-out error:", error);
-
-      const gpsError = error;
-
-      if (
-        gpsError?.code === "GPS_ACCURACY_LOW" ||
-        gpsError?.code === "NOT_SECURE" ||
-        gpsError?.code === 1 ||
-        gpsError?.code === 2 ||
-        gpsError?.code === 3
-      ) {
+      if (!description) {
         showMessage(
-          getGpsErrorMessage(gpsError),
+          "Please enter your work report.",
           "error"
         );
-      } else {
+
+        return;
+      }
+
+      if (
+        description.length < 10
+      ) {
         showMessage(
-          error?.response?.data?.message ||
-            error?.message ||
+          "Work report should contain at least 10 characters.",
+          "error"
+        );
+
+        return;
+      }
+
+      if (
+        typeof navigator ===
+          "undefined" ||
+        !navigator.geolocation
+      ) {
+        showMessage(
+          "Your browser does not support location services.",
+          "error"
+        );
+
+        return;
+      }
+
+      try {
+        setWorkReportLoading(
+          true
+        );
+
+        /* ===================================================
+           SAVE / UPDATE WORK REPORT
+           =================================================== */
+
+        if (workReportExists) {
+          await api.put(
+            "/work-reports/my",
+            {
+              description,
+            }
+          );
+        } else {
+          await api.post(
+            "/work-reports",
+            {
+              description,
+            }
+          );
+        }
+
+        setWorkReportExists(
+          true
+        );
+
+        showMessage(
+          "Work report saved. Getting your location...",
+          "info"
+        );
+
+        /* ===================================================
+           GET GPS
+           =================================================== */
+
+        const position =
+          await getBestLocation();
+
+        const latitude =
+          Number(
+            position.latitude
+          );
+
+        const longitude =
+          Number(
+            position.longitude
+          );
+
+        const accuracy =
+          Number(
+            position.accuracy
+          );
+
+        console.log(
+          "CHECK-OUT LOCATION READY:",
+          {
+            latitude,
+            longitude,
+            accuracy,
+          }
+        );
+
+        if (
+          !Number.isFinite(
+            latitude
+          ) ||
+          !Number.isFinite(
+            longitude
+          ) ||
+          !Number.isFinite(
+            accuracy
+          )
+        ) {
+          throw new Error(
+            "Invalid location received from browser."
+          );
+        }
+
+        if (
+          accuracy >
+          MAX_GPS_ACCURACY
+        ) {
+          throw {
+            code:
+              "GPS_ACCURACY_LOW",
+            accuracy,
+            message:
+              `GPS accuracy is about ${Math.round(
+                accuracy
+              )}m. Please move near a window or outside and try again.`,
+          };
+        }
+
+        showMessage(
+          "Location found. Checking you out...",
+          "info"
+        );
+
+        /* ===================================================
+           CHECK OUT
+           =================================================== */
+
+        const response =
+          await api.post(
+            "/attendance/check-out",
+            {
+              latitude,
+              longitude,
+              accuracy,
+            }
+          );
+
+        console.log(
+          "CHECK-OUT RESPONSE:",
+          response?.data
+        );
+
+        showMessage(
+          response?.data
+            ?.message ||
+            "Check-out successful",
+          "success"
+        );
+
+        setShowWorkReport(
+          false
+        );
+
+        setWorkDescription("");
+
+        await fetchAttendance();
+
+        await fetchTodayWorkReport();
+      } catch (error) {
+        console.error(
+          "CHECK-OUT ERROR:",
+          error
+        );
+
+        if (
+          error?.code ===
+            "GPS_ACCURACY_LOW" ||
+          error?.code === 1 ||
+          error?.code === 2 ||
+          error?.code === 3 ||
+          error?.code ===
+            "GEOLOCATION_NOT_SUPPORTED"
+        ) {
+          showMessage(
+            getGpsErrorMessage(
+              error
+            ),
+            "error"
+          );
+
+          return;
+        }
+
+        const backendMessage =
+          error?.response
+            ?.data?.message;
+
+        if (backendMessage) {
+          showMessage(
+            backendMessage,
+            "error"
+          );
+
+          return;
+        }
+
+        showMessage(
+          error?.message ||
             "Check-out failed. Please try again.",
           "error"
         );
+      } finally {
+        setWorkReportLoading(
+          false
+        );
       }
-    } finally {
-      setWorkReportLoading(false);
-    }
-  };
+    };
+
 
   /* =========================================================
      FILTERING
      ========================================================= */
 
-  const filteredAttendance = useMemo(() => {
-    return attendance.filter((record) => {
-      const status = String(
-        record?.status || ""
-      ).toUpperCase();
+  const filteredAttendance =
+    useMemo(() => {
+      return attendance.filter(
+        (record) => {
+          const status =
+            String(
+              record?.status ||
+                ""
+            ).toUpperCase();
 
-      const method = String(
-        getAttendanceMethod(record) || ""
-      ).toUpperCase();
+          const method =
+            String(
+              getAttendanceMethod(
+                record
+              ) || ""
+            ).toUpperCase();
 
-      const statusMatches =
-        statusFilter === "ALL" ||
-        status === statusFilter;
+          const statusMatches =
+            statusFilter ===
+              "ALL" ||
+            status ===
+              statusFilter;
 
-      const methodMatches =
-        methodFilter === "ALL" ||
-        method === methodFilter;
+          const methodMatches =
+            methodFilter ===
+              "ALL" ||
+            method ===
+              methodFilter;
 
-      return (
-        statusMatches &&
-        methodMatches
+          return (
+            statusMatches &&
+            methodMatches
+          );
+        }
       );
-    });
-  }, [
-    attendance,
-    statusFilter,
-    methodFilter,
-  ]);
+    }, [
+      attendance,
+      statusFilter,
+      methodFilter,
+    ]);
+
 
   /* =========================================================
      PAGINATION
      ========================================================= */
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      filteredAttendance.length /
-        recordsPerPage
-    )
-  );
-
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages
-  );
-
-  const paginatedAttendance = useMemo(() => {
-    const startIndex =
-      (safeCurrentPage - 1) *
-      recordsPerPage;
-
-    return filteredAttendance.slice(
-      startIndex,
-      startIndex + recordsPerPage
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredAttendance.length /
+          recordsPerPage
+      )
     );
-  }, [
-    filteredAttendance,
-    safeCurrentPage,
-  ]);
+
+  const safeCurrentPage =
+    Math.min(
+      currentPage,
+      totalPages
+    );
+
+  const paginatedAttendance =
+    useMemo(() => {
+      const startIndex =
+        (safeCurrentPage - 1) *
+        recordsPerPage;
+
+      return filteredAttendance.slice(
+        startIndex,
+        startIndex +
+          recordsPerPage
+      );
+    }, [
+      filteredAttendance,
+      safeCurrentPage,
+    ]);
+
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, methodFilter]);
+  }, [
+    statusFilter,
+    methodFilter,
+  ]);
+
 
   /* =========================================================
      CLEAR FILTERS
@@ -1194,15 +1479,24 @@ const MyAttendance = () => {
     setCurrentPage(1);
   };
 
+
   /* =========================================================
      CLOSE WORK REPORT MODAL
      ========================================================= */
 
-  const closeWorkReportModal = () => {
-    if (workReportLoading) return;
+  const closeWorkReportModal =
+    () => {
+      if (
+        workReportLoading
+      ) {
+        return;
+      }
 
-    setShowWorkReport(false);
-  };
+      setShowWorkReport(
+        false
+      );
+    };
+
 
   /* =========================================================
      RENDER
@@ -1216,26 +1510,34 @@ const MyAttendance = () => {
           ===================================================== */}
 
       <div className="attendance-page-header">
+
         <div>
+
           <div className="attendance-eyebrow">
             ATTENDANCE
           </div>
 
-          <h1>My Attendance</h1>
+          <h1>
+            My Attendance
+          </h1>
 
           <p>
             Track your daily attendance, working hours and
             attendance history.
           </p>
+
         </div>
 
         <div className="attendance-current-date">
+
           <span className="current-date-label">
             TODAY
           </span>
 
           <strong>
-            {formatLongDate(currentTime)}
+            {formatLongDate(
+              currentTime
+            )}
           </strong>
 
           <span>
@@ -1249,8 +1551,11 @@ const MyAttendance = () => {
               }
             )}
           </span>
+
         </div>
+
       </div>
+
 
       {/* =====================================================
           MESSAGE
@@ -1261,16 +1566,24 @@ const MyAttendance = () => {
           className={`attendance-message ${messageType}`}
         >
           <span className="message-icon">
-            {messageType === "error"
+
+            {messageType ===
+            "error"
               ? "!"
-              : messageType === "info"
+              : messageType ===
+                "info"
               ? "i"
               : "✓"}
+
           </span>
 
-          <span>{message}</span>
+          <span>
+            {message}
+          </span>
+
         </div>
       )}
+
 
       {/* =====================================================
           TODAY ATTENDANCE
@@ -1281,13 +1594,17 @@ const MyAttendance = () => {
         <div className="today-attendance-header">
 
           <div>
+
             <span className="today-section-label">
               TODAY'S ATTENDANCE
             </span>
 
             <h2>
-              {formatDate(currentTime)}
+              {formatDate(
+                currentTime
+              )}
             </h2>
+
           </div>
 
           <div
@@ -1299,6 +1616,7 @@ const MyAttendance = () => {
                 : "pending"
             }`}
           >
+
             <span className="status-dot"></span>
 
             {todayAttendance?.status
@@ -1306,43 +1624,56 @@ const MyAttendance = () => {
                   todayAttendance.status
                 )
               : "Not Checked In"}
+
           </div>
 
         </div>
+
 
         <div className="today-attendance-body">
 
           <div className="today-time-grid">
 
             <div className="today-time-item">
+
               <span className="today-time-label">
                 CHECK IN
               </span>
 
               <strong>
-                {todayAttendance?.checkIn?.time
+                {todayAttendance?.checkIn
+                  ?.time
                   ? formatTime(
-                      todayAttendance.checkIn.time
+                      todayAttendance
+                        .checkIn.time
                     )
                   : "--:--"}
               </strong>
+
             </div>
 
+
             <div className="today-time-item">
+
               <span className="today-time-label">
                 CHECK OUT
               </span>
 
               <strong>
-                {todayAttendance?.checkOut?.time
+                {todayAttendance?.checkOut
+                  ?.time
                   ? formatTime(
-                      todayAttendance.checkOut.time
+                      todayAttendance
+                        .checkOut.time
                     )
                   : "--:--"}
               </strong>
+
             </div>
 
+
             <div className="today-time-item">
+
               <span className="today-time-label">
                 WORKING TIME
               </span>
@@ -1352,9 +1683,12 @@ const MyAttendance = () => {
                   liveWorkingMinutes
                 )}
               </strong>
+
             </div>
 
+
             <div className="today-time-item">
+
               <span className="today-time-label">
                 METHOD
               </span>
@@ -1374,9 +1708,11 @@ const MyAttendance = () => {
                 )}
 
               </strong>
+
             </div>
 
           </div>
+
 
           <div className="today-attendance-actions">
 
@@ -1384,9 +1720,14 @@ const MyAttendance = () => {
               <button
                 type="button"
                 className="check-in-button"
-                onClick={handleCheckIn}
-                disabled={actionLoading}
+                onClick={
+                  handleCheckIn
+                }
+                disabled={
+                  actionLoading
+                }
               >
+
                 {actionLoading ? (
                   <>
                     <span className="button-spinner"></span>
@@ -1394,20 +1735,29 @@ const MyAttendance = () => {
                   </>
                 ) : (
                   <>
-                    <span>✓</span>
+                    <span>
+                      ✓
+                    </span>
                     Check In
                   </>
                 )}
+
               </button>
             )}
+
 
             {isCheckedIn && (
               <button
                 type="button"
                 className="check-out-button"
-                onClick={handleCheckOutClick}
-                disabled={actionLoading}
+                onClick={
+                  handleCheckOutClick
+                }
+                disabled={
+                  actionLoading
+                }
               >
+
                 {actionLoading ? (
                   <>
                     <span className="button-spinner"></span>
@@ -1415,17 +1765,26 @@ const MyAttendance = () => {
                   </>
                 ) : (
                   <>
-                    <span>↗</span>
+                    <span>
+                      ↗
+                    </span>
                     Check Out
                   </>
                 )}
+
               </button>
             )}
 
+
             {isCheckedOut && (
               <div className="checked-out-message">
-                <span>✓</span>
+
+                <span>
+                  ✓
+                </span>
+
                 Attendance completed for today
+
               </div>
             )}
 
@@ -1434,6 +1793,7 @@ const MyAttendance = () => {
         </div>
 
       </section>
+
 
       {/* =====================================================
           FILTERS
@@ -1444,6 +1804,7 @@ const MyAttendance = () => {
         <div className="attendance-filters-header">
 
           <div>
+
             <span className="attendance-section-label">
               ATTENDANCE HISTORY
             </span>
@@ -1451,16 +1812,21 @@ const MyAttendance = () => {
             <h2>
               Attendance Records
             </h2>
+
           </div>
 
           <span className="attendance-count">
+
             {filteredAttendance.length} record
-            {filteredAttendance.length !== 1
+            {filteredAttendance.length !==
+            1
               ? "s"
               : ""}
+
           </span>
 
         </div>
+
 
         <div className="attendance-filters">
 
@@ -1472,13 +1838,17 @@ const MyAttendance = () => {
 
             <select
               id="status-filter"
-              value={statusFilter}
+              value={
+                statusFilter
+              }
               onChange={(event) =>
                 setStatusFilter(
-                  event.target.value
+                  event.target
+                    .value
                 )
               }
             >
+
               <option value="ALL">
                 All Status
               </option>
@@ -1518,9 +1888,11 @@ const MyAttendance = () => {
               <option value="OVERTIME">
                 Overtime
               </option>
+
             </select>
 
           </div>
+
 
           <div className="filter-group">
 
@@ -1530,13 +1902,17 @@ const MyAttendance = () => {
 
             <select
               id="method-filter"
-              value={methodFilter}
+              value={
+                methodFilter
+              }
               onChange={(event) =>
                 setMethodFilter(
-                  event.target.value
+                  event.target
+                    .value
                 )
               }
             >
+
               <option value="ALL">
                 All Methods
               </option>
@@ -1552,14 +1928,18 @@ const MyAttendance = () => {
               <option value="FIELD">
                 Field
               </option>
+
             </select>
 
           </div>
 
+
           <button
             type="button"
             className="clear-filters-button"
-            onClick={clearFilters}
+            onClick={
+              clearFilters
+            }
           >
             Clear Filters
           </button>
@@ -1568,25 +1948,31 @@ const MyAttendance = () => {
 
       </section>
 
+
       {/* =====================================================
           LOADING
           ===================================================== */}
 
       {loading && (
         <div className="attendance-loading">
+
           <span className="loading-spinner"></span>
+
           <span>
             Loading attendance...
           </span>
+
         </div>
       )}
+
 
       {/* =====================================================
           EMPTY
           ===================================================== */}
 
       {!loading &&
-        filteredAttendance.length === 0 && (
+        filteredAttendance.length ===
+          0 && (
           <div className="empty-attendance">
 
             <div className="empty-attendance-icon">
@@ -1602,11 +1988,15 @@ const MyAttendance = () => {
               the selected filters.
             </p>
 
-            {(statusFilter !== "ALL" ||
-              methodFilter !== "ALL") && (
+            {(statusFilter !==
+              "ALL" ||
+              methodFilter !==
+                "ALL") && (
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={
+                  clearFilters
+                }
               >
                 Clear Filters
               </button>
@@ -1615,17 +2005,21 @@ const MyAttendance = () => {
           </div>
         )}
 
+
       {/* =====================================================
           RECORD LIST
           ===================================================== */}
 
       {!loading &&
-        paginatedAttendance.length > 0 && (
+        paginatedAttendance.length >
+          0 && (
           <div className="attendance-record-list">
 
             {paginatedAttendance.map(
-              (record, index) => {
-
+              (
+                record,
+                index
+              ) => {
                 const recordStatus =
                   record?.status ||
                   "UNKNOWN";
@@ -1661,6 +2055,7 @@ const MyAttendance = () => {
 
                     </div>
 
+
                     <div className="record-status">
 
                       <span
@@ -1675,37 +2070,50 @@ const MyAttendance = () => {
 
                     </div>
 
+
                     <div className="record-time">
 
                       <div>
+
                         <span>
                           IN
                         </span>
 
                         <strong>
-                          {record?.checkIn?.time
+                          {record?.checkIn
+                            ?.time
                             ? formatTime(
-                                record.checkIn.time
+                                record
+                                  .checkIn
+                                  .time
                               )
                             : "--:--"}
                         </strong>
+
                       </div>
 
+
                       <div>
+
                         <span>
                           OUT
                         </span>
 
                         <strong>
-                          {record?.checkOut?.time
+                          {record?.checkOut
+                            ?.time
                             ? formatTime(
-                                record.checkOut.time
+                                record
+                                  .checkOut
+                                  .time
                               )
                             : "--:--"}
                         </strong>
+
                       </div>
 
                     </div>
+
 
                     <div className="record-duration">
 
@@ -1721,6 +2129,7 @@ const MyAttendance = () => {
                       </strong>
 
                     </div>
+
 
                     <div className="record-method">
 
@@ -1752,6 +2161,7 @@ const MyAttendance = () => {
           </div>
         )}
 
+
       {/* =====================================================
           PAGINATION
           ===================================================== */}
@@ -1759,7 +2169,6 @@ const MyAttendance = () => {
       {!loading &&
         filteredAttendance.length >
           recordsPerPage && (
-
           <div className="attendance-pagination">
 
             <button
@@ -1774,41 +2183,50 @@ const MyAttendance = () => {
                 )
               }
               disabled={
-                safeCurrentPage === 1
+                safeCurrentPage ===
+                1
               }
             >
               ← Previous
             </button>
 
+
             <div className="pagination-pages">
 
               {Array.from(
                 {
-                  length: totalPages,
+                  length:
+                    totalPages,
                 },
-                (_, index) =>
+                (
+                  _,
+                  index
+                ) =>
                   index + 1
-              ).map((page) => (
-
-                <button
-                  type="button"
-                  key={page}
-                  className={
-                    page ===
-                    safeCurrentPage
-                      ? "active"
-                      : ""
-                  }
-                  onClick={() =>
-                    setCurrentPage(page)
-                  }
-                >
-                  {page}
-                </button>
-
-              ))}
+              ).map(
+                (page) => (
+                  <button
+                    type="button"
+                    key={page}
+                    className={
+                      page ===
+                      safeCurrentPage
+                        ? "active"
+                        : ""
+                    }
+                    onClick={() =>
+                      setCurrentPage(
+                        page
+                      )
+                    }
+                  >
+                    {page}
+                  </button>
+                )
+              )}
 
             </div>
+
 
             <button
               type="button"
@@ -1831,6 +2249,7 @@ const MyAttendance = () => {
 
           </div>
         )}
+
 
       {/* =====================================================
           WORK REPORT MODAL
@@ -1870,6 +2289,7 @@ const MyAttendance = () => {
 
               </div>
 
+
               <button
                 type="button"
                 className="modal-close-button"
@@ -1886,6 +2306,7 @@ const MyAttendance = () => {
 
             </div>
 
+
             <div className="modal-body">
 
               <label htmlFor="work-description">
@@ -1894,10 +2315,15 @@ const MyAttendance = () => {
 
               <textarea
                 id="work-description"
-                value={workDescription}
-                onChange={(event) =>
+                value={
+                  workDescription
+                }
+                onChange={(
+                  event
+                ) =>
                   setWorkDescription(
-                    event.target.value
+                    event.target
+                      .value
                   )
                 }
                 placeholder="Example: Completed attendance frontend, fixed mobile GPS issue and tested check-in/check-out..."
@@ -1907,6 +2333,7 @@ const MyAttendance = () => {
                 }
               />
 
+
               <div className="work-report-helper">
 
                 <span>
@@ -1914,13 +2341,17 @@ const MyAttendance = () => {
                 </span>
 
                 <span>
-                  {workDescription.trim().length}{" "}
+                  {
+                    workDescription.trim()
+                      .length
+                  }{" "}
                   characters
                 </span>
 
               </div>
 
             </div>
+
 
             <div className="modal-footer">
 
@@ -1936,6 +2367,7 @@ const MyAttendance = () => {
               >
                 Cancel
               </button>
+
 
               <button
                 type="button"
@@ -1956,7 +2388,9 @@ const MyAttendance = () => {
                 ) : (
                   <>
                     Save Report & Check Out
-                    <span>→</span>
+                    <span>
+                      →
+                    </span>
                   </>
                 )}
 
