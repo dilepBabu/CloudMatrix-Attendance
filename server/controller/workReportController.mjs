@@ -4,9 +4,18 @@ import Attendance from "../model/Attendance.mjs";
 
 import mongoose from "mongoose";
 
+
+// =========================================================
+// CREATE WORK REPORT
+// =========================================================
+
 export const createWorkReport = async (req, res) => {
   try {
-    const { description } = req.body;
+    const { description, attendanceId } = req.body;
+
+    // -----------------------------------------------------
+    // Validate description
+    // -----------------------------------------------------
 
     if (!description || !description.trim()) {
       return res.status(400).json({
@@ -29,7 +38,30 @@ export const createWorkReport = async (req, res) => {
       });
     }
 
+
+    // -----------------------------------------------------
+    // Validate attendanceId
+    // -----------------------------------------------------
+
+    if (!attendanceId) {
+      return res.status(400).json({
+        success: false,
+        message: "Attendance record is required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(attendanceId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid attendance record",
+      });
+    }
+
+
+    // -----------------------------------------------------
     // Find logged-in employee
+    // -----------------------------------------------------
+
     const employee = await Employee.findOne({
       userId: req.user._id,
       employmentStatus: "ACTIVE",
@@ -42,40 +74,52 @@ export const createWorkReport = async (req, res) => {
       });
     }
 
-    // Get today's date range
-    const now = new Date();
 
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
+    // -----------------------------------------------------
+    // Find EXACT attendance record
+    // -----------------------------------------------------
 
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    // Find today's attendance
     const attendance = await Attendance.findOne({
+      _id: attendanceId,
       employeeId: employee._id,
-      date: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
     });
 
     if (!attendance) {
+      return res.status(400).json({
+        success: false,
+        message: "Attendance record not found",
+      });
+    }
+
+
+    // -----------------------------------------------------
+    // Check-in required
+    // -----------------------------------------------------
+
+    if (!attendance.checkIn?.time) {
       return res.status(400).json({
         success: false,
         message: "You must check in before submitting a work report",
       });
     }
 
-    // Make sure employee has checked in
-    if (!attendance.checkIn?.time) {
+
+    // -----------------------------------------------------
+    // Report can only be submitted before checkout
+    // -----------------------------------------------------
+
+    if (attendance.checkOut?.time) {
       return res.status(400).json({
         success: false,
-        message: "Check-in is required before submitting a work report",
+        message: "Work report cannot be submitted after checkout",
       });
     }
 
+
+    // -----------------------------------------------------
     // Check whether report already exists
+    // -----------------------------------------------------
+
     const existingReport = await WorkReport.findOne({
       attendanceId: attendance._id,
     });
@@ -83,17 +127,38 @@ export const createWorkReport = async (req, res) => {
     if (existingReport) {
       return res.status(400).json({
         success: false,
-        message: "Work report has already been submitted for today",
+        message: "Work report has already been submitted for this attendance",
       });
     }
+
+
+    // -----------------------------------------------------
+    // Use attendance date
+    // -----------------------------------------------------
+
+    const reportDate = attendance.date
+      ? new Date(attendance.date)
+      : new Date();
+
+    reportDate.setHours(0, 0, 0, 0);
+
+
+    // -----------------------------------------------------
+    // Create work report
+    // -----------------------------------------------------
 
     const workReport = await WorkReport.create({
       employeeId: employee._id,
       userId: req.user._id,
       attendanceId: attendance._id,
-      date: startOfDay,
+      date: reportDate,
       description: description.trim(),
     });
+
+
+    // -----------------------------------------------------
+    // Response
+    // -----------------------------------------------------
 
     return res.status(201).json({
       success: true,
@@ -110,8 +175,16 @@ export const createWorkReport = async (req, res) => {
     });
   }
 };
+
+
+
+// =========================================================
+// GET MY WORK REPORTS
+// =========================================================
+
 export const getMyWorkReport = async (req, res) => {
   try {
+
     const employee = await Employee.findOne({
       userId: req.user._id,
       employmentStatus: "ACTIVE",
@@ -123,6 +196,7 @@ export const getMyWorkReport = async (req, res) => {
         message: "Active employee profile not found",
       });
     }
+
 
     const workReports = await WorkReport.find({
       employeeId: employee._id,
@@ -136,11 +210,13 @@ export const getMyWorkReport = async (req, res) => {
         createdAt: -1,
       });
 
+
     return res.status(200).json({
       success: true,
       count: workReports.length,
       workReports,
     });
+
   } catch (error) {
     console.error("Get My Work Reports Error:", error);
 
@@ -152,9 +228,20 @@ export const getMyWorkReport = async (req, res) => {
 };
 
 
+
+// =========================================================
+// UPDATE MY WORK REPORT
+// =========================================================
+
 export const updateMyWorkReport = async (req, res) => {
   try {
-    const { description } = req.body;
+
+    const { description, attendanceId } = req.body;
+
+
+    // -----------------------------------------------------
+    // Validate description
+    // -----------------------------------------------------
 
     if (!description || !description.trim()) {
       return res.status(400).json({
@@ -179,6 +266,11 @@ export const updateMyWorkReport = async (req, res) => {
       });
     }
 
+
+    // -----------------------------------------------------
+    // Find employee
+    // -----------------------------------------------------
+
     const employee = await Employee.findOne({
       userId: req.user._id,
       employmentStatus: "ACTIVE",
@@ -191,32 +283,51 @@ export const updateMyWorkReport = async (req, res) => {
       });
     }
 
-    const now = new Date();
 
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
+    // -----------------------------------------------------
+    // Validate attendanceId
+    // -----------------------------------------------------
 
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
+    if (!attendanceId) {
+      return res.status(400).json({
+        success: false,
+        message: "Attendance record is required",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(attendanceId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid attendance record",
+      });
+    }
+
+
+    // -----------------------------------------------------
+    // Find exact work report
+    // -----------------------------------------------------
 
     const workReport = await WorkReport.findOne({
       employeeId: employee._id,
-      date: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
+      attendanceId: attendanceId,
     });
 
     if (!workReport) {
       return res.status(404).json({
         success: false,
-        message: "Work report not found for today",
+        message: "Work report not found for this attendance",
       });
     }
 
-    const attendance = await Attendance.findById(
-      workReport.attendanceId
-    );
+
+    // -----------------------------------------------------
+    // Find linked attendance
+    // -----------------------------------------------------
+
+    const attendance = await Attendance.findOne({
+      _id: workReport.attendanceId,
+      employeeId: employee._id,
+    });
 
     if (!attendance) {
       return res.status(404).json({
@@ -224,6 +335,11 @@ export const updateMyWorkReport = async (req, res) => {
         message: "Attendance record not found",
       });
     }
+
+
+    // -----------------------------------------------------
+    // Cannot edit after checkout
+    // -----------------------------------------------------
 
     if (attendance.checkOut?.time) {
       return res.status(400).json({
@@ -233,9 +349,15 @@ export const updateMyWorkReport = async (req, res) => {
       });
     }
 
+
+    // -----------------------------------------------------
+    // Update
+    // -----------------------------------------------------
+
     workReport.description = description.trim();
 
     await workReport.save();
+
 
     return res.status(200).json({
       success: true,
@@ -253,16 +375,30 @@ export const updateMyWorkReport = async (req, res) => {
   }
 };
 
+
+
+// =========================================================
+// GET ALL WORK REPORTS - ADMIN
+// =========================================================
+
 export const getAllWorkReports = async (req, res) => {
   try {
-    console.log("===== GET MY WORK REPORT =====");
+
+    console.log("===== GET ALL WORK REPORTS =====");
     console.log("req.user:", req.user);
+
+
     const { date, employeeId } = req.query;
 
     const filter = {};
 
+
+    // -----------------------------------------------------
     // Filter by date
+    // -----------------------------------------------------
+
     if (date) {
+
       const selectedDate = new Date(date);
 
       if (Number.isNaN(selectedDate.getTime())) {
@@ -272,11 +408,13 @@ export const getAllWorkReports = async (req, res) => {
         });
       }
 
+
       const startOfDay = new Date(selectedDate);
       startOfDay.setHours(0, 0, 0, 0);
 
       const endOfDay = new Date(selectedDate);
       endOfDay.setHours(23, 59, 59, 999);
+
 
       filter.date = {
         $gte: startOfDay,
@@ -284,8 +422,13 @@ export const getAllWorkReports = async (req, res) => {
       };
     }
 
+
+    // -----------------------------------------------------
     // Filter by employee
+    // -----------------------------------------------------
+
     if (employeeId) {
+
       if (!mongoose.Types.ObjectId.isValid(employeeId)) {
         return res.status(400).json({
           success: false,
@@ -295,6 +438,11 @@ export const getAllWorkReports = async (req, res) => {
 
       filter.employeeId = employeeId;
     }
+
+
+    // -----------------------------------------------------
+    // Get reports
+    // -----------------------------------------------------
 
     const workReports = await WorkReport.find(filter)
       .populate(
@@ -310,6 +458,7 @@ export const getAllWorkReports = async (req, res) => {
         createdAt: -1,
       });
 
+
     return res.status(200).json({
       success: true,
       count: workReports.length,
@@ -317,6 +466,7 @@ export const getAllWorkReports = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error("Get All Work Reports Error:", error);
 
     return res.status(500).json({
