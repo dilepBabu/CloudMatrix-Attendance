@@ -10,9 +10,10 @@ import "./MyAttendance.css";
 
    GPS FIX:
    - High accuracy location first
+   - Multiple GPS readings
+   - Keeps the most accurate reading
    - Normal browser location fallback
-   - No watchPosition()
-   - No manual secure-context rejection
+   - Uses watchPosition() to improve mobile accuracy
    - Frontend GPS accuracy limit = 300m
    - Backend performs actual office-radius validation
 
@@ -312,21 +313,23 @@ const MAX_GPS_ACCURACY = 300;
    GPS HELPER
    =========================================================
 
-   FIXED PROBLEMS:
+   GPS STRATEGY:
 
-   OLD:
-   - getCurrentPosition()
-   - watchPosition()
-   - 45 second wait
-   - manual secure-context rejection
+   1. Start high-accuracy location.
+   2. Collect multiple location readings.
+   3. Keep the reading with the best accuracy.
+   4. If accuracy <= 50m, finish immediately.
+   5. If high accuracy does not provide a good result,
+      start normal browser location fallback.
+   6. After 30 seconds, use the best reading if accuracy
+      is <= 300m.
+   7. Otherwise return GPS_ACCURACY_LOW.
 
-   NEW:
-   - high accuracy first
-   - normal location fallback
-   - no watchPosition
-   - faster failure
-   - better laptop support
-   - better mobile support
+   IMPORTANT:
+   - Does NOT change backend office radius.
+   - Does NOT change check-in API.
+   - Does NOT change check-out API.
+   - Works for laptop and mobile.
    ========================================================= */
 
 const getBestLocation = () => {
@@ -346,54 +349,123 @@ const getBestLocation = () => {
 
     let finished = false;
 
-    const finishSuccess = (position) => {
+    let bestPosition = null;
+
+    let highAccuracyWatchId = null;
+
+    let fallbackWatchId = null;
+
+    let highAccuracyTimeout = null;
+
+    let finalTimeout = null;
+
+
+    /* =====================================================
+       CLEANUP
+       ===================================================== */
+
+    const cleanup = () => {
+      if (
+        highAccuracyWatchId !== null
+      ) {
+        navigator.geolocation.clearWatch(
+          highAccuracyWatchId
+        );
+
+        highAccuracyWatchId = null;
+      }
+
+      if (
+        fallbackWatchId !== null
+      ) {
+        navigator.geolocation.clearWatch(
+          fallbackWatchId
+        );
+
+        fallbackWatchId = null;
+      }
+
+      if (
+        highAccuracyTimeout !== null
+      ) {
+        clearTimeout(
+          highAccuracyTimeout
+        );
+
+        highAccuracyTimeout = null;
+      }
+
+      if (
+        finalTimeout !== null
+      ) {
+        clearTimeout(
+          finalTimeout
+        );
+
+        finalTimeout = null;
+      }
+    };
+
+
+    /* =====================================================
+       FINISH WITH LOCATION
+       ===================================================== */
+
+    const finish = (position) => {
       if (finished) return;
 
       if (!position?.coords) {
         return;
       }
 
-      const latitude = Number(
-        position.coords.latitude
-      );
+      const latitude =
+        Number(
+          position.coords.latitude
+        );
 
-      const longitude = Number(
-        position.coords.longitude
-      );
+      const longitude =
+        Number(
+          position.coords.longitude
+        );
 
-      const accuracy = Number(
-        position.coords.accuracy
-      );
+      const accuracy =
+        Number(
+          position.coords.accuracy
+        );
 
       if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude) ||
-        !Number.isFinite(accuracy)
+        !Number.isFinite(
+          latitude
+        ) ||
+        !Number.isFinite(
+          longitude
+        ) ||
+        !Number.isFinite(
+          accuracy
+        )
       ) {
         return;
       }
 
+      if (
+        accuracy >
+        MAX_GPS_ACCURACY
+      ) {
+        return;
+      }
+
+      finished = true;
+
+      cleanup();
+
       console.log(
-        "GPS LOCATION FOUND:",
+        "FINAL GPS LOCATION:",
         {
           latitude,
           longitude,
           accuracy,
         }
       );
-
-      /*
-       * Do not send an inaccurate position
-       * to the backend.
-       */
-
-      if (
-        accuracy > MAX_GPS_ACCURACY
-      ) {
-        return;
-      }
-
-      finished = true;
 
       resolve({
         latitude,
@@ -402,217 +474,260 @@ const getBestLocation = () => {
       });
     };
 
-    const finishError = (error) => {
+
+    /* =====================================================
+       FINISH USING BEST AVAILABLE LOCATION
+       ===================================================== */
+
+    const finishWithBestLocation = () => {
       if (finished) return;
+
+      if (
+        bestPosition
+      ) {
+        const accuracy =
+          Number(
+            bestPosition.coords
+              .accuracy
+          );
+
+        if (
+          Number.isFinite(
+            accuracy
+          ) &&
+          accuracy <=
+            MAX_GPS_ACCURACY
+        ) {
+          finish(
+            bestPosition
+          );
+
+          return;
+        }
+      }
+
+      cleanup();
 
       finished = true;
 
-      reject(error);
+      reject({
+        code:
+          "GPS_ACCURACY_LOW",
+
+        message:
+          "Unable to get an accurate mobile location. Please turn ON GPS/Location, move near a window or outside, and try again.",
+      });
     };
 
 
     /* =====================================================
-       NORMAL LOCATION FALLBACK
+       UPDATE BEST GPS READING
        ===================================================== */
 
-    const requestNormalLocation = () => {
+    const updateBestPosition = (
+      position
+    ) => {
       if (finished) return;
 
+      if (!position?.coords) {
+        return;
+      }
+
+      const latitude =
+        Number(
+          position.coords.latitude
+        );
+
+      const longitude =
+        Number(
+          position.coords.longitude
+        );
+
+      const accuracy =
+        Number(
+          position.coords.accuracy
+        );
+
+      if (
+        !Number.isFinite(
+          latitude
+        ) ||
+        !Number.isFinite(
+          longitude
+        ) ||
+        !Number.isFinite(
+          accuracy
+        )
+      ) {
+        return;
+      }
+
       console.log(
-        "Trying normal browser location..."
-      );
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          if (finished) return;
-
-          const latitude = Number(
-            position?.coords?.latitude
-          );
-
-          const longitude = Number(
-            position?.coords?.longitude
-          );
-
-          const accuracy = Number(
-            position?.coords?.accuracy
-          );
-
-          console.log(
-            "GPS NORMAL RESULT:",
-            {
-              latitude,
-              longitude,
-              accuracy,
-            }
-          );
-
-          if (
-            !Number.isFinite(latitude) ||
-            !Number.isFinite(longitude) ||
-            !Number.isFinite(accuracy)
-          ) {
-            finishError({
-              code: "GPS_ACCURACY_LOW",
-              message:
-                "The browser returned an invalid location. Please try again.",
-            });
-
-            return;
-          }
-
-          if (
-            accuracy <=
-            MAX_GPS_ACCURACY
-          ) {
-            finishSuccess(position);
-
-            return;
-          }
-
-          finishError({
-            code: "GPS_ACCURACY_LOW",
-            accuracy,
-            message:
-              `GPS accuracy is about ${Math.round(
-                accuracy
-              )}m. Please move outside or near a window, keep Location/GPS ON, and try again.`,
-          });
-        },
-
-        (error) => {
-          if (finished) return;
-
-          console.error(
-            "NORMAL GPS ERROR:",
-            error
-          );
-
-          finishError(error);
-        },
-
+        "GPS READING:",
         {
-          /*
-           * Normal browser location is useful
-           * especially on laptops where there may
-           * be no actual GPS hardware.
-           */
-
-          enableHighAccuracy: false,
-
-          /*
-           * Allow a recent Wi-Fi/network location.
-           */
-
-          maximumAge: 30000,
-
-          timeout: 20000,
+          latitude,
+          longitude,
+          accuracy,
         }
       );
-    };
 
 
-    /* =====================================================
-       HIGH ACCURACY LOCATION
-       ===================================================== */
+      /* ===================================================
+         KEEP MOST ACCURATE READING
+         =================================================== */
 
-    console.log(
-      "Starting high accuracy GPS..."
-    );
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        if (finished) return;
-
-        const latitude = Number(
-          position?.coords?.latitude
-        );
-
-        const longitude = Number(
-          position?.coords?.longitude
-        );
-
-        const accuracy = Number(
-          position?.coords?.accuracy
-        );
+      if (
+        !bestPosition ||
+        accuracy <
+          Number(
+            bestPosition.coords
+              .accuracy
+          )
+      ) {
+        bestPosition =
+          position;
 
         console.log(
-          "GPS HIGH ACCURACY RESULT:",
+          "NEW BEST GPS READING:",
           {
             latitude,
             longitude,
             accuracy,
           }
         );
-
-        /*
-         * Accept immediately if accurate enough.
-         */
-
-        if (
-          Number.isFinite(latitude) &&
-          Number.isFinite(longitude) &&
-          Number.isFinite(accuracy) &&
-          accuracy <=
-            MAX_GPS_ACCURACY
-        ) {
-          finishSuccess(position);
-
-          return;
-        }
-
-        /*
-         * High accuracy result exists,
-         * but it is not accurate enough.
-         *
-         * Try normal location.
-         */
-
-        requestNormalLocation();
-      },
-
-      (error) => {
-        if (finished) return;
-
-        console.error(
-          "HIGH ACCURACY GPS ERROR:",
-          error
-        );
-
-        /*
-         * Permission denied is final.
-         */
-
-        if (error?.code === 1) {
-          finishError(error);
-
-          return;
-        }
-
-        /*
-         * For timeout / unavailable,
-         * use normal browser location.
-         */
-
-        requestNormalLocation();
-      },
-
-      {
-        enableHighAccuracy: true,
-
-        /*
-         * Do not use stale GPS.
-         */
-
-        maximumAge: 0,
-
-        /*
-         * Laptop/mobile gets enough time.
-         */
-
-        timeout: 15000,
       }
+
+
+      /* ===================================================
+         VERY GOOD LOCATION
+         =================================================== */
+
+      if (
+        accuracy <= 50
+      ) {
+        finish(
+          position
+        );
+      }
+    };
+
+
+    /* =====================================================
+       NORMAL GPS FALLBACK
+       =====================================================
+
+       IMPORTANT:
+       This function is declared BEFORE the high accuracy
+       watcher starts.
+
+       This avoids calling a const function before it has
+       been initialized.
+       ===================================================== */
+
+    const startFallback = () => {
+      if (finished) return;
+
+      if (
+        fallbackWatchId !== null
+      ) {
+        return;
+      }
+
+      console.log(
+        "STARTING NORMAL MOBILE GPS FALLBACK..."
+      );
+
+      fallbackWatchId =
+        navigator.geolocation.watchPosition(
+          (position) => {
+            updateBestPosition(
+              position
+            );
+          },
+
+          (error) => {
+            console.error(
+              "NORMAL GPS ERROR:",
+              error
+            );
+          },
+
+          {
+            enableHighAccuracy:
+              false,
+
+            maximumAge:
+              10000,
+
+            timeout:
+              15000,
+          }
+        );
+    };
+
+
+    /* =====================================================
+       HIGH ACCURACY GPS
+       ===================================================== */
+
+    console.log(
+      "STARTING HIGH ACCURACY MOBILE GPS..."
     );
+
+    highAccuracyWatchId =
+      navigator.geolocation.watchPosition(
+        (position) => {
+          updateBestPosition(
+            position
+          );
+        },
+
+        (error) => {
+          console.error(
+            "HIGH ACCURACY GPS ERROR:",
+            error
+          );
+
+          /*
+           * Do not immediately fail.
+           *
+           * Start normal browser location fallback.
+           */
+
+          startFallback();
+        },
+
+        {
+          enableHighAccuracy:
+            true,
+
+          maximumAge:
+            0,
+
+          timeout:
+            10000,
+        }
+      );
+
+
+    /* =====================================================
+       START NORMAL FALLBACK AFTER 15 SECONDS
+       ===================================================== */
+
+    highAccuracyTimeout =
+      setTimeout(() => {
+        startFallback();
+      }, 15000);
+
+
+    /* =====================================================
+       FINAL RESULT AFTER 30 SECONDS
+       ===================================================== */
+
+    finalTimeout =
+      setTimeout(() => {
+        finishWithBestLocation();
+      }, 30000);
   });
 };
 
@@ -622,7 +737,8 @@ const getBestLocation = () => {
    ========================================================= */
 
 const MyAttendance = () => {
-  const [attendance, setAttendance] = useState([]);
+  const [attendance, setAttendance] =
+    useState([]);
 
   const [loading, setLoading] =
     useState(true);
@@ -731,7 +847,9 @@ const MyAttendance = () => {
         ).getTime();
 
       if (
-        Number.isNaN(checkInTime)
+        Number.isNaN(
+          checkInTime
+        )
       ) {
         return 0;
       }
@@ -761,6 +879,7 @@ const MyAttendance = () => {
     type = "success"
   ) => {
     setMessage(text);
+
     setMessageType(type);
 
     setTimeout(() => {
@@ -898,6 +1017,7 @@ const MyAttendance = () => {
 
   useEffect(() => {
     fetchAttendance();
+
     fetchTodayWorkReport();
   }, []);
 
@@ -1004,7 +1124,9 @@ const MyAttendance = () => {
           throw {
             code:
               "GPS_ACCURACY_LOW",
+
             accuracy,
+
             message:
               `GPS accuracy is about ${Math.round(
                 accuracy
@@ -1197,6 +1319,7 @@ const MyAttendance = () => {
           true
         );
 
+
         /* ===================================================
            SAVE / UPDATE WORK REPORT
            =================================================== */
@@ -1225,6 +1348,7 @@ const MyAttendance = () => {
           "Work report saved. Getting your location...",
           "info"
         );
+
 
         /* ===================================================
            GET GPS
@@ -1280,7 +1404,9 @@ const MyAttendance = () => {
           throw {
             code:
               "GPS_ACCURACY_LOW",
+
             accuracy,
+
             message:
               `GPS accuracy is about ${Math.round(
                 accuracy
@@ -1292,6 +1418,7 @@ const MyAttendance = () => {
           "Location found. Checking you out...",
           "info"
         );
+
 
         /* ===================================================
            CHECK OUT
@@ -1475,7 +1602,9 @@ const MyAttendance = () => {
 
   const clearFilters = () => {
     setStatusFilter("ALL");
+
     setMethodFilter("ALL");
+
     setCurrentPage(1);
   };
 
