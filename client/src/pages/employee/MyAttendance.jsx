@@ -846,6 +846,23 @@ const MyAttendance = () => {
 
   /* =======================================================
      FETCH TODAY WORK REPORT
+
+     IMPORTANT FIX:
+
+     This callback intentionally has an
+     EMPTY dependency array.
+
+     currentTime changes every second.
+     If currentTime is placed inside the
+     dependency array, this function is
+     recreated every second.
+
+     That causes the initial useEffect to
+     run every second and reset the textarea.
+
+     We therefore use new Date() INSIDE this
+     function whenever it actually needs
+     today's date.
      ======================================================= */
 
   const fetchTodayWorkReport =
@@ -861,7 +878,7 @@ const MyAttendance = () => {
             response?.data;
 
           /*
-           * Your backend may return:
+           * Backend may return:
            *
            * {
            *   success: true,
@@ -883,14 +900,23 @@ const MyAttendance = () => {
               data?.workReports
             )
           ) {
+            /*
+             * IMPORTANT:
+             *
+             * Use a fresh Date here instead
+             * of currentTime.
+             *
+             * This prevents the textarea
+             * from being reset every second.
+             */
+
             const todayKey =
               getDateKey(
-                currentTime
+                new Date()
               );
 
             /*
-             * Prefer a report connected
-             * to today's attendance.
+             * Prefer today's report.
              */
 
             const todayReports =
@@ -921,14 +947,39 @@ const MyAttendance = () => {
 
             report =
               todayReports[0] ||
-              data.workReports[0] ||
               null;
+
+            /*
+             * If there is exactly one report
+             * and it was not matched by date,
+             * use it as the returned report.
+             *
+             * This keeps compatibility with
+             * your existing backend response.
+             */
+
+            if (
+              !report &&
+              data.workReports.length ===
+                1
+            ) {
+              report =
+                data.workReports[0];
+            }
           } else {
+            /*
+             * Backend returned a single report.
+             */
+
             report =
               data?.workReport ||
               data?.report ||
               null;
           }
+
+          /*
+           * Report exists.
+           */
 
           if (
             report &&
@@ -947,6 +998,10 @@ const MyAttendance = () => {
             return report;
           }
 
+          /*
+           * No report exists.
+           */
+
           setWorkReportExists(
             false
           );
@@ -957,6 +1012,11 @@ const MyAttendance = () => {
 
           return null;
         } catch (error) {
+          /*
+           * 404 simply means no report
+           * exists yet.
+           */
+
           if (
             error?.response
               ?.status === 404
@@ -980,7 +1040,16 @@ const MyAttendance = () => {
           return null;
         }
       },
-      [currentTime]
+
+      /*
+       * IMPORTANT:
+       *
+       * DO NOT ADD currentTime HERE.
+       *
+       * It must stay [].
+       */
+
+      []
     );
 
   /* =======================================================
@@ -1013,7 +1082,7 @@ const MyAttendance = () => {
 
   /* =======================================================
      ACTIVE ATTENDANCE
-     
+
      OVERNIGHT SHIFT SUPPORT
 
      Example:
@@ -1840,7 +1909,6 @@ const MyAttendance = () => {
         }
 
         /*
-         * IMPORTANT:
          * Do not continue to checkout if
          * backend did not confirm success.
          */
@@ -1863,15 +1931,6 @@ const MyAttendance = () => {
         /* =================================================
            4. VERIFY REPORT WAS SAVED
            ================================================= */
-
-        /*
-         * Fetch the reports again.
-         *
-         * This prevents a situation where
-         * the frontend thinks the report was
-         * saved but backend checkout cannot
-         * find it.
-         */
 
         let savedReport =
           null;
@@ -1947,12 +2006,11 @@ const MyAttendance = () => {
         } catch (verifyError) {
           /*
            * Do NOT fail checkout just
-           * because the verification GET
+           * because verification GET
            * has a problem.
            *
-           * The POST/PUT already returned
-           * success, and backend checkout
-           * itself will verify the report.
+           * Backend checkout itself
+           * verifies the report.
            */
 
           console.warn(
@@ -1962,7 +2020,8 @@ const MyAttendance = () => {
         }
 
         /*
-         * Keep the report description in state.
+         * Keep the report description
+         * in state.
          */
 
         setWorkReportDescription(
@@ -2006,8 +2065,6 @@ const MyAttendance = () => {
           {};
 
         /*
-         * IMPORTANT FIX:
-         *
          * REMOTE and FIELD do NOT require
          * GPS in your backend.
          *
@@ -2126,14 +2183,12 @@ const MyAttendance = () => {
         );
 
         /*
-         * IMPORTANT:
-         *
          * If report save succeeded but
          * checkout failed because of GPS,
          * leave the report saved.
          *
-         * User can simply click
-         * Submit & Check Out again.
+         * User can click Submit & Check Out
+         * again.
          */
 
         const errorMessage =
