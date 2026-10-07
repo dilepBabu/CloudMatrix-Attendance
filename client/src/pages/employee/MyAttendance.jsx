@@ -138,19 +138,6 @@ const formatStatus = (status) => {
   }
 };
 
-/*
- * CSS uses:
- * .present
- * .absent
- * .leave
- * .holiday
- * .weekend
- * .missed
- * .half-day
- * .overtime
- * .unknown
- */
-
 const getStatusClass = (status) => {
   if (!status) return "unknown";
 
@@ -411,9 +398,7 @@ const getBestLocation = (onGpsUpdate = null) => {
 
       resolve({
         latitude,
-
         longitude,
-
         accuracy,
       });
     };
@@ -464,11 +449,6 @@ const getBestLocation = (onGpsUpdate = null) => {
         }
       }
 
-      /*
-       * Excellent GPS.
-       * Finish immediately.
-       */
-
       if (accuracy <= 50) {
         finish(position);
       }
@@ -478,13 +458,6 @@ const getBestLocation = (onGpsUpdate = null) => {
       error
     ) => {
       if (finished) return;
-
-      /*
-       * Do not immediately reject during
-       * the first high-accuracy attempt.
-       *
-       * We allow the fallback to run.
-       */
 
       if (fallbackStarted) {
         if (bestPosition) {
@@ -508,22 +481,15 @@ const getBestLocation = (onGpsUpdate = null) => {
           handleError,
           {
             enableHighAccuracy: true,
-
             maximumAge: 0,
-
             timeout:
               HIGH_ACCURACY_TIMEOUT,
           }
         );
     } catch (error) {
       reject(error);
-
       return;
     }
-
-    /*
-     * Normal GPS fallback.
-     */
 
     setTimeout(() => {
       if (finished) return;
@@ -603,10 +569,6 @@ const getBestLocation = (onGpsUpdate = null) => {
         }
       );
     }, FALLBACK_DELAY);
-
-    /*
-     * Final timeout.
-     */
 
     setTimeout(() => {
       if (finished) return;
@@ -710,16 +672,6 @@ const MyAttendance = () => {
     setWorkReportExists,
   ] = useState(false);
 
-  /*
-   * Keep the attendance ID for which
-   * checkout was opened.
-   *
-   * This is important for overnight
-   * attendance and prevents a stale
-   * report from being used for another
-   * attendance.
-   */
-
   const [
     checkoutAttendanceId,
     setCheckoutAttendanceId,
@@ -744,10 +696,6 @@ const MyAttendance = () => {
     gpsDebug,
     setGpsDebug,
   ] = useState(null);
-
-  /* =======================================================
-     GPS DEBUG UPDATE
-     ======================================================= */
 
   const updateGpsDebug =
     useCallback(
@@ -845,24 +793,7 @@ const MyAttendance = () => {
     );
 
   /* =======================================================
-     FETCH TODAY WORK REPORT
-
-     IMPORTANT FIX:
-
-     This callback intentionally has an
-     EMPTY dependency array.
-
-     currentTime changes every second.
-     If currentTime is placed inside the
-     dependency array, this function is
-     recreated every second.
-
-     That causes the initial useEffect to
-     run every second and reset the textarea.
-
-     We therefore use new Date() INSIDE this
-     function whenever it actually needs
-     today's date.
+     FETCH WORK REPORT
      ======================================================= */
 
   const fetchTodayWorkReport =
@@ -877,109 +808,69 @@ const MyAttendance = () => {
           const data =
             response?.data;
 
-          /*
-           * Backend may return:
-           *
-           * {
-           *   success: true,
-           *   workReports: [...]
-           * }
-           *
-           * OR:
-           *
-           * {
-           *   success: true,
-           *   workReport: {...}
-           * }
-           */
-
-          let report = null;
+          let reports = [];
 
           if (
             Array.isArray(
               data?.workReports
             )
           ) {
-            /*
-             * IMPORTANT:
-             *
-             * Use a fresh Date here instead
-             * of currentTime.
-             *
-             * This prevents the textarea
-             * from being reset every second.
-             */
-
-            const todayKey =
-              getDateKey(
-                new Date()
-              );
-
-            /*
-             * Prefer today's report.
-             */
-
-            const todayReports =
-              data.workReports
-                .filter(
-                  (item) =>
-                    getDateKey(
-                      item?.date
-                    ) ===
-                    todayKey
-                )
-                .sort(
-                  (a, b) => {
-                    return (
-                      new Date(
-                        b?.createdAt ||
-                          b?.date ||
-                          0
-                      ).getTime() -
-                      new Date(
-                        a?.createdAt ||
-                          a?.date ||
-                          0
-                      ).getTime()
-                    );
-                  }
-                );
-
-            report =
-              todayReports[0] ||
-              null;
-
-            /*
-             * If there is exactly one report
-             * and it was not matched by date,
-             * use it as the returned report.
-             *
-             * This keeps compatibility with
-             * your existing backend response.
-             */
-
-            if (
-              !report &&
-              data.workReports.length ===
-                1
-            ) {
-              report =
-                data.workReports[0];
-            }
-          } else {
-            /*
-             * Backend returned a single report.
-             */
-
-            report =
-              data?.workReport ||
-              data?.report ||
-              null;
+            reports =
+              data.workReports;
+          } else if (
+            Array.isArray(data)
+          ) {
+            reports = data;
+          } else if (
+            data?.workReport
+          ) {
+            reports = [
+              data.workReport,
+            ];
+          } else if (
+            data?.report
+          ) {
+            reports = [
+              data.report,
+            ];
           }
 
+          if (
+            reports.length ===
+            0
+          ) {
+            setWorkReportExists(
+              false
+            );
+
+            setWorkReportDescription(
+              ""
+            );
+
+            return null;
+          }
+
+          const todayKey =
+            getDateKey(
+              new Date()
+            );
+
           /*
-           * Report exists.
+           * Prefer report for today's
+           * attendance date.
            */
+
+          const todayReport =
+            reports.find(
+              (report) =>
+                getDateKey(
+                  report?.date
+                ) === todayKey
+            );
+
+          const report =
+            todayReport ||
+            reports[0];
 
           if (
             report &&
@@ -998,10 +889,6 @@ const MyAttendance = () => {
             return report;
           }
 
-          /*
-           * No report exists.
-           */
-
           setWorkReportExists(
             false
           );
@@ -1012,11 +899,6 @@ const MyAttendance = () => {
 
           return null;
         } catch (error) {
-          /*
-           * 404 simply means no report
-           * exists yet.
-           */
-
           if (
             error?.response
               ?.status === 404
@@ -1037,18 +919,16 @@ const MyAttendance = () => {
             error
           );
 
+          /*
+           * Important:
+           *
+           * Do not erase the user's
+           * textarea if this request fails.
+           */
+
           return null;
         }
       },
-
-      /*
-       * IMPORTANT:
-       *
-       * DO NOT ADD currentTime HERE.
-       *
-       * It must stay [].
-       */
-
       []
     );
 
@@ -1082,18 +962,6 @@ const MyAttendance = () => {
 
   /* =======================================================
      ACTIVE ATTENDANCE
-
-     OVERNIGHT SHIFT SUPPORT
-
-     Example:
-
-     Oct 7 7:00 PM
-     ->
-     Oct 8 3:00 AM
-
-     The attendance DATE remains
-     Oct 7, but it is still the active
-     attendance until checkout.
      ======================================================= */
 
   const activeAttendance =
@@ -1103,10 +971,6 @@ const MyAttendance = () => {
           currentTime
         );
 
-      /* ---------------------------------------------------
-         Today's attendance
-         --------------------------------------------------- */
-
       const todayAttendance =
         attendance.find(
           (record) =>
@@ -1114,10 +978,6 @@ const MyAttendance = () => {
               record?.date
             ) === todayKey
         ) || null;
-
-      /* ---------------------------------------------------
-         Today's OPEN attendance
-         --------------------------------------------------- */
 
       if (
         todayAttendance
@@ -1127,11 +987,6 @@ const MyAttendance = () => {
       ) {
         return todayAttendance;
       }
-
-      /* ---------------------------------------------------
-         Find latest OPEN attendance
-         within previous 24 hours.
-         --------------------------------------------------- */
 
       const now =
         currentTime.getTime();
@@ -1183,31 +1038,20 @@ const MyAttendance = () => {
             }
           )
           .sort(
-            (a, b) => {
-              return (
-                new Date(
-                  b.checkIn.time
-                ).getTime() -
-                new Date(
-                  a.checkIn.time
-                ).getTime()
-              );
-            }
+            (a, b) =>
+              new Date(
+                b.checkIn.time
+              ).getTime() -
+              new Date(
+                a.checkIn.time
+              ).getTime()
           )[0] || null;
-
-      /* ---------------------------------------------------
-         Open overnight attendance wins.
-         --------------------------------------------------- */
 
       if (
         openAttendance
       ) {
         return openAttendance;
       }
-
-      /* ---------------------------------------------------
-         Otherwise today's record.
-         --------------------------------------------------- */
 
       return (
         todayAttendance ||
@@ -1265,8 +1109,6 @@ const MyAttendance = () => {
         return 0;
       }
 
-      /* Already checked out */
-
       if (
         activeAttendance
           ?.checkOut?.time
@@ -1306,8 +1148,6 @@ const MyAttendance = () => {
         return 0;
       }
 
-      /* Still checked in */
-
       const now =
         currentTime.getTime();
 
@@ -1335,8 +1175,6 @@ const MyAttendance = () => {
       let records = [
         ...attendance,
       ];
-
-      /* Search */
 
       if (search.trim()) {
         const searchValue =
@@ -1387,8 +1225,6 @@ const MyAttendance = () => {
           );
       }
 
-      /* Status */
-
       if (
         statusFilter !==
         "ALL"
@@ -1415,8 +1251,6 @@ const MyAttendance = () => {
           );
       }
 
-      /* Method */
-
       if (
         methodFilter !==
         "ALL"
@@ -1438,8 +1272,6 @@ const MyAttendance = () => {
             }
           );
       }
-
-      /* Newest first */
 
       records.sort(
         (a, b) => {
@@ -1497,7 +1329,7 @@ const MyAttendance = () => {
     ]);
 
   /* =======================================================
-     RESET PAGE WHEN FILTER CHANGES
+     RESET PAGE
      ======================================================= */
 
   useEffect(() => {
@@ -1558,6 +1390,15 @@ const MyAttendance = () => {
 
         const data =
           response?.data;
+
+        if (
+          data?.success === false
+        ) {
+          throw new Error(
+            data?.message ||
+              "Check-in failed."
+          );
+        }
 
         setMessage(
           data?.message ||
@@ -1649,6 +1490,22 @@ const MyAttendance = () => {
         return;
       }
 
+      const attendanceId =
+        activeAttendance?._id ||
+        activeAttendance?.id;
+
+      if (!attendanceId) {
+        setMessage(
+          "Unable to identify the attendance record. Please refresh the page and try again."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
+
       try {
         setActionLoading(
           true
@@ -1658,27 +1515,19 @@ const MyAttendance = () => {
         setMessageType("");
 
         /*
-         * Save exactly which attendance
-         * we are checking out.
-         *
-         * This is important for overnight
-         * shifts.
+         * Store EXACT attendance ID.
          */
 
         setCheckoutAttendanceId(
-          activeAttendance?._id ||
-            activeAttendance?.id ||
-            null
+          String(
+            attendanceId
+          )
         );
 
         /*
          * Load existing report.
          *
-         * If one already exists, its
-         * description is loaded.
-         *
-         * If none exists, textarea stays
-         * empty.
+         * This does NOT perform checkout.
          */
 
         await fetchTodayWorkReport();
@@ -1710,7 +1559,7 @@ const MyAttendance = () => {
     };
 
   /* =======================================================
-     WORK REPORT + CHECK OUT
+     WORK REPORT + CHECKOUT
      ======================================================= */
 
   const handleWorkReportAndCheckout =
@@ -1722,15 +1571,136 @@ const MyAttendance = () => {
       }
 
       /*
-       * Always use the attendance that
-       * was selected when the modal opened.
+       * IMPORTANT:
+       *
+       * Use the attendance ID captured
+       * when the checkout button was clicked.
        */
 
       const currentAttendanceId =
-        checkoutAttendanceId ||
-        activeAttendance?._id ||
-        activeAttendance?.id ||
-        null;
+        checkoutAttendanceId;
+
+      if (!currentAttendanceId) {
+        setMessage(
+          "Attendance ID is missing. Please close this window, refresh the page, and try again."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
+
+      const selectedAttendance =
+        attendance.find(
+          (record) =>
+            String(
+              record?._id ||
+                record?.id ||
+                ""
+            ) ===
+            String(
+              currentAttendanceId
+            )
+        ) || null;
+
+      if (!selectedAttendance) {
+        setMessage(
+          "The selected attendance record could not be found. Please refresh the page and try again."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
+
+      if (
+        !selectedAttendance
+          ?.checkIn?.time
+      ) {
+        setMessage(
+          "No valid check-in was found for this attendance."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
+
+      if (
+        selectedAttendance
+          ?.checkOut?.time
+      ) {
+        setMessage(
+          "This attendance has already been checked out."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        setShowWorkReportModal(
+          false
+        );
+
+        setCheckoutAttendanceId(
+          null
+        );
+
+        return;
+      }
+
+      const description =
+        workReportDescription.trim();
+
+      /* =====================================================
+         VALIDATE DESCRIPTION
+         ===================================================== */
+
+      if (!description) {
+        setMessage(
+          "Please enter your work report before checkout."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
+
+      if (
+        description.length < 10
+      ) {
+        setMessage(
+          "Work report must contain at least 10 characters."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
+
+      if (
+        description.length > 2000
+      ) {
+        setMessage(
+          "Work report cannot exceed 2000 characters."
+        );
+
+        setMessageType(
+          "error"
+        );
+
+        return;
+      }
 
       try {
         setWorkReportLoading(
@@ -1741,139 +1711,8 @@ const MyAttendance = () => {
         setMessageType("");
 
         /* =================================================
-           1. VALIDATE ATTENDANCE
-           ================================================= */
-
-        if (
-          !currentAttendanceId
-        ) {
-          setMessage(
-            "Unable to identify the active attendance. Please refresh the page and try again."
-          );
-
-          setMessageType(
-            "error"
-          );
-
-          return;
-        }
-
-        /*
-         * Make sure the selected attendance
-         * is still open.
-         */
-
-        const selectedAttendance =
-          attendance.find(
-            (record) =>
-              String(
-                record?._id ||
-                  record?.id ||
-                  ""
-              ) ===
-              String(
-                currentAttendanceId
-              )
-          ) ||
-          activeAttendance;
-
-        if (
-          !selectedAttendance
-        ) {
-          setMessage(
-            "Active attendance could not be found. Please refresh the page and try again."
-          );
-
-          setMessageType(
-            "error"
-          );
-
-          return;
-        }
-
-        if (
-          !selectedAttendance
-            ?.checkIn?.time
-        ) {
-          setMessage(
-            "No valid check-in was found for this attendance."
-          );
-
-          setMessageType(
-            "error"
-          );
-
-          return;
-        }
-
-        if (
-          selectedAttendance
-            ?.checkOut?.time
-        ) {
-          setMessage(
-            "This attendance has already been checked out."
-          );
-
-          setMessageType(
-            "error"
-          );
-
-          setShowWorkReportModal(
-            false
-          );
-
-          return;
-        }
-
-        /* =================================================
-           2. VALIDATE WORK REPORT
-           ================================================= */
-
-        const description =
-          workReportDescription.trim();
-
-        if (!description) {
-          setMessage(
-            "Please enter your work report before checkout."
-          );
-
-          setMessageType(
-            "error"
-          );
-
-          return;
-        }
-
-        if (
-          description.length < 10
-        ) {
-          setMessage(
-            "Work report must contain at least 10 characters."
-          );
-
-          setMessageType(
-            "error"
-          );
-
-          return;
-        }
-
-        if (
-          description.length > 2000
-        ) {
-          setMessage(
-            "Work report cannot exceed 2000 characters."
-          );
-
-          setMessageType(
-            "error"
-          );
-
-          return;
-        }
-
-        /* =================================================
-           3. SAVE WORK REPORT
+           STEP 1
+           SAVE WORK REPORT
            ================================================= */
 
         let reportResponse;
@@ -1881,10 +1720,9 @@ const MyAttendance = () => {
         if (
           workReportExists
         ) {
-          /*
-           * Existing report:
-           * update it.
-           */
+          console.log(
+            "UPDATING EXISTING WORK REPORT"
+          );
 
           reportResponse =
             await api.put(
@@ -1894,10 +1732,9 @@ const MyAttendance = () => {
               }
             );
         } else {
-          /*
-           * No report:
-           * create it.
-           */
+          console.log(
+            "CREATING NEW WORK REPORT"
+          );
 
           reportResponse =
             await api.post(
@@ -1908,10 +1745,10 @@ const MyAttendance = () => {
             );
         }
 
-        /*
-         * Do not continue to checkout if
-         * backend did not confirm success.
-         */
+        console.log(
+          "WORK REPORT RESPONSE:",
+          reportResponse?.data
+        );
 
         if (
           !reportResponse?.data
@@ -1920,116 +1757,25 @@ const MyAttendance = () => {
           throw new Error(
             reportResponse?.data
               ?.message ||
-              "Unable to save work report."
-          );
-        }
-
-        setWorkReportExists(
-          true
-        );
-
-        /* =================================================
-           4. VERIFY REPORT WAS SAVED
-           ================================================= */
-
-        let savedReport =
-          null;
-
-        try {
-          const verifyResponse =
-            await api.get(
-              "/work-reports/my"
-            );
-
-          const verifyData =
-            verifyResponse?.data;
-
-          const reports =
-            Array.isArray(
-              verifyData?.workReports
-            )
-              ? verifyData.workReports
-              : [];
-
-          /*
-           * First try to find report
-           * using attendanceId.
-           */
-
-          savedReport =
-            reports.find(
-              (report) =>
-                String(
-                  report?.attendanceId
-                    ?._id ||
-                    report?.attendanceId ||
-                    ""
-                ) ===
-                String(
-                  currentAttendanceId
-                )
-            ) || null;
-
-          /*
-           * If backend returns a single
-           * report instead of an array,
-           * use it.
-           */
-
-          if (
-            !savedReport &&
-            verifyData?.workReport
-          ) {
-            const singleReport =
-              verifyData.workReport;
-
-            const reportAttendanceId =
-              singleReport
-                ?.attendanceId?._id ||
-              singleReport
-                ?.attendanceId ||
-              null;
-
-            if (
-              !reportAttendanceId ||
-              String(
-                reportAttendanceId
-              ) ===
-                String(
-                  currentAttendanceId
-                )
-            ) {
-              savedReport =
-                singleReport;
-            }
-          }
-        } catch (verifyError) {
-          /*
-           * Do NOT fail checkout just
-           * because verification GET
-           * has a problem.
-           *
-           * Backend checkout itself
-           * verifies the report.
-           */
-
-          console.warn(
-            "WORK REPORT VERIFICATION WARNING:",
-            verifyError
+              "Work report could not be saved."
           );
         }
 
         /*
-         * Keep the report description
-         * in state.
+         * Keep local state.
          */
+
+        setWorkReportExists(
+          true
+        );
 
         setWorkReportDescription(
           description
         );
 
         /* =================================================
-           5. CHECK ATTENDANCE METHOD
+           STEP 2
+           DETERMINE ATTENDANCE METHOD
            ================================================= */
 
         const attendanceMethod =
@@ -2043,32 +1789,26 @@ const MyAttendance = () => {
           ).toUpperCase();
 
         console.log(
-          "CHECKOUT ATTENDANCE:",
-          selectedAttendance
-        );
-
-        console.log(
-          "CHECKOUT ATTENDANCE ID:",
+          "ATTENDANCE ID:",
           currentAttendanceId
         );
 
         console.log(
-          "CHECKOUT METHOD:",
+          "ATTENDANCE METHOD:",
           attendanceMethod
         );
 
         /* =================================================
-           6. GPS ONLY FOR OFFICE
+           STEP 3
+           PREPARE CHECKOUT PAYLOAD
            ================================================= */
 
         let checkoutPayload =
           {};
 
         /*
-         * REMOTE and FIELD do NOT require
-         * GPS in your backend.
-         *
-         * Only OFFICE requires GPS.
+         * OFFICE:
+         * GPS required.
          */
 
         if (
@@ -2086,7 +1826,7 @@ const MyAttendance = () => {
             );
 
           console.log(
-            "CHECK-OUT GPS:",
+            "CHECKOUT GPS:",
             gps
           );
 
@@ -2100,56 +1840,92 @@ const MyAttendance = () => {
             accuracy:
               gps.accuracy,
           };
-        } else {
-          /*
-           * Remote / Field:
-           * no GPS required.
-           */
+        }
 
+        /*
+         * REMOTE:
+         * No GPS.
+         */
+
+        else if (
+          attendanceMethod ===
+          "REMOTE"
+        ) {
           setGpsDebug({
             source:
-              `CHECKOUT METHOD ${attendanceMethod} - GPS NOT REQUIRED`,
+              "REMOTE ATTENDANCE - GPS NOT REQUIRED FOR CHECKOUT",
+          });
+        }
+
+        /*
+         * FIELD:
+         * No GPS.
+         */
+
+        else if (
+          attendanceMethod ===
+          "FIELD"
+        ) {
+          setGpsDebug({
+            source:
+              "FIELD ATTENDANCE - GPS NOT REQUIRED FOR CHECKOUT",
+          });
+        }
+
+        /*
+         * Unknown method:
+         *
+         * Let backend decide.
+         */
+
+        else {
+          setGpsDebug({
+            source:
+              "ATTENDANCE METHOD NOT FOUND - SENDING CHECKOUT REQUEST",
           });
         }
 
         /* =================================================
-           7. CHECK OUT
+           STEP 4
+           CHECKOUT
            ================================================= */
 
         console.log(
-          "CHECKOUT REQUEST PAYLOAD:",
+          "CHECKOUT PAYLOAD:",
           checkoutPayload
         );
 
-        const response =
+        const checkoutResponse =
           await api.post(
             "/attendance/check-out",
             checkoutPayload
           );
 
-        const data =
-          response?.data;
+        console.log(
+          "CHECKOUT RESPONSE:",
+          checkoutResponse?.data
+        );
 
-        /*
-         * Backend must explicitly confirm
-         * checkout success.
-         */
+        const checkoutData =
+          checkoutResponse?.data;
 
         if (
-          !data?.success
+          checkoutData?.success ===
+          false
         ) {
           throw new Error(
-            data?.message ||
+            checkoutData?.message ||
               "Checkout failed."
           );
         }
 
         /* =================================================
-           8. SUCCESS
+           STEP 5
+           SUCCESS
            ================================================= */
 
         setMessage(
-          data?.message ||
+          checkoutData?.message ||
             "Work report submitted and checkout completed successfully."
         );
 
@@ -2166,13 +1942,13 @@ const MyAttendance = () => {
         );
 
         /*
-         * Refresh attendance first.
+         * Refresh attendance.
          */
 
         await fetchAttendance();
 
         /*
-         * Refresh report after checkout.
+         * Refresh work report.
          */
 
         await fetchTodayWorkReport();
@@ -2183,12 +1959,14 @@ const MyAttendance = () => {
         );
 
         /*
-         * If report save succeeded but
-         * checkout failed because of GPS,
-         * leave the report saved.
+         * IMPORTANT:
          *
-         * User can click Submit & Check Out
-         * again.
+         * If work report was already saved
+         * and GPS/checkout failed, DO NOT
+         * delete/clear the report.
+         *
+         * User can simply press
+         * Submit & Check Out again.
          */
 
         const errorMessage =
@@ -2204,10 +1982,6 @@ const MyAttendance = () => {
         setMessageType(
           "error"
         );
-
-        /*
-         * Backend GPS rejection details.
-         */
 
         if (
           error?.response
@@ -2246,7 +2020,7 @@ const MyAttendance = () => {
     };
 
   /* =======================================================
-     CLOSE WORK REPORT MODAL
+     CLOSE MODAL
      ======================================================= */
 
   const handleCloseWorkReportModal =
@@ -2294,9 +2068,8 @@ const MyAttendance = () => {
           </p>
         </div>
 
-        {/* Current date / clock */}
-
         <div className="attendance-current-date">
+
           <span className="current-date-label">
             CURRENT DATE
           </span>
@@ -2312,6 +2085,7 @@ const MyAttendance = () => {
               currentTime
             )}
           </span>
+
         </div>
 
       </div>
@@ -2493,8 +2267,6 @@ const MyAttendance = () => {
 
       <div className="today-attendance-card">
 
-        {/* HEADER */}
-
         <div className="today-attendance-header">
 
           <div>
@@ -2533,17 +2305,12 @@ const MyAttendance = () => {
 
         </div>
 
-        {/* BODY */}
-
         <div className="today-attendance-body">
-
-          {/* TIME GRID */}
 
           <div className="today-time-grid">
 
-            {/* CHECK IN */}
-
             <div className="today-time-item">
+
               <span className="today-time-label">
                 CHECK IN
               </span>
@@ -2557,11 +2324,11 @@ const MyAttendance = () => {
                     )
                   : "-"}
               </strong>
+
             </div>
 
-            {/* CHECK OUT */}
-
             <div className="today-time-item">
+
               <span className="today-time-label">
                 CHECK OUT
               </span>
@@ -2575,11 +2342,11 @@ const MyAttendance = () => {
                     )
                   : "-"}
               </strong>
+
             </div>
 
-            {/* WORKING TIME */}
-
             <div className="today-time-item">
+
               <span className="today-time-label">
                 WORKING TIME
               </span>
@@ -2589,16 +2356,17 @@ const MyAttendance = () => {
                   liveWorkingMinutes
                 )}
               </strong>
+
             </div>
 
-            {/* METHOD */}
-
             <div className="today-time-item">
+
               <span className="today-time-label">
                 METHOD
               </span>
 
               <strong className="method-value">
+
                 <span>
                   {getMethodIcon(
                     getAttendanceMethod(
@@ -2614,16 +2382,14 @@ const MyAttendance = () => {
                     )
                   )}
                 </span>
+
               </strong>
+
             </div>
 
           </div>
 
-          {/* ACTION BUTTONS */}
-
           <div className="today-attendance-actions">
-
-            {/* CHECK IN */}
 
             {!hasCheckedIn && (
               <button
@@ -2646,8 +2412,6 @@ const MyAttendance = () => {
               </button>
             )}
 
-            {/* CHECK OUT */}
-
             {isCheckedIn && (
               <button
                 type="button"
@@ -2669,10 +2433,9 @@ const MyAttendance = () => {
               </button>
             )}
 
-            {/* COMPLETED */}
-
             {isCheckedOut && (
               <div className="checked-out-message">
+
                 <span>
                   ✓
                 </span>
@@ -2681,6 +2444,7 @@ const MyAttendance = () => {
                   Attendance completed
                   for this shift.
                 </span>
+
               </div>
             )}
 
@@ -2695,8 +2459,6 @@ const MyAttendance = () => {
           ================================================= */}
 
       <div className="attendance-filters-card">
-
-        {/* FILTER HEADER */}
 
         <div className="attendance-filters-header">
 
@@ -2724,13 +2486,10 @@ const MyAttendance = () => {
 
         </div>
 
-        {/* FILTERS */}
-
         <div className="attendance-filters">
 
-          {/* SEARCH */}
-
           <div className="filter-group">
+
             <label>
               Search
             </label>
@@ -2774,11 +2533,11 @@ const MyAttendance = () => {
                 fontSize: 11,
               }}
             />
+
           </div>
 
-          {/* STATUS */}
-
           <div className="filter-group">
+
             <label>
               Status
             </label>
@@ -2828,12 +2587,13 @@ const MyAttendance = () => {
               <option value="MISSED_CHECKOUT">
                 Missed Checkout
               </option>
+
             </select>
+
           </div>
 
-          {/* METHOD */}
-
           <div className="filter-group">
+
             <label>
               Method
             </label>
@@ -2863,10 +2623,10 @@ const MyAttendance = () => {
               <option value="FIELD">
                 Field
               </option>
-            </select>
-          </div>
 
-          {/* CLEAR */}
+            </select>
+
+          </div>
 
           <button
             type="button"
@@ -2895,11 +2655,13 @@ const MyAttendance = () => {
       {loading ? (
 
         <div className="attendance-loading">
+
           <span className="loading-spinner" />
 
           <span>
             Loading attendance...
           </span>
+
         </div>
 
       ) : paginatedAttendance.length ===
@@ -2926,6 +2688,7 @@ const MyAttendance = () => {
               "ALL" ||
             methodFilter !==
               "ALL") && (
+
             <button
               type="button"
               onClick={() => {
@@ -2940,6 +2703,7 @@ const MyAttendance = () => {
             >
               Clear Filters
             </button>
+
           )}
 
         </div>
@@ -2950,6 +2714,7 @@ const MyAttendance = () => {
 
           {paginatedAttendance.map(
             (record) => {
+
               const method =
                 getAttendanceMethod(
                   record
@@ -2970,8 +2735,6 @@ const MyAttendance = () => {
                   }
                 >
 
-                  {/* DATE */}
-
                   <div className="record-date">
 
                     <strong>
@@ -2988,8 +2751,6 @@ const MyAttendance = () => {
 
                   </div>
 
-                  {/* STATUS */}
-
                   <div className="record-status">
 
                     <span
@@ -3003,8 +2764,6 @@ const MyAttendance = () => {
                     </span>
 
                   </div>
-
-                  {/* CHECK IN / CHECK OUT */}
 
                   <div className="record-time">
 
@@ -3046,8 +2805,6 @@ const MyAttendance = () => {
 
                   </div>
 
-                  {/* WORKING TIME */}
-
                   <div className="record-duration">
 
                     <span>
@@ -3061,8 +2818,6 @@ const MyAttendance = () => {
                     </strong>
 
                   </div>
-
-                  {/* METHOD */}
 
                   <div className="record-method">
 
@@ -3086,6 +2841,7 @@ const MyAttendance = () => {
           )}
 
         </div>
+
       )}
 
       {/* =================================================
@@ -3094,9 +2850,8 @@ const MyAttendance = () => {
 
       {filteredAttendance.length >
         recordsPerPage && (
-        <div className="attendance-pagination">
 
-          {/* PREVIOUS */}
+        <div className="attendance-pagination">
 
           <button
             type="button"
@@ -3117,8 +2872,6 @@ const MyAttendance = () => {
             Previous
           </button>
 
-          {/* PAGE NUMBERS */}
-
           <div className="pagination-pages">
 
             {Array.from(
@@ -3127,6 +2880,7 @@ const MyAttendance = () => {
                   totalPages,
               },
               (_, index) => {
+
                 const page =
                   index + 1;
 
@@ -3154,8 +2908,6 @@ const MyAttendance = () => {
 
           </div>
 
-          {/* NEXT */}
-
           <button
             type="button"
             disabled={
@@ -3176,6 +2928,7 @@ const MyAttendance = () => {
           </button>
 
         </div>
+
       )}
 
       {/* =================================================
@@ -3183,11 +2936,10 @@ const MyAttendance = () => {
           ================================================= */}
 
       {showWorkReportModal && (
+
         <div className="work-report-modal-overlay">
 
           <div className="work-report-modal">
-
-            {/* MODAL HEADER */}
 
             <div className="modal-header">
 
@@ -3208,8 +2960,6 @@ const MyAttendance = () => {
 
               </div>
 
-              {/* CLOSE */}
-
               <button
                 type="button"
                 className="modal-close-button"
@@ -3225,8 +2975,6 @@ const MyAttendance = () => {
               </button>
 
             </div>
-
-            {/* MODAL BODY */}
 
             <div className="modal-body">
 
@@ -3268,8 +3016,6 @@ const MyAttendance = () => {
 
             </div>
 
-            {/* MODAL FOOTER */}
-
             <div className="modal-footer">
 
               <button
@@ -3295,6 +3041,7 @@ const MyAttendance = () => {
                   workReportLoading
                 }
               >
+
                 {workReportLoading && (
                   <span className="button-spinner" />
                 )}
@@ -3302,6 +3049,7 @@ const MyAttendance = () => {
                 {workReportLoading
                   ? "Processing..."
                   : "Submit & Check Out"}
+
               </button>
 
             </div>
@@ -3309,6 +3057,7 @@ const MyAttendance = () => {
           </div>
 
         </div>
+
       )}
 
     </div>
