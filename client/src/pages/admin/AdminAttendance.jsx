@@ -27,6 +27,19 @@ const AdminAttendance = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  // Monthly employee report
+const [reportEmployeeId, setReportEmployeeId] = useState("");
+const [reportMonth, setReportMonth] = useState(() => {
+  const today = new Date();
+
+  return `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}`;
+});
+
+const [monthlyReport, setMonthlyReport] = useState(null);
+const [reportLoading, setReportLoading] = useState(false);
+const [reportError, setReportError] = useState("");
 
   // --------------------------------------------------
   // Fetch Employees
@@ -43,6 +56,56 @@ const AdminAttendance = () => {
       console.error("Fetch employees error:", error);
     }
   };
+  // --------------------------------------------------
+// Fetch Individual Employee Monthly Report
+// --------------------------------------------------
+
+const fetchMonthlyReport = async () => {
+  if (!reportEmployeeId || !reportMonth) {
+    setMonthlyReport(null);
+    return;
+  }
+
+  try {
+    setReportLoading(true);
+    setReportError("");
+
+    const [year, month] = reportMonth.split("-");
+
+    const response = await api.get(
+      `/attendance/employee/${reportEmployeeId}/summary`,
+      {
+        params: {
+          month: Number(month),
+          year: Number(year),
+        },
+      }
+    );
+
+    if (response.data.success) {
+      setMonthlyReport(response.data);
+    } else {
+      setMonthlyReport(null);
+      setReportError(
+        response.data.message || "Unable to load monthly report."
+      );
+    }
+  } catch (error) {
+    console.error("Monthly report error:", error);
+
+    setMonthlyReport(null);
+    setReportError(
+      error.response?.data?.message ||
+        "Unable to load monthly report."
+    );
+  } finally {
+    setReportLoading(false);
+  }
+};
+
+useEffect(() => {
+  fetchMonthlyReport();
+}, [reportEmployeeId, reportMonth]);
 
   // --------------------------------------------------
   // Fetch Attendance
@@ -581,49 +644,232 @@ const AdminAttendance = () => {
         </div>
       )}
 
-      {/* Stats */}
+  {/* Stats */}
 
-      <div className="attendance-stats">
-        <div className="attendance-stat-card">
-          <span className="stat-label">
-            Total Records
-          </span>
+<div className="attendance-stats">
+  <div className="attendance-stat-card">
+    <span className="stat-label">Total Records</span>
+    <strong>{stats.total}</strong>
+  </div>
 
-          <strong>{stats.total}</strong>
+  <div className="attendance-stat-card">
+    <span className="stat-label">Present</span>
+    <strong>{stats.present}</strong>
+  </div>
+
+  <div className="attendance-stat-card">
+    <span className="stat-label">Half Day</span>
+    <strong>{stats.halfDay}</strong>
+  </div>
+
+  <div className="attendance-stat-card">
+    <span className="stat-label">Missed Checkout</span>
+    <strong>{stats.missedCheckout}</strong>
+  </div>
+
+  <div className="attendance-stat-card">
+    <span className="stat-label">Overtime</span>
+    <strong>{stats.overtime}</strong>
+  </div>
+</div>
+
+{/* ==================================================
+    INDIVIDUAL EMPLOYEE MONTHLY REPORT
+================================================== */}
+
+<div className="monthly-report-section">
+  <div className="monthly-report-header">
+    <div>
+      <h2>Employee Monthly Attendance Report</h2>
+      <p>
+        View individual attendance details for monthly salary calculation.
+      </p>
+    </div>
+  </div>
+
+  <div className="monthly-report-filters">
+    <div className="filter-group">
+      <label htmlFor="report-employee">Select Employee</label>
+
+      <select
+        id="report-employee"
+        value={reportEmployeeId}
+        onChange={(event) => setReportEmployeeId(event.target.value)}
+      >
+        <option value="">Select an employee</option>
+
+        {employees.map((employee) => (
+          <option key={employee._id} value={employee._id}>
+            {employee.employeeId} - {employee.name}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div className="filter-group">
+      <label htmlFor="report-month">Select Month</label>
+
+      <input
+        id="report-month"
+        type="month"
+        value={reportMonth}
+        onChange={(event) => setReportMonth(event.target.value)}
+      />
+    </div>
+
+    <button
+      type="button"
+      className="attendance-refresh-btn"
+      onClick={fetchMonthlyReport}
+      disabled={!reportEmployeeId || !reportMonth || reportLoading}
+    >
+      {reportLoading ? "Loading..." : "Refresh Report"}
+    </button>
+  </div>
+
+  {reportError && (
+    <div className="attendance-alert attendance-alert-error">
+      {reportError}
+    </div>
+  )}
+
+  {!reportEmployeeId && (
+    <div className="attendance-empty">
+      <h3>Select an employee</h3>
+      <p>
+        Choose an employee and month to view their attendance report.
+      </p>
+    </div>
+  )}
+
+  {reportLoading && (
+    <div className="attendance-loading">
+      Loading monthly report...
+    </div>
+  )}
+
+  {!reportLoading && monthlyReport && (
+    <>
+      <div className="monthly-report-employee">
+        <div>
+          <span>Employee</span>
+          <strong>{monthlyReport.employee?.name || "-"}</strong>
         </div>
 
-        <div className="attendance-stat-card">
-          <span className="stat-label">
-            Present
-          </span>
-
-          <strong>{stats.present}</strong>
+        <div>
+          <span>Employee ID</span>
+          <strong>{monthlyReport.employee?.employeeId || "-"}</strong>
         </div>
 
-        <div className="attendance-stat-card">
-          <span className="stat-label">
-            Half Day
-          </span>
-
-          <strong>{stats.halfDay}</strong>
+        <div>
+          <span>Department</span>
+          <strong>{monthlyReport.employee?.department || "-"}</strong>
         </div>
 
-        <div className="attendance-stat-card">
-          <span className="stat-label">
-            Missed Checkout
-          </span>
-
-          <strong>{stats.missedCheckout}</strong>
-        </div>
-
-        <div className="attendance-stat-card">
-          <span className="stat-label">
-            Overtime
-          </span>
-
-          <strong>{stats.overtime}</strong>
+        <div>
+          <span>Designation</span>
+          <strong>{monthlyReport.employee?.designation || "-"}</strong>
         </div>
       </div>
+
+      <div className="monthly-report-stats">
+        {[
+          ["Present", monthlyReport.summary?.present, "status-present"],
+          ["Absent", monthlyReport.summary?.absent, "status-absent"],
+          ["Half Day", monthlyReport.summary?.halfDay, "status-half-day"],
+          ["Leave", monthlyReport.summary?.onLeave, "status-leave"],
+          ["Holiday", monthlyReport.summary?.holiday, "status-holiday"],
+          ["Weekend", monthlyReport.summary?.weekend, "status-weekend"],
+          ["Missed Checkout", monthlyReport.summary?.missedCheckout, "status-missed"],
+          ["Overtime Days", monthlyReport.summary?.overtime, "status-default"],
+          ["Upcoming", monthlyReport.summary?.upcoming, "status-default"],
+        ].map(([label, value, statusClass]) => (
+          <div className="monthly-report-stat-card" key={label}>
+            <span>{label}</span>
+            <strong className={statusClass}>
+              {value ?? 0}
+            </strong>
+          </div>
+        ))}
+      </div>
+
+      <div className="monthly-report-overtime">
+        <strong>Total Overtime Minutes:</strong>{" "}
+        {monthlyReport.summary?.overtimeMinutes || 0} minutes
+      </div>
+
+      <div className="monthly-report-table-card">
+        <div className="attendance-table-header">
+          <div>
+            <h2>Date-wise Attendance</h2>
+            <p>
+              {monthlyReport.calendar?.length || 0} calendar days
+            </p>
+          </div>
+        </div>
+
+        <div className="attendance-table-wrapper">
+          <table className="attendance-table monthly-report-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th>Working Minutes</th>
+                <th>Status</th>
+                <th>Overtime</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {(monthlyReport.calendar || []).map((day) => {
+                const attendanceRecord = day.attendance;
+
+                return (
+                  <tr key={day.dateKey}>
+                    <td>{formatDate(day.date)}</td>
+                    <td>{day.day}</td>
+
+                    <td>
+                      {attendanceRecord?.checkIn?.time
+                        ? formatDateTime(attendanceRecord.checkIn.time)
+                        : "-"}
+                    </td>
+
+                    <td>
+                      {attendanceRecord?.checkOut?.time
+                        ? formatDateTime(attendanceRecord.checkOut.time)
+                        : "-"}
+                    </td>
+
+                    <td>
+                      {attendanceRecord?.workingMinutes || 0}m
+                    </td>
+
+                    <td>
+                      <span
+                        className={`status-badge ${getStatusClass(day.status)}`}
+                      >
+                        {day.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      {day.isOvertime
+                        ? `+${day.overtimeMinutes || 0}m`
+                        : "-"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
+  )}
+</div>
 
       {/* Filters */}
 

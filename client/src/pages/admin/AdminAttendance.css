@@ -1445,3 +1445,252 @@
     padding: 12px 13px 13px;
   }
 }
+
+/* =========================================================
+   INDIVIDUAL MONTHLY EMPLOYEE REPORT
+   ========================================================= */
+
+.monthly-report-section {
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 25px;
+  padding: 22px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 15px;
+}
+
+.monthly-report-header {
+  margin-bottom: 18px;
+}
+
+.monthly-report-header h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.monthly-report-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.monthly-report-filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(160px, 220px) auto;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.monthly-report-filters button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.monthly-report-employee {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.monthly-report-employee > div {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.monthly-report-employee span {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.monthly-report-employee strong {
+  display: block;
+  color: #1e293b;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.monthly-report-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.monthly-report-stat-card {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+  background: white;
+}
+
+.monthly-report-stat-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.monthly-report-stat-card strong {
+  display: inline-block;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.monthly-report-overtime {
+  margin-bottom: 18px;
+  padding: 13px 15px;
+  border-radius: 9px;
+  background: #fff7ed;
+  color: #9a3412;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.monthly-report-table-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.monthly-report-table {
+  min-width: 900px;
+}
+
+.monthly-report-table td {
+  white-space: nowrap;
+}
+
+/* =========================================================
+   MONTHLY REPORT RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .monthly-report-employee {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .monthly-report-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .monthly-report-filters button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .monthly-report-section {
+    padding: 15px;
+  }
+
+  .monthly-report-header h2 {
+    font-size: 16px;
+  }
+
+  .monthly-report-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .monthly-report-employee {
+    grid-template-columns: 1fr;
+  }
+
+  .monthly-report-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .monthly-report-stat-card {
+    padding: 12px;
+  }
+
+  .monthly-report-stat-card strong {
+    font-size: 20px;
+  }
+}
+/* =========================================================
+   MONTHLY REPORT LAYOUT FIX
+   ========================================================= */
+
+.monthly-report-section {
+  display: block;
+  clear: both;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.monthly-report-filters > * {
+  min-width: 0;
+}
+
+.monthly-report-filters input,
+.monthly-report-filters select {
+  width: 100%;
+  min-width: 0;
+}
+
+.monthly-report-table-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.monthly-report-table-card .attendance-table-wrapper {
+  max-width: 100%;
+}
+
+.monthly-report-stats > *,
+.monthly-report-employee > * {
+  min-width: 0;
+}
+
+@media (max-width: 600px) {
+  .monthly-report-section {
+    padding: 14px;
+  }
+
+  .monthly-report-filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .monthly-report-filters .attendance-refresh-btn {
+    width: 100%;
+  }
+
+  .monthly-report-employee {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .monthly-report-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .monthly-report-overtime {
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 340px) {
+  .monthly-report-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
